@@ -5,6 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'name' => '3D галерея',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -48,10 +49,34 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'gallery/index',
                 'admin/<action:(.*?)>/<id:(.*?)>' => 'admin/<action>',
+                'object/<action:(.*?)>/<id:(.*?)>' => 'object/<action>',
+                'category' => 'category/index',
+                'category/<id:(.*?)>' => 'category/view',
+                '<controller:(.*?)>/<action:(.*?)>/<id:(.*?)>' => '<controller>/<action>',
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
     ],
+    'controllerMap' => [
+        'elfinder' => [
+            'class' => 'mihaildev\elfinder\Controller',
+            'access' => ['admin'], //глобальный доступ к фаил менеджеру @ - для авторизорованных , ? - для гостей , чтоб открыть всем ['@', '?']
+            'disabledCommands' => ['netmount'], //отключение ненужных команд https://github.com/Studio-42/elFinder/wiki/Client-configuration-options#commands
+            'roots' => [
+                [
+                    'baseUrl'=>'@web',
+                    'basePath'=>'@webroot',
+                    'path' => 'files/global',
+                    'name' => 'Global'
+                ],
+            ],
+        ]
+    ],
+    'language' => 'ru',
     'params' => $params,
 ];
 
@@ -61,15 +86,17 @@ if (YII_ENV_DEV) {
     $config['modules']['debug'] = [
         'class' => 'yii\debug\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['127.0.0.1', '10.2.5.41', '84.237.52.66'],
     ];
 
     $config['bootstrap'][] = 'gii';
     $config['modules']['gii'] = [
         'class' => 'yii\gii\Module',
         // uncomment the following to add your IP if you are not connecting from localhost.
-        //'allowedIPs' => ['127.0.0.1', '::1'],
+        'allowedIPs' => ['127.0.0.1', '10.2.5.41', '84.237.52.66']
     ];
 }
-
+//echo '<pre>';
+//print_r($_SERVER);
+//echo '</pre>'; die;
 return $config;

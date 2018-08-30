@@ -4,7 +4,11 @@ namespace app\controllers;
 
 use app\models\Category;
 use app\models\ObjectCategory;
+use app\models\ObjectLabel;
+use app\models\ObjectOption;
+use app\models\ObjectSetting;
 use Yii;
+use yii\filters\AccessControl;
 use yii\web\Controller;
 use app\models\Object;
 use yii\web\UploadedFile;
@@ -12,6 +16,23 @@ use yii\web\HttpException;
 
 class AdminController extends Controller
 {
+    public function behaviors()
+    {
+        return [
+            'access' => [
+                'class' => AccessControl::className(),
+//                'only' => ['create','edit'],
+                'rules' => [
+                    [
+//                        'actions' => ['create'],
+                        'allow' => true,
+                        'roles' => ['admin'],
+                    ],
+                ],
+            ],
+        ];
+    }
+
     public function actionIndex()
     {
         $objects = Object::find()->all();
@@ -83,6 +104,13 @@ class AdminController extends Controller
         $this->redirect(['admin/index']);
     }
 
+    public function actionListCategory(){
+        $categories = Category::find()->all();
+        return $this->render('listCategories',[
+            'categories' => $categories,
+        ]);
+    }
+
     public function actionAddCategory(){
         $category = new Category();
         if ($category->load(Yii::$app->request->post())) {
@@ -110,6 +138,98 @@ class AdminController extends Controller
         return $this->render('editCategory', [
             'model' => $category,
         ]);
+    }
+
+    public function actionListObjectOption(){
+        $listObjectOption = ObjectOption::find()->all();
+        return $this->render('listObjectOption',[
+            'listObjectOption' => $listObjectOption,
+        ]);
+    }
+
+    public function actionAddObjectOption(){
+        $objectOption = new ObjectOption();
+        if ($objectOption->load(Yii::$app->request->post())) {
+            if ($objectOption->validate() and $objectOption->save()) {
+                Yii::$app->session->setFlash('success', "Опция сохранена");
+                $this->redirect(['admin/list-object-option']);
+            }
+        }
+        return $this->render('addObjectOption', [
+            'model' => $objectOption,
+        ]);
+
+    }
+
+    public function actionEditObjectOption($id){
+        $objectOption = ObjectOption::findOne($id);
+        if ($objectOption->load(Yii::$app->request->post())) {
+            if ($objectOption->validate() and $objectOption->save()) {
+                Yii::$app->session->setFlash('success', "Опция сохранена");
+                $this->redirect(['admin/list-object-option']);
+            }
+        }
+        return $this->render('editObjectOption', [
+            'model' => $objectOption,
+        ]);
+
+    }
+
+    public function actionListObjectSetting(){
+        $listObjectSetting = ObjectSetting::find()->all();
+        return $this->render('listObjectSetting',[
+            'listObjectSetting' => $listObjectSetting,
+        ]);
+    }
+
+    public function actionAddObjectSetting(){
+        $objectSetting = new ObjectSetting();
+        if ($objectSetting->load(Yii::$app->request->post())) {
+            if ($objectSetting->validate() and $objectSetting->save()) {
+                Yii::$app->session->setFlash('success', "Опция сохранена");
+                $this->redirect(['admin/list-object-setting']);
+            }
+        }
+        return $this->render('addObjectSetting', [
+            'model' => $objectSetting,
+        ]);
+
+    }
+
+    public function actionEditObjectSetting($id){
+        $objectSetting = ObjectSetting::findOne($id);
+        if ($objectSetting->load(Yii::$app->request->post())) {
+            if ($objectSetting->validate() and $objectSetting->save()) {
+                Yii::$app->session->setFlash('success', "Опция сохранена");
+                $this->redirect(['admin/list-object-setting']);
+            }
+        }
+        return $this->render('editObjectSetting', [
+            'model' => $objectSetting,
+        ]);
+
+    }
+
+    public function actionEditObjectLabel($id){
+        $object = Object::findOne($id);
+        if(empty($object)){
+            throw new HttpException(404);
+        }
+        $label = new ObjectLabel();
+        $label->id_object = $object->id;
+
+        if ($label->load(Yii::$app->request->post())) {
+            if ($label->validate() and $label->save()) {
+                Yii::$app->session->setFlash('success', "Метка сохранена");
+                $this->refresh();
+            }
+        }
+
+        return $this->render('editObjectLabel', [
+            'object' => $object,
+            'label' => $label,
+        ]);
+
     }
 
 }

@@ -7,6 +7,8 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 
+echo $this->render('_header');
+
 $this->title = 'Edit 3d model';
 $this->params['breadcrumbs'][] = $this->title;
 ?>

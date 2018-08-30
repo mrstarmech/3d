@@ -27,7 +27,13 @@ class Category extends ActiveRecord
     public function behaviors()
     {
         return [
-            TimestampBehavior::class,
+            TimestampBehavior::className(),
         ];
+    }
+
+    public function getObjects(){
+        return $this->hasMany(ObjectCategory::className(), ['id_category' => 'id'])
+            ->joinWith('object')
+            ->where(['visible' => 1]);
     }
 }

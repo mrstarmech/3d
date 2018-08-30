@@ -14,10 +14,10 @@ class ObjectCategory extends ActiveRecord
     }
 
     public function getObject(){
-        return $this->hasOne(Object::class, [ 'id' => 'id_object']);
+        return $this->hasOne(Object::className(), [ 'id' => 'id_object']);
     }
 
     public function getCategory(){
-        return $this->hasOne(Category::class, [ 'id' => 'id_category']);
+        return $this->hasOne(Category::className(), [ 'id' => 'id_category']);
     }
 }

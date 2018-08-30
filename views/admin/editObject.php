@@ -3,6 +3,10 @@
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\ArrayHelper;
+use mihaildev\ckeditor\CKEditor;
+use mihaildev\elfinder\ElFinder;
+
+echo $this->render('_header');
 
 $this->title = 'Edit 3d model';
 $this->params['breadcrumbs'][] = $this->title;
@@ -13,8 +17,22 @@ $this->params['breadcrumbs'][] = $this->title;
     'options' => ['enctype' => 'multipart/form-data'],
 ]); ?>
 
+<?= $form->field($model, 'visible')->checkbox() ?>
 <?= $form->field($model, 'name')->textInput(['autofocus' => true]) ?>
-<?= $form->field($model, 'description')->textarea() ?>
+<?= $form->field($model, 'description')->widget(CKEditor::className() ,
+    [
+        'options' => [
+            'allowedContent' => true,
+        ],
+        'editorOptions' => ElFinder::ckeditorOptions(
+            'elfinder',
+            [
+                'inline' => false,
+                'skin' => 'office2013,/js/cke/skins/office2013/'
+            ]
+        ),
+
+    ]) ?>
 
 <?= $form->field($model, 'fileImage')->fileInput() ?>
 <?= $form->field($model, 'fileObj')->fileInput() ?>

@@ -1,25 +1,36 @@
 <?php
 use yii\helpers\Html;
 use yii\helpers\Url;
+
+echo $this->render('_header');
 ?>
+
+<?= Html::a('Add', ['admin/add-object'],['class' => 'btn btn-primary']) ?>
+
 <?php if(!empty($objects)): ?>
-    <?php foreach($objects as $object): ?>
-        <div class="col-xs-3">
-            <div class="item-object">
-                <a href="<?= Url::to(['admin/edit-object', 'id' => $object->id]) ?>">
-                    <div style="
-                        display: block;
-                        width: 100%;
-                        height: 200px;
-                        background: url('<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>') no-repeat;
-                        background-position: center;
-                        background-size: cover;
-                        "></div>
-                </a>
-                <h2><?= $object->name?></h2>
-                <p><?= $object->description ?? '&nbsp;'?></p>
-                <?= Html::a('view', ['admin/edit-object', 'id' => $object->id]) ?>
+    <div class="row">
+        <?php foreach($objects as $object): ?>
+            <div class="col-xs-12 col-sm-6 col-md-4">
+                <div class="item-object">
+                    <a href="<?= Url::to(['object/view', 'id' => $object->id]) ?>">
+                        <div style="
+                                display: block;
+                                width: 100%;
+                                height: 250px;
+                        <?php if(!empty($object->image)): ?>
+                                background: url('<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>') no-repeat;
+                        <?php else: ?>
+                                background: url('/img/poster.none.png') no-repeat;
+                        <?php endif; ?>
+                                background-size: cover;
+                                background-position: center;
+                                ">
+
+                        </div>
+                    </a>
+                    <span><?= $object->name?></span>
+                </div>
             </div>
-        </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
+    </div>
 <?php endif; ?>

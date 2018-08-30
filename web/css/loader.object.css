@@ -1,0 +1,48 @@
+.modal {
+  position: absolute !important; }
+
+.modal-backdrop {
+  position: absolute !important;
+  right: 15px !important;
+  left: 15px !important;
+  bottom: 20px !important; }
+
+.container-object {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  cursor: pointer;
+  margin-bottom: 20px; }
+  .container-object[data-state=static]:before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: .2;
+    background: rgba(0, 0, 0, 0.2);
+    -webkit-transition: opacity 0.3s;
+    -moz-transition: opacity 0.3s;
+    -o-transition: opacity 0.3s;
+    transition: opacity 0.3s; }
+  .container-object[data-state=static]:hover:before {
+    opacity: 1; }
+  .container-object .canvas-object {
+    width: 100%;
+    height: 100%;
+    z-index: 0; }
+  .container-object .container-menu-object {
+    position: absolute;
+    z-index: 999;
+    bottom: 0;
+    right: 0; }
+    .container-object .container-menu-object .submenu {
+      display: none; }
+  .container-object .modal .modal-dialog {
+    width: 90% !important;
+    margin: auto !important;
+    margin-top: 10% !important; }
+
+/*# sourceMappingURL=loader.object.css.map */

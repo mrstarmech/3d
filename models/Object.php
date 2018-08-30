@@ -9,9 +9,10 @@ use yii\helpers\FileHelper;
 class Object extends ActiveRecord
 {
     const SCENARIO_SAVE = 'save';
+    const SCENARIO_VIEW = 'view';
 
     public $pathImage = 'uploads';
-    public $pathFile = '../objects';
+    public $pathFile = 'objects';
 
     public $fileImage;
     public $fileObj;
@@ -23,6 +24,7 @@ class Object extends ActiveRecord
         return [
             [['name'], 'required'],
             [['name','description','image','obj','mtl','texture'], 'string'],
+            [['visible'], 'in', 'range' => [0,1]],
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
@@ -33,23 +35,29 @@ class Object extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'name' => 'Name',
-            'description' => 'Description',
-            'image' => 'Image',
+            'name' => 'Название',
+            'description' => 'Описание',
+            'image' => 'Постер',
+            'visible' => 'Отображение',
+            'fileTexture' => 'Файл постера',
+            'fileImage' => 'Файл текстуры',
+            'fileObj' => 'Файл формата obj',
+            'fileMtl' => 'Файл формата mtl',
         ];
     }
 
     public function behaviors()
     {
         return [
-            TimestampBehavior::class,
+            TimestampBehavior::className(),
         ];
     }
 
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_SAVE] = ['name','description','image','obj','mtl','texture'];
+        $scenarios[self::SCENARIO_SAVE] = ['name','description','image','obj','mtl','texture','visible'];
+        $scenarios[self::SCENARIO_VIEW] = ['name','description','image','obj','mtl','texture'];
 
         return $scenarios;
     }
@@ -114,14 +122,37 @@ class Object extends ActiveRecord
         }
     }
 
+    public function getLabels(){
+        return $this->hasMany(ObjectLabel::className(), ['id_object' => 'id']);
+    }
+
     public function beforeDelete()
     {
         $path = $this->pathImage . '/' . $this->id;
 
         if(!empty($this->image) and file_exists($path . '/' . $this->image)){
-//            unlink($path . '/' . $this->image);
+            unlink($path . '/' . $this->image);
+        }
+        if(is_dir($path)){
             rmdir($path);
         }
+
+
+        $path = $this->pathFile . '/' . $this->id;
+
+        if(!empty($this->obj) and file_exists($path . '/' . $this->obj)){
+            unlink($path . '/' . $this->obj);
+        }
+        if(!empty($this->mtl) and file_exists($path . '/' . $this->mtl)){
+            unlink($path . '/' . $this->mtl);
+        }
+        if(!empty($this->texture) and file_exists($path . '/' . $this->texture)){
+            unlink($path . '/' . $this->texture);
+        }
+        if(is_dir($path)){
+            rmdir($path);
+        }
+
         return parent::beforeDelete();
     }
 }
