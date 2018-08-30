@@ -39,8 +39,8 @@ class Object extends ActiveRecord
             'description' => 'Описание',
             'image' => 'Постер',
             'visible' => 'Отображение',
-            'fileTexture' => 'Файл постера',
-            'fileImage' => 'Файл текстуры',
+            'fileImage' => 'Файл постера',
+            'fileTexture' => 'Файл текстуры',
             'fileObj' => 'Файл формата obj',
             'fileMtl' => 'Файл формата mtl',
         ];

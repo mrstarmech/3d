@@ -13,6 +13,7 @@ use yii\web\Controller;
 use app\models\Object;
 use yii\web\UploadedFile;
 use yii\web\HttpException;
+use yii\data\Pagination;
 
 class AdminController extends Controller
 {
@@ -35,9 +36,16 @@ class AdminController extends Controller
 
     public function actionIndex()
     {
-        $objects = Object::find()->all();
+        $query = Object::find();
+        $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 12]);
+        $objects = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->orderBy(['created_at' => SORT_DESC])
+            ->all();
+
         return $this->render('index',[
             'objects' => $objects,
+            'pages' => $pages,
         ]);
     }
 
@@ -54,7 +62,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function actionEditObject($id){
+    public function actionEditObjectGeneral($id){
         $object = Object::findOne($id);
         if(empty($object)){
             throw new HttpException(404);
@@ -87,7 +95,34 @@ class AdminController extends Controller
 
         $categories = Category::find()->all();
 
-        return $this->render('editObject', [
+        return $this->render('editObjectGeneral', [
+            'model' => $object,
+            'objectCategories' => $objectCategories,
+            'categories' => $categories,
+            'objectCategory' => $objectCategory,
+        ]);
+    }
+
+    public function actionEditObjectCategory($id){
+        $object = Object::findOne($id);
+        if(empty($object)){
+            throw new HttpException(404);
+        }
+
+        $objectCategories = ObjectCategory::find()
+            ->where(['id_object' => $object->id])
+            ->all();
+        $objectCategory = new ObjectCategory();
+        if ($objectCategory->load(Yii::$app->request->post())) {
+            if ($objectCategory->validate() and $objectCategory->save()) {
+                Yii::$app->session->setFlash('success', "Категория добавлена");
+                return $this->refresh();
+            }
+        }
+
+        $categories = Category::find()->all();
+
+        return $this->render('editObjectcategory', [
             'model' => $object,
             'objectCategories' => $objectCategories,
             'categories' => $categories,
@@ -101,7 +136,7 @@ class AdminController extends Controller
             throw new HttpException(404);
         }
         $object->delete();
-        $this->redirect(['admin/index']);
+        return $this->redirect(['admin/index']);
     }
 
     public function actionListCategory(){
@@ -115,8 +150,8 @@ class AdminController extends Controller
         $category = new Category();
         if ($category->load(Yii::$app->request->post())) {
             if ($category->validate() and $category->save()) {
-                Yii::$app->session->setFlash('success', "Категория сохранена");
-                $this->redirect(['admin/edit-category/' . $category->id]);
+                Yii::$app->session->setFlash('success', "Категория добавлена");
+                return $this->redirect(['admin/edit-category/' . $category->id]);
             }
         }
         return $this->render('addCategory', [
@@ -132,12 +167,21 @@ class AdminController extends Controller
         if ($category->load(Yii::$app->request->post())) {
             if ($category->validate() and $category->save()) {
                 Yii::$app->session->setFlash('success', "Категория сохранена");
-                $this->redirect(['admin/edit-category/' . $category->id]);
+                return $this->refresh();
             }
         }
         return $this->render('editCategory', [
             'model' => $category,
         ]);
+    }
+
+    public function actionDeleteCategory($id){
+        $сategory = Category::findOne($id);
+        if(empty($сategory)){
+            throw new HttpException(404);
+        }
+        $сategory->delete();
+        return $this->redirect(['admin/list-category']);
     }
 
     public function actionListObjectOption(){
@@ -232,4 +276,13 @@ class AdminController extends Controller
 
     }
 
+    public function actionDeleteObjectCategory($id){
+        $objectCategory = ObjectCategory::findOne($id);
+        if(empty($objectCategory)){
+            throw new HttpException(404);
+        }
+        $object = $objectCategory->object;
+        $objectCategory->delete();
+        return $this->redirect(['admin/edit-object-category', 'id' => $object->id]);
+    }
 }

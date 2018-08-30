@@ -3,22 +3,25 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 
 echo $this->render('_header');
-
 ?>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="pull-right">
+                <?= Html::a('Добавить категорию', ['admin/add-category'],['class' => 'btn btn-primary']) ?>
+            </div>
+        </div>
+    </div>
 
-<?= Html::a('Add', ['admin/add-category'],['class' => 'btn btn-primary']) ?>
-
+    <br>
 <?php if(!empty($categories)): ?>
-    <table class="table table-responsive table-bordered">
-        <?php foreach($categories as $item): ?>
-            <tr>
-                <td>
-                    <?= Html::a($item->name,['admin/edit-category','id' => $item->id]) ?>
-                </td>
-                <td>
-                    <?= $item->description ?>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
+    <div class="list-group">
+        <?php if(!empty($categories)): ?>
+            <?php foreach($categories as $category): ?>
+                <a class="list-group-item" href="<?= Url::to(['admin/edit-category', 'id' => $category->id]) ?>">
+                    <?= $category->name ?>
+                    <span class="badge"><?= count($category->objects) ?></span>
+                </a>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
 <?php endif; ?>

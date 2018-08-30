@@ -7,7 +7,7 @@ use mihaildev\elfinder\ElFinder;
 
 echo $this->render('_header');
 
-$this->title = 'Add 3d model';
+$this->title = 'Добавить модель';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="row">
@@ -33,12 +33,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
         ]) ?>
     <div class="form-group">
-        <div class="col-lg-offset-1 col-lg-11">
-            <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
-        </div>
+        <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary']) ?>
     </div>
-
-    <?= strtotime('now')?>
 
     <?php ActiveForm::end(); ?>
 

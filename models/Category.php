@@ -19,8 +19,8 @@ class Category extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'name' => 'Name',
-            'description' => 'Description',
+            'name' => 'Название',
+            'description' => 'Описание',
         ];
     }
 

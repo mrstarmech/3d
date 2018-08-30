@@ -21,4 +21,12 @@ class ObjectLabel extends ActiveRecord
             TimestampBehavior::className(),
         ];
     }
+
+    public function attributeLabels()
+    {
+        return [
+            'position' => 'Координаты',
+            'description' => 'Описание',
+        ];
+    }
 }

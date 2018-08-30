@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="col-xs-12 col-md-6 tree-object" data-tree-object="<?= $object->id ?>"></div>
 <?php if(1): // TODO: admin check ?>
     <div class="pull-right">
-        <?= Html::a('Edit', ['admin/edit-object', 'id' => $object->id], ['class' => 'btn btn-primary'])?>
+        <?= Html::a('Edit', ['admin/edit-object-general', 'id' => $object->id], ['class' => 'btn btn-primary'])?>
     </div>
 <?php endif; ?>
 <h1><?= $this->title ?></h1>

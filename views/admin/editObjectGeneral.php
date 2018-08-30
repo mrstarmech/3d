@@ -7,11 +7,18 @@ use mihaildev\ckeditor\CKEditor;
 use mihaildev\elfinder\ElFinder;
 
 echo $this->render('_header');
+echo $this->render('_header_object', ['id' => $model->id]);
 
-$this->title = 'Edit 3d model';
+$this->title = 'Редактирование модели';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<h1><?= Html::encode($this->title) ?></h1>
+<h1><?= Html::encode($this->title) ?> <small><?= $model->name ?></small></h1>
+
+<small>
+    Дата создания: <?= date("d.m.Y H:i:s", $model->created_at) ?>
+    <br>
+    Дата последнего изменения: <?= date("d.m.Y H:i:s", $model->updated_at) ?>
+</small>
 
 <?php $form = ActiveForm::begin([
     'options' => ['enctype' => 'multipart/form-data'],
@@ -39,50 +46,21 @@ $this->params['breadcrumbs'][] = $this->title;
 <?= $form->field($model, 'fileMtl')->fileInput() ?>
 <?= $form->field($model, 'fileTexture')->fileInput() ?>
 <div class="form-group">
-    <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
+    <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
+
     <div class="pull-right">
-        <?= Html::a('Delete', [
+        <?= Html::a('Удалить модель', [
             'admin/delete-object',
             'id' => $model->id
         ],
         [
             'class' => 'btn btn-danger',
             'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
+                'confirm' => 'Вы уверены, что хотите удалить эту модель?',
                 'method' => 'post',
             ],
         ]) ?>
     </div>
-</div>
-
-<?php ActiveForm::end(); ?>
-
-<hr>
-<?php
-$categories_ = ArrayHelper::map($categories,'id', 'name');
-?>
-<?php if(!empty($objectCategories)): ?>
-    <ul>
-        <?php foreach ($objectCategories as $item): ?>
-            <?php
-            ArrayHelper::remove($categories_, $item->id);
-            ?>
-            <li><?= $item->category->name ?></li>
-        <?php endforeach; ?>
-    </ul>
-<?php endif; ?>
-
-<?php
-$form = ActiveForm::begin([
-    'options' => ['enctype' => 'multipart/form-data'],
-]);
-?>
-
-<?= $form->field($objectCategory, 'id_category')->dropDownList($categories_,['class' => 'form-control']) ?>
-<?= $form->field($objectCategory, 'id_object')->hiddenInput(['value' => $model->id])->label(false) ?>
-
-<div class="form-group">
-    <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
 </div>
 
 <?php ActiveForm::end(); ?>

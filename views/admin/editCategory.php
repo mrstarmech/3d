@@ -6,33 +6,58 @@
 
 use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
+use mihaildev\ckeditor\CKEditor;
+use mihaildev\elfinder\ElFinder;
 
 echo $this->render('_header');
 
-$this->title = 'Edit 3d model';
+$this->title = 'Редактировать категорию';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="row">
-    <h1><?= Html::encode($this->title) ?></h1>
+<h1><?= Html::encode($this->title) ?> <small><?= $model->name ?></small></h1>
 
-    <?php $form = ActiveForm::begin([
-        'id' => 'login-form',
-        'layout' => 'horizontal',
-        'fieldConfig' => [
-            'template' => "{label}\n<div class=\"col-lg-3\">{input}</div>\n<div class=\"col-lg-8\">{error}</div>",
-            'labelOptions' => ['class' => 'col-lg-1 control-label'],
+<small>
+    Дата создания: <?= date("d.m.Y H:i:s", $model->created_at) ?>
+    <br>
+    Дата последнего изменения: <?= date("d.m.Y H:i:s", $model->updated_at) ?>
+</small>
+
+<div class="clearfix"></div>
+
+<br>
+
+<?php $form = ActiveForm::begin() ?>
+
+<?= $form->field($model, 'name')->textInput(['autofocus' => true]) ?>
+<?= $form->field($model, 'description')->widget(CKEditor::className() ,
+    [
+        'options' => [
+            'allowedContent' => true,
         ],
-        'options' => ['enctype' => 'multipart/form-data'],
-    ]); ?>
+        'editorOptions' => ElFinder::ckeditorOptions(
+            'elfinder',
+            [
+                'inline' => false,
+                'skin' => 'office2013,/js/cke/skins/office2013/'
+            ]
+        ),
 
-    <?= $form->field($model, 'name')->textInput(['autofocus' => true]) ?>
-    <?= $form->field($model, 'description')->textarea() ?>
-    <div class="form-group">
-        <div class="col-lg-offset-1 col-lg-11">
-            <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
-        </div>
+    ]) ?>
+<div class="form-group">
+        <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>    <div class="pull-right">
+        <?= Html::a('Удалить категорию', [
+            'admin/delete-category',
+            'id' => $model->id
+        ],
+            [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Вы уверены, что хотите удалить эту категорию?',
+                    'method' => 'post',
+                ],
+            ]) ?>
     </div>
-
-    <?php ActiveForm::end(); ?>
-
 </div>
+
+<?php ActiveForm::end(); ?>
+
