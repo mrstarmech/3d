@@ -5,14 +5,44 @@ namespace app\models;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\helpers\FileHelper;
+use yii\helpers\Url;
 
 class Object extends ActiveRecord
 {
     const SCENARIO_SAVE = 'save';
     const SCENARIO_VIEW = 'view';
 
+    const LOADER_OBJ = 'objLoader';
+    const LOADER_UTF8 = 'utf8Loader';
+
     public $pathImage = 'uploads';
     public $pathFile = 'objects';
+    public $defaultOption = [
+        "grid" => false,
+        "ruler" => false,
+        "wireframe" => false,
+        "autorotate" => false,
+        "showgui" => false,
+        "lights" => "Cameralight",
+        "loader" => "objLoader",
+        "controls" => "OrbitControls",
+        "camera" => "auto",
+        "cameraDistanceMultiplier" => 1,
+        "cameraCoords" => [
+            "x" => 0,
+            "y" => 0,
+            "z" => 0
+        ]
+    ];
+    public $defaultSetting = [
+        "name" => "",
+        "texture" => "",
+        "mesh" => "",
+        "ambient" => "",
+        "color" => "",
+        "specular" => "",
+        "shininess" => ""
+    ];
 
     public $fileImage;
     public $fileObj;
@@ -23,8 +53,8 @@ class Object extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name','description','image','obj','mtl','texture'], 'string'],
-            [['visible'], 'in', 'range' => [0,1]],
+            [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting'], 'string'],
+            [['visible'], 'in', 'range' => [0, 1]],
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
@@ -43,6 +73,8 @@ class Object extends ActiveRecord
             'fileTexture' => 'Файл текстуры',
             'fileObj' => 'Файл формата obj',
             'fileMtl' => 'Файл формата mtl',
+            'option' => 'Опции',
+            'setting' => 'Настройки'
         ];
     }
 
@@ -56,8 +88,8 @@ class Object extends ActiveRecord
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_SAVE] = ['name','description','image','obj','mtl','texture','visible'];
-        $scenarios[self::SCENARIO_VIEW] = ['name','description','image','obj','mtl','texture'];
+        $scenarios[self::SCENARIO_SAVE] = ['name', 'description', 'image', 'obj', 'mtl', 'texture', 'visible', 'option', 'setting'];
+        $scenarios[self::SCENARIO_VIEW] = ['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting'];
 
         return $scenarios;
     }
@@ -66,10 +98,19 @@ class Object extends ActiveRecord
     {
         if ($this->validate()) {
 
-            if($this->fileImage) {
+            if (empty($this->option) or empty($this->optionArray)) {
+                $this->option = json_encode($this->defaultOption);
+            }
+
+            if (empty($this->setting)) {
+                $this->setting = json_encode($this->defaultSetting);
+                $this->setSetting('name', $this->name);
+            }
+
+            if ($this->fileImage) {
                 $path = $this->pathImage . '/' . $this->id;
 
-                if(!empty($this->image) and file_exists($path . '/' . $this->image)){
+                if (!empty($this->image) and file_exists($path . '/' . $this->image)) {
                     unlink($path . '/' . $this->image);
                 }
 
@@ -80,22 +121,26 @@ class Object extends ActiveRecord
                 $this->image = $newName . '.' . $this->fileImage->extension;
             }
 
-            if($this->fileObj) {
+            if ($this->fileObj) {
                 $path = $this->pathFile . '/' . $this->id;
 
-                if(!empty($this->obj) and file_exists($path . '/' . $this->obj)){
+                if (!empty($this->obj) and file_exists($path . '/' . $this->obj)) {
                     unlink($path . '/' . $this->obj);
                 }
 
                 FileHelper::createDirectory($path);
                 $this->fileObj->saveAs($path . '/' . $this->fileObj->baseName . '.' . $this->fileObj->extension);
                 $this->obj = $this->fileObj->baseName . '.' . $this->fileObj->extension;
+
+                if ($this->optionArray->loader == Object::LOADER_OBJ) {
+                    $this->setSetting('mesh', '/' . $path . '/' . $this->obj);
+                }
             }
 
-            if($this->fileMtl) {
+            if ($this->fileMtl) {
                 $path = $this->pathFile . '/' . $this->id;
 
-                if(!empty($this->mtl) and file_exists($path . '/' . $this->mtl)){
+                if (!empty($this->mtl) and file_exists($path . '/' . $this->mtl)) {
                     unlink($path . '/' . $this->mtl);
                 }
 
@@ -104,16 +149,18 @@ class Object extends ActiveRecord
                 $this->mtl = $this->fileMtl->baseName . '.' . $this->fileMtl->extension;
             }
 
-            if($this->fileTexture) {
+            if ($this->fileTexture) {
                 $path = $this->pathFile . '/' . $this->id;
 
-                if(!empty($this->texture) and file_exists($path . '/' . $this->texture)){
+                if (!empty($this->texture) and file_exists($path . '/' . $this->texture)) {
                     unlink($path . '/' . $this->texture);
                 }
 
                 FileHelper::createDirectory($path);
                 $this->fileTexture->saveAs($path . '/' . $this->fileTexture->baseName . '.' . $this->fileTexture->extension);
                 $this->texture = $this->fileTexture->baseName . '.' . $this->fileTexture->extension;
+
+                $this->setSetting('texture', '/' . $path . '/' . $this->texture);
             }
 
             return true;
@@ -122,34 +169,83 @@ class Object extends ActiveRecord
         }
     }
 
-    public function getLabels(){
+    public function getLabels()
+    {
         return $this->hasMany(ObjectLabel::className(), ['id_object' => 'id']);
+    }
+
+    public function getOptionArray()
+    {
+        return json_decode($this->option);
+    }
+
+    public function getSettingArray()
+    {
+        return json_decode($this->setting);
+    }
+
+    public function setOption($field, $value)
+    {
+        $option = $this->getOptionArray();
+        $option->$field = $value;
+        $this->option = json_encode($option);
+    }
+
+    public function setSetting($field, $value)
+    {
+        $setting = $this->getSettingArray();
+        $setting->$field = $value;
+        $this->setting = json_encode($setting);
+    }
+
+    public function getContentMtl()
+    {
+        if ($this->mtl and file_exists($this->pathFileWR . '/' . $this->mtl)) {
+            return file_get_contents($this->pathFileWR . '/' . $this->mtl);
+        }
+        return false;
+    }
+
+    public function getContentObj()
+    {
+        if ($this->obj and file_exists($this->pathFileWR . '/' . $this->obj)) {
+            return file_get_contents($this->pathFileWR . '/' . $this->obj);
+        }
+        return false;
+    }
+
+    public function getPathFileWR()
+    {
+        if ($this->id) {
+            return Url::to('@webroot/' . $this->pathFile . '/' . $this->id);
+        }
+        return false;
     }
 
     public function beforeDelete()
     {
         $path = $this->pathImage . '/' . $this->id;
 
-        if(!empty($this->image) and file_exists($path . '/' . $this->image)){
+        if (!empty($this->image) and file_exists($path . '/' . $this->image)) {
             unlink($path . '/' . $this->image);
         }
-        if(is_dir($path)){
+        if (is_dir($path)) {
             rmdir($path);
         }
 
 
         $path = $this->pathFile . '/' . $this->id;
 
-        if(!empty($this->obj) and file_exists($path . '/' . $this->obj)){
+        if (!empty($this->obj) and file_exists($path . '/' . $this->obj)) {
             unlink($path . '/' . $this->obj);
         }
-        if(!empty($this->mtl) and file_exists($path . '/' . $this->mtl)){
+        if (!empty($this->mtl) and file_exists($path . '/' . $this->mtl)) {
             unlink($path . '/' . $this->mtl);
         }
-        if(!empty($this->texture) and file_exists($path . '/' . $this->texture)){
+        if (!empty($this->texture) and file_exists($path . '/' . $this->texture)) {
             unlink($path . '/' . $this->texture);
         }
-        if(is_dir($path)){
+        if (is_dir($path)) {
             rmdir($path);
         }
 

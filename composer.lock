@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "062fa18efd4851d3bf2740e956d090ef",
+    "content-hash": "f7c7d3b20555a7fc33c220929a78cf8c",
     "packages": [
         {
             "name": "bower-asset/bootstrap",
@@ -29,17 +29,55 @@
             ]
         },
         {
-            "name": "bower-asset/font-awesome",
-            "version": "5.2.0",
+            "name": "bower-asset/codemirror",
+            "version": "5.40.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FortAwesome/Font-Awesome.git",
-                "reference": "03bcd4dc0831f0651a3b5a7cd41153e8129fccf3"
+                "url": "https://github.com/components/codemirror.git",
+                "reference": "21e642c519b6595101c47f1854c33cded43e5267"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FortAwesome/Font-Awesome/zipball/03bcd4dc0831f0651a3b5a7cd41153e8129fccf3",
-                "reference": "03bcd4dc0831f0651a3b5a7cd41153e8129fccf3",
+                "url": "https://api.github.com/repos/components/codemirror/zipball/21e642c519b6595101c47f1854c33cded43e5267",
+                "reference": "21e642c519b6595101c47f1854c33cded43e5267",
+                "shasum": null
+            },
+            "type": "bower-asset"
+        },
+        {
+            "name": "bower-asset/fancybox",
+            "version": "v3.3.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fancyapps/fancybox.git",
+                "reference": "059c44062a033665cb635364320713cbc52de651"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fancyapps/fancybox/zipball/059c44062a033665cb635364320713cbc52de651",
+                "reference": "059c44062a033665cb635364320713cbc52de651",
+                "shasum": null
+            },
+            "require": {
+                "bower-asset/jquery": ">=1.9.0"
+            },
+            "type": "bower-asset",
+            "license": [
+                "GPL-3.0"
+            ]
+        },
+        {
+            "name": "bower-asset/font-awesome",
+            "version": "5.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/FortAwesome/Font-Awesome.git",
+                "reference": "ff2853acce00085b5830a050a2afa328fd212562"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/FortAwesome/Font-Awesome/zipball/ff2853acce00085b5830a050a2afa328fd212562",
+                "reference": "ff2853acce00085b5830a050a2afa328fd212562",
                 "shasum": null
             },
             "type": "bower-asset"
@@ -206,6 +244,106 @@
             "time": "2017-07-16T21:13:23+00:00"
         },
         {
+            "name": "conquer/codemirror",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/borodulin/yii2-codemirror.git",
+                "reference": "427485df607720d44ddf964081ba3525b849ae4c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/borodulin/yii2-codemirror/zipball/427485df607720d44ddf964081ba3525b849ae4c",
+                "reference": "427485df607720d44ddf964081ba3525b849ae4c",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/codemirror": "*",
+                "conquer/helpers": "~2.0.8",
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "conquer\\codemirror\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Borodulin",
+                    "email": "borodulin@gmail.com"
+                }
+            ],
+            "description": "Yii2 codemirror widget",
+            "homepage": "https://github.com/borodulin/yii2-codemirror",
+            "keywords": [
+                "codemirror",
+                "extension",
+                "widget",
+                "yii2"
+            ],
+            "time": "2018-08-18T01:35:24+00:00"
+        },
+        {
+            "name": "conquer/helpers",
+            "version": "2.0.13",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/borodulin/yii2-helpers.git",
+                "reference": "fce7205b0e7f9d2673ddb21702ad858287ab8fa3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/borodulin/yii2-helpers/zipball/fce7205b0e7f9d2673ddb21702ad858287ab8fa3",
+                "reference": "fce7205b0e7f9d2673ddb21702ad858287ab8fa3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "yiisoft/yii2": ">=2.0.13"
+            },
+            "type": "yii2-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0.13.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "conquer\\helpers\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Andrey Borodulin",
+                    "email": "borodulin@gmail.com"
+                }
+            ],
+            "description": "Yii2 helpers",
+            "homepage": "https://github.com/borodulin/yii2-helpers",
+            "keywords": [
+                "extension",
+                "helpers",
+                "widget",
+                "yii2"
+            ],
+            "time": "2018-03-14T04:09:25+00:00"
+        },
+        {
             "name": "ezyang/htmlpurifier",
             "version": "v4.10.0",
             "source": {
@@ -251,6 +389,62 @@
                 "html"
             ],
             "time": "2018-02-23T01:58:20+00:00"
+        },
+        {
+            "name": "kdn/yii2-json-editor",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dmitry-kulikov/yii2-json-editor.git",
+                "reference": "e1fa26ac1f55ab5fd98397da4dc490d495deec06"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dmitry-kulikov/yii2-json-editor/zipball/e1fa26ac1f55ab5fd98397da4dc490d495deec06",
+                "reference": "e1fa26ac1f55ab5fd98397da4dc490d495deec06",
+                "shasum": ""
+            },
+            "require": {
+                "npm-asset/jsoneditor": "5.*",
+                "php": ">=5.4.0",
+                "yiisoft/yii2": "2.*"
+            },
+            "require-dev": {
+                "phpunit/php-invoker": "1.*",
+                "phpunit/phpunit": "4.*"
+            },
+            "suggest": {
+                "ext-runkit": "this extension is needed to run all tests, otherwise some tests will be skipped"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "kdn\\yii2\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dmitry Kulikov",
+                    "email": "kulikovdn@gmail.com"
+                }
+            ],
+            "description": "JSON editor widget (josdejong/jsoneditor) for Yii 2.",
+            "homepage": "https://github.com/dmitry-kulikov/yii2-json-editor",
+            "keywords": [
+                "Viewer",
+                "editor",
+                "extension",
+                "formatter",
+                "json",
+                "jsoneditor",
+                "widget",
+                "yii2"
+            ],
+            "time": "2018-07-27T18:16:19+00:00"
         },
         {
             "name": "mihaildev/yii2-ckeditor",
@@ -355,6 +549,278 @@
             "time": "2017-01-06T23:35:14+00:00"
         },
         {
+            "name": "newerton/yii2-fancybox-3",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/newerton/yii2-fancybox-3.git",
+                "reference": "3e42c3e981afab250f2557697cfd509118aa9524"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/newerton/yii2-fancybox-3/zipball/3e42c3e981afab250f2557697cfd509118aa9524",
+                "reference": "3e42c3e981afab250f2557697cfd509118aa9524",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/fancybox": "~3.3.5",
+                "php": ">=5.6.0",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "newerton\\fancybox3\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Newerton Vargas de Araujo",
+                    "email": "newerton.araujo@gmail.com"
+                }
+            ],
+            "description": "fancyBox is a tool that offers a nice and elegant way to add zooming functionality for images, html content and multi-media on your webpages.",
+            "keywords": [
+                "extension",
+                "fancyapps",
+                "fancybox",
+                "fancybox3",
+                "yii2"
+            ],
+            "time": "2018-04-20T16:51:49+00:00"
+        },
+        {
+            "name": "npm-asset/ajv",
+            "version": "5.5.2",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/ajv/-/ajv-5.5.2.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "npm-asset/co": ">=4.6.0,<5.0.0",
+                "npm-asset/fast-deep-equal": ">=1.0.0,<2.0.0",
+                "npm-asset/fast-json-stable-stringify": ">=2.0.0,<3.0.0",
+                "npm-asset/json-schema-traverse": ">=0.3.0,<0.4.0"
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/brace",
+            "version": "0.11.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/brace/-/brace-0.11.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/co",
+            "version": "4.6.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/co/-/co-4.6.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/drag-tracker",
+            "version": "1.0.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/drag-tracker/-/drag-tracker-1.0.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/fast-deep-equal",
+            "version": "1.1.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-1.1.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/fast-json-stable-stringify",
+            "version": "2.0.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/fast-json-stable-stringify/-/fast-json-stable-stringify-2.0.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/javascript-natural-sort",
+            "version": "0.7.1",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/javascript-natural-sort/-/javascript-natural-sort-0.7.1.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/jmespath",
+            "version": "0.15.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset"
+        },
+        {
+            "name": "npm-asset/json-schema-traverse",
+            "version": "0.3.1",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/json-schema-traverse/-/json-schema-traverse-0.3.1.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/json-source-map",
+            "version": "0.4.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/json-source-map/-/json-source-map-0.4.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/jsoneditor",
+            "version": "5.24.2",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/jsoneditor/-/jsoneditor-5.24.2.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "npm-asset/ajv": "5.5.2",
+                "npm-asset/brace": "0.11.0",
+                "npm-asset/javascript-natural-sort": "0.7.1",
+                "npm-asset/jmespath": "0.15.0",
+                "npm-asset/json-source-map": ">=0.4.0,<0.5.0",
+                "npm-asset/mobius1-selectr": "2.4.1",
+                "npm-asset/picomodal": "3.0.0",
+                "npm-asset/vanilla-picker": "2.3.0"
+            },
+            "type": "npm-asset",
+            "license": [
+                "Apache-2.0"
+            ]
+        },
+        {
+            "name": "npm-asset/mobius1-selectr",
+            "version": "2.4.1",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/mobius1-selectr/-/mobius1-selectr-2.4.1.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/picomodal",
+            "version": "3.0.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/picomodal/-/picomodal-3.0.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "npm-asset/sphinxxxx--color-conversion",
+            "version": "2.1.1",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/@sphinxxxx/color-conversion/-/color-conversion-2.1.1.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "npm-asset",
+            "license": [
+                "ISC"
+            ]
+        },
+        {
+            "name": "npm-asset/vanilla-picker",
+            "version": "2.3.0",
+            "dist": {
+                "type": "tar",
+                "url": "https://registry.npmjs.org/vanilla-picker/-/vanilla-picker-2.3.0.tgz",
+                "reference": null,
+                "shasum": null
+            },
+            "require": {
+                "npm-asset/drag-tracker": ">=1.0.0,<2.0.0",
+                "npm-asset/sphinxxxx--color-conversion": ">=2.1.1,<3.0.0"
+            },
+            "type": "npm-asset",
+            "license": [
+                "ISC"
+            ]
+        },
+        {
             "name": "rmrevin/yii2-fontawesome",
             "version": "3.1.0",
             "source": {
@@ -413,16 +879,16 @@
         },
         {
             "name": "studio-42/elfinder",
-            "version": "2.1.41",
+            "version": "2.1.42",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Studio-42/elFinder.git",
-                "reference": "8a4000573d1bba41001b996b891d43de3768d610"
+                "reference": "83f4b3102bafd4393cb51ff41af4edd34f8132f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Studio-42/elFinder/zipball/8a4000573d1bba41001b996b891d43de3768d610",
-                "reference": "8a4000573d1bba41001b996b891d43de3768d610",
+                "url": "https://api.github.com/repos/Studio-42/elFinder/zipball/83f4b3102bafd4393cb51ff41af4edd34f8132f4",
+                "reference": "83f4b3102bafd4393cb51ff41af4edd34f8132f4",
                 "shasum": ""
             },
             "require": {
@@ -467,7 +933,7 @@
             ],
             "description": "File manager for web",
             "homepage": "http://elfinder.org",
-            "time": "2018-08-19T07:28:57+00:00"
+            "time": "2018-08-29T06:44:30+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -3591,7 +4057,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "newerton/yii2-fancybox-3": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

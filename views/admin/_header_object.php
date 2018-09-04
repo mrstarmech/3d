@@ -5,6 +5,7 @@
             ['label' => 'Общие', 'url' => ['admin/edit-object-general', 'id' => $id]],
             ['label' => 'Метки', 'url' => ['admin/edit-object-label', 'id' => $id]],
             ['label' => 'Категории', 'url' => ['admin/edit-object-category', 'id' => $id]],
+            ['label' => 'Обработка', 'url' => ['admin/processing', 'id' => $id]],
         ],
     ]) ?>
 </div>

@@ -11,12 +11,18 @@ $this->registerJsFile('js/label.js',['depends' => ['yii\bootstrap\BootstrapPlugi
 $this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
-$this->registerJsFile('js/tmp.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+//$script = "
+//t.switchEnv('createLabel', true);
+//";
+//$this->registerJs($script, yii\web\View::POS_END);
+
 $this->title = $object->name;
 $this->params['breadcrumbs'][] = $this->title;
 
 echo $this->render('_header');
 echo $this->render('_header_object', ['id' => $object->id]);
+
+echo newerton\fancybox3\FancyBox::widget();
 ?>
 <div class="col-xs-12 tree-object" data-tree-object="<?= $object->id ?>"></div>
 

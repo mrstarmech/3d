@@ -4,7 +4,7 @@ var OBJECTS,
 
 OBJECTS = $('.tree-object');
 
-OBJECTS.each(function() {
+OBJECTS.each(function () {
     var value = $(this).attr('data-tree-object'),
         object = getObject(value),
         model = getModel(),
@@ -12,7 +12,7 @@ OBJECTS.each(function() {
         divCanvas = $('<div class="' + classNameCanvas + '"></div>');
 
     var styleDivContainer = {
-        'background': 'url(\'/' + model['pathImage'] +'/' + object['id'] + '/' + object['image'] + '\')',
+        'background': 'url(\'/' + model['pathImage'] + '/' + object['id'] + '/' + object['image'] + '\')',
         'background-position': 'center',
         'background-size': 'cover',
     };
@@ -24,48 +24,26 @@ OBJECTS.each(function() {
 });
 
 OBJECTS.click(function () {
-    distance();
-    if($(this).attr('data-render')){
+
+    if ($(this).attr('data-render') == 'success') {
+        distance();
+    }
+
+    if ($(this).attr('data-render')) {
         return false;
     }
-    var value = $(this).attr('data-tree-object'),
-        object = getObject(value),
-        model = getModel();
 
-    setting = {
-        "name": object['name'],
-        "texture": '/' + model['pathFile'] + '/' + object['id'] + '/' + object['texture'],
-        "mesh": '/' + model['pathFile'] + '/' + object['id'] + '/' + object['obj'],
-        "ambient": "",
-        "color": "",
-        "specular": "",
-        "shininess": ""
-    };
-    options = {
-        "grid": false,
-        "ruler": false,
-        "wireframe": false,
-        "autorotate": false,
-        "showgui": false,
-        "lights": "AmbientLight",
-        "loader": "objLoader",
-        "controls": "OrbitControls",
-        "camera": "auto",
-        "cameraDistanceMultiplier": 1,
-        "cameraCoords": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-        }
-    };
+    object = getObject($(this).attr('data-tree-object'));
+
     try {
-        window.t = new viewer(setting, options);
+        window.t = new viewer(object.setting, object.option, object.label);
+        // window.t = new viewer(object.setting, object.option);
         t.appendTo(classNameCanvas);
-        t.switchEnv('createLabel',true);
-        $(this).attr('data-render','success');
+        t.switchEnv('createLabel', true);
+        $(this).attr('data-render', 'success');
         $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
         $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
-        $(this).children('.' + classNameContainer).attr('data-state','dynamic');
+        $(this).children('.' + classNameContainer).attr('data-state', 'dynamic');
     } catch (error) {
         console.log(error);
     }
@@ -81,7 +59,7 @@ function getObject(id) {
         url: "/object/data",
         data: {id: id, _csrf: csrfToken},
         cache: false,
-        success: function(response){
+        success: function (response) {
             object = response;
         }
     });
@@ -98,7 +76,7 @@ function getModel() {
         url: "/object/setting",
         data: {_csrf: csrfToken},
         cache: false,
-        success: function(response){
+        success: function (response) {
             model = response;
         }
     });
@@ -131,7 +109,8 @@ function modalDialog() {
         body = $('<div class="modal-body"></div>'),
         pre = $('<pre></pre>'),
         code = $('<code></code>');
-    code.text('<div class="tree-test"></div>');;
+    code.text('<div class="tree-test"></div>');
+    ;
     pre.append(code);
     body.append(pre);
     content.append(body);
@@ -141,8 +120,8 @@ function modalDialog() {
     return modal;
 }
 
-function distance(){
-    if(options.ruler && t.rulerDistance() !== 0){
+function distance() {
+    if (object.option.ruler && t.rulerDistance() !== 0) {
         $('.menu-object[data-menu=ruler]').attr({
             'data-toggle': 'tooltip',
             'data-html': 'true',
@@ -150,24 +129,24 @@ function distance(){
             'title': t.rulerDistance() + '&nbsp;мм'
         });
         $('.menu-object[data-menu=ruler]').tooltip('show');
-    }else{
+    } else {
         $('.menu-object[data-menu=ruler]').tooltip('destroy');
     }
 }
 
 
-$('.' + classNameContainer).on('click', '.menu-object', function(){
-    switch ($(this).attr('data-menu')){
+$('.' + classNameContainer).on('click', '.menu-object', function () {
+    switch ($(this).attr('data-menu')) {
         case 'full-screen':
-            if($(this).attr('data-full-screen') === 'true'){
-                if(document.exitFullscreen) document.exitFullscreen();
-                else if(document.mozCancelFullScreen) document.mozCancelFullScreen();
-                else if(document.webkitCancelFullScreen) document.webkitCancelFullScreen();
-                else if(document.msExitFullscreen) document.msExitFullscreen();
+            if ($(this).attr('data-full-screen') === 'true') {
+                if (document.exitFullscreen) document.exitFullscreen();
+                else if (document.mozCancelFullScreen) document.mozCancelFullScreen();
+                else if (document.webkitCancelFullScreen) document.webkitCancelFullScreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
                 else {
                     //альтернативное решение для браузеров, которые не поддерживают exitfullscreen()
                 }
-            }else{
+            } else {
                 var elements = document.getElementsByClassName(classNameCanvas);
                 var i = elements[0];
                 if (i.requestFullscreen) {
@@ -178,22 +157,23 @@ $('.' + classNameContainer).on('click', '.menu-object', function(){
                     i.mozRequestFullScreen();
                 } else if (i.msRequestFullscreen) {
                     i.msRequestFullscreen();
-                };
+                }
+                ;
             }
             break;
         case 'collapse':
             $('.' + classNameContainer + " .submenu").toggle();
-            buttonActive($(this),$('.' + classNameContainer + " .submenu").is(':visible'));
+            buttonActive($(this), $('.' + classNameContainer + " .submenu").is(':visible'));
             break;
         case 'rotate':
-            options.autorotate = !options.autorotate;
-            t.switchEnv('autoRotate', options.autorotate);
-            buttonActive($(this),options.autorotate);
+            object.option.autorotate = !object.option.autorotate;
+            t.switchEnv('autoRotate', object.option.autorotate);
+            buttonActive($(this), object.option.autorotate);
             break;
         case 'value-wire-frame':
-            options.valuewireframe = !options.valuewireframe;
-            t.switchEnv('wireframe',options.valuewireframe);
-            buttonActive($(this),options.valuewireframe);
+            object.option.valuewireframe = !object.option.valuewireframe;
+            t.switchEnv('wireframe', object.option.valuewireframe);
+            buttonActive($(this), object.option.valuewireframe);
             break;
         case 'share':
             $('#share-object').modal();
@@ -201,47 +181,47 @@ $('.' + classNameContainer).on('click', '.menu-object', function(){
             $('body').removeClass();
             break;
         case 'ruler':
-            options.ruler = !options.ruler;
-            t.switchEnv('ruler',options.ruler);
-            buttonActive($(this),options.ruler);
+            object.option.ruler = !object.option.ruler;
+            t.switchEnv('ruler', object.option.ruler);
+            buttonActive($(this), object.option.ruler);
             break;
     }
 });
 
-function buttonActive(element,value){
-    if(value){
+function buttonActive(element, value) {
+    if (value) {
         element.addClass('active');
-    }else {
+    } else {
         element.removeClass('active');
     }
 }
 
-$('.' + classNameContainer).on('dblclick', '.' + classNameCanvas, function(){
-    options.autorotate = !options.autorotate;
-    t.switchEnv('autoRotate', options.autorotate);
-    buttonActive($('.menu-object[data-menu=rotate]'),options.autorotate);
+$('.' + classNameContainer).on('dblclick', '.' + classNameCanvas, function () {
+    object.option.autorotate = !object.option.autorotate;
+    t.switchEnv('autoRotate', object.option.autorotate);
+    buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
 });
 
-var eFullscreenName = function (){
-    if('onfullscreenchange' in document) return 'fullscreenchange';
-    if('onmozfullscreenchange' in document) return 'mozfullscreenchange';
-    if('onwebkitfullscreenchange' in document) return 'webkitfullscreenchange';
-    if('onmsfullscreenchange' in document) return 'MSFullscreenChange';
+var eFullscreenName = function () {
+    if ('onfullscreenchange' in document) return 'fullscreenchange';
+    if ('onmozfullscreenchange' in document) return 'mozfullscreenchange';
+    if ('onwebkitfullscreenchange' in document) return 'webkitfullscreenchange';
+    if ('onmsfullscreenchange' in document) return 'MSFullscreenChange';
     return false;
 }();
 
-if(eFullscreenName){
+if (eFullscreenName) {
     document.addEventListener(eFullscreenName, function () {
         var element = $('.menu-object[data-menu=full-screen]'),
             value = element.attr('data-full-screen') === 'true'
         element.attr('data-full-screen', !value);
-        buttonActive(element,!value);
+        buttonActive(element, !value);
     }, false);
 }
 
-$('.' + classNameContainer).on('click', '.' + classNameCanvas, function(){
+$('.' + classNameContainer).on('click', '.' + classNameCanvas, function () {
     var new_label = t.getNewLabel();
-    if(new_label){
+    if (new_label) {
         var position = new_label.position;
         $('input[id=objectlabel-position]').val(JSON.stringify(position));
     }

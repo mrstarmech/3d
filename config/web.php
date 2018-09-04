@@ -54,6 +54,7 @@ $config = [
                 'object/<action:(.*?)>/<id:(.*?)>' => 'object/<action>',
                 'category' => 'category/index',
                 'category/<id:(.*?)>' => 'category/view',
+                'iframe/<id:(.*?)>' => 'object/iframe',
                 '<controller:(.*?)>/<action:(.*?)>/<id:(.*?)>' => '<controller>/<action>',
             ],
         ],
@@ -96,7 +97,5 @@ if (YII_ENV_DEV) {
         'allowedIPs' => ['127.0.0.1', '10.2.5.41', '84.237.52.66']
     ];
 }
-//echo '<pre>';
-//print_r($_SERVER);
-//echo '</pre>'; die;
+
 return $config;

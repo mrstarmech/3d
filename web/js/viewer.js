@@ -817,12 +817,14 @@ function viewer(model,options,labels){
 
             var intersects = getObjectSplite(label,mouse);
             if(intersects && intersects.object.type == 'Sprite') {
-                console.log(intersects.object);
-                $.fancybox.open({
-                    src : '<div class="message">'+intersects.object.description+'</div>',
-                    type : 'html',
-                    smallBtn : false
-                });
+                try {
+                    // console.log(intersects.object);
+                    $.fancybox.open({
+                        src: '<div class="message">' + intersects.object.description + '</div>',
+                        type: 'html',
+                        smallBtn: false
+                    });
+                }catch (e){}
             }else if(controllers.createLabel){
                 var intersects = getObjectSplite(sceneObjectsMesh,mouse);
                 CreateSplite(intersects);
