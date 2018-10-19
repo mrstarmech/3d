@@ -19,6 +19,7 @@ class m180628_174525_create_object_table extends Migration
             'obj' => $this->string(),
             'mtl' => $this->string(),
             'texture' => $this->string(),
+            'image' => $this->string(),
             'setting' => $this->text(),
             'option' => $this->text(),
             'visible' => $this->smallInteger(),

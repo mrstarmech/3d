@@ -9,6 +9,7 @@ use app\models\ObjectOption;
 use app\models\ObjectSetting;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\FileHelper;
 use yii\helpers\Url;
 use yii\web\Controller;
 use app\models\Object;
@@ -35,6 +36,102 @@ class AdminController extends Controller
         ];
     }
 
+    public function actionTest()
+    {
+
+        $objects = Object::find()->all();
+
+        foreach ($objects as $object) {
+
+//            $object->setting = str_replace("'", '"', $object->setting);
+//            $object->setting = str_replace("name:", '"name":', $object->setting);
+//            $object->setting = str_replace("texture:", '"texture":', $object->setting);
+//            $object->setting = str_replace("mesh:", '"mesh":', $object->setting);
+//            $object->setting = str_replace("ambient:", '"ambient":', $object->setting);
+//            $object->setting = str_replace("color:", '"color":', $object->setting);
+//            $object->setting = str_replace("specular:", '"specular":', $object->setting);
+//            $object->setting = str_replace("shininess:", '"shininess":', $object->setting);
+//            $object->setting = str_replace("mtl:", '"mtl":', $object->setting);
+//
+//            $object->option = preg_replace("/\t/", '', $object->option);
+//            $object->option = preg_replace("/;$/", '', $object->option);
+//            $object->option = str_replace('  ', '', $object->option);
+//            $object->option = str_replace("'", '"', $object->option);
+//            $object->option = str_replace("grid:", '"grid":', $object->option);
+//            $object->option = str_replace("ruler:", '"ruler":', $object->option);
+//            $object->option = str_replace("wireframe:", '"wireframe":', $object->option);
+//            $object->option = str_replace("autorotate:", '"autorotate":', $object->option);
+//            $object->option = str_replace("showgui:", '"showgui":', $object->option);
+//            $object->option = str_replace("lights:", '"lights":', $object->option);
+//            $object->option = str_replace("loader:", '"loader":', $object->option);
+//            $object->option = str_replace("controls:", '"controls":', $object->option);
+//            $object->option = str_replace("camera:", '"camera":', $object->option);
+//            $object->option = str_replace("cameraDistanceMultiplier:", '"cameraDistanceMultiplier":', $object->option);
+//            $object->option = str_replace("cameraCoords:", '"cameraCoords":', $object->option);
+//            $object->option = str_replace("x:", '"x":', $object->option);
+//            $object->option = str_replace("y:", '"y":', $object->option);
+//            $object->option = str_replace("z:", '"z":', $object->option);
+//            $object->option = str_replace("backgroundColor:", '"backgroundColor":', $object->option);
+//
+//            $object->option = str_replace("grid :", '"grid":', $object->option);
+//            $object->option = str_replace("ruler :", '"ruler":', $object->option);
+//            $object->option = str_replace("wireframe :", '"wireframe":', $object->option);
+//            $object->option = str_replace("autorotate :", '"autorotate":', $object->option);
+//            $object->option = str_replace("showgui :", '"showgui":', $object->option);
+//            $object->option = str_replace("lights :", '"lights":', $object->option);
+//            $object->option = str_replace("loader :", '"loader":', $object->option);
+//            $object->option = str_replace("controls :", '"controls":', $object->option);
+//            $object->option = str_replace("camera :", '"camera":', $object->option);
+//            $object->option = str_replace("cameraDistanceMultiplier :", '"cameraDistanceMultiplier":', $object->option);
+//            $object->option = str_replace("cameraCoords :", '"cameraCoords":', $object->option);
+//            $object->option = str_replace("x :", '"x":', $object->option);
+//            $object->option = str_replace("y :", '"y":', $object->option);
+//            $object->option = str_replace("z :", '"z":', $object->option);
+//            $object->option = str_replace("aturotateDisableByClick :", '"aturotateDisableByClick":', $object->option);
+//
+//
+//            if (!json_decode($object->option) or !json_decode($object->setting)) {
+//                var_dump($object->id);
+//                var_dump($object->option);
+//                var_dump($object->setting);
+//                die;
+//            } else {
+//                $object->option = json_encode(json_decode($object->option));
+//                $object->setting = json_encode(json_decode($object->setting));
+//                $object->save();
+//            }
+
+//            if (!$object->image) {
+//
+//                $path_ = $_SERVER['DOCUMENT_ROOT'] . '/web/uploads/' . $object->id;
+//                $path_img = $_SERVER['DOCUMENT_ROOT'] . '/web/preview/' . $object->id . '/' . $object->id . '.png';
+//
+//                if (!file_exists($path_img)) {
+//                    var_dump($path_img);
+//                    continue;
+//                }
+//
+//                if (!file_exists($path_)) {
+//                    mkdir($path_, 0777, true);
+//                }
+////
+//                $newName = strtotime('now');
+//                $object->image = $newName . '.png';
+//
+//                if(!copy($path_img, $path_ . '/' . $object->image)) {
+//                    echo "error copy";
+//                    die;
+//                } else {
+//                    $object->save();
+//                }
+//            }
+
+//            $object->setting = str_replace('\/models\/', '\/objects\/', $object->setting);
+//            $object->save();
+        }
+        die;
+    }
+
     public function actionIndex()
     {
         $query = Object::find();
@@ -56,7 +153,7 @@ class AdminController extends Controller
         if ($object->load(Yii::$app->request->post())) {
             if ($object->validate() and $object->save()) {
                 Yii::$app->session->setFlash('success', "Модель сохранена");
-                return $this->redirect(['admin/edit-object/' . $object->id]);
+                return $this->redirect(['admin/edit-object-general/' . $object->id]);
             }
         }
         return $this->render('addObject', [

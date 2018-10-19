@@ -7,6 +7,13 @@ use yii\behaviors\TimestampBehavior;
 use yii\helpers\FileHelper;
 use yii\helpers\Url;
 
+/**
+ * Class Object
+ *
+ *
+ * @package app\models
+ */
+
 class Object extends ActiveRecord
 {
     const SCENARIO_SAVE = 'save';
