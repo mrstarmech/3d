@@ -4,25 +4,24 @@ var OBJECTS,
 
 OBJECTS = $('.tree-object');
 
+OBJECTS.each(function () {
+    var value = $(this).attr('data-tree-object'),
+        object = getObject(value),
+        model = getModel(),
+        divContainer = $('<div class=' + classNameContainer + ' data-state="static"></div>'),
+        divCanvas = $('<div class="' + classNameCanvas + '"></div>');
 
-// OBJECTS.each(function () {
-//     var value = $(this).attr('data-tree-object'),
-//         object = getObject(value),
-//         model = getModel(),
-//         divContainer = $('<div class=' + classNameContainer + ' data-state="static"></div>'),
-//         divCanvas = $('<div class="' + classNameCanvas + '"></div>');
-//
-//     var styleDivContainer = {
-//         'background': 'url(\'/' + model['pathImage'] + '/' + object['id'] + '/' + object['image'] + '\')',
-//         'background-position': 'center',
-//         'background-size': 'cover',
-//     };
-//
-//     divContainer.css(styleDivContainer);
-//     divContainer.append(divCanvas);
-//
-//     $(this).append(divContainer);
-// });
+    var styleDivContainer = {
+        'background': 'url(\'/' + model['pathImage'] + '/' + object['id'] + '/' + object['image'] + '\')',
+        'background-position': 'center',
+        'background-size': 'cover',
+    };
+
+    divContainer.css(styleDivContainer);
+    divContainer.append(divCanvas);
+
+    $(this).append(divContainer);
+});
 
 OBJECTS.click(function () {
 
@@ -34,73 +33,58 @@ OBJECTS.click(function () {
         return false;
     }
 
-    // object = getObject($(this).attr('data-tree-object'));
+    object = getObject($(this).attr('data-tree-object'));
 
-    // try {
-    //     window.t = new viewer(object.setting, object.option, object.label);
-    //     // window.t = new viewer(object.setting, object.option);
-    //     t.appendTo(classNameCanvas);
-    //     t.switchEnv('createLabel', true);
-    //     $(this).attr('data-render', 'success');
-    //     $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
-    //     $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
-    //     $(this).children('.' + classNameContainer).attr('data-state', 'dynamic');
-    // } catch (error) {
-    //     console.log(error);
-    // }
-});
-
-function start() {
     try {
-        // window.t = new viewer(object.setting, object.option, object.label);
-        window.t = new viewer(object.setting, object.option);
+        window.t = new viewer(object.setting, object.option, object.label);
+        // window.t = new viewer(object.setting, object.option);
         t.appendTo(classNameCanvas);
-        // t.switchEnv('createLabel', true);
-        OBJECTS.attr('data-render', 'success');
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
-        OBJECTS.children('.' + classNameContainer).attr('data-state', 'dynamic');
+        t.switchEnv('createLabel', true);
+        $(this).attr('data-render', 'success');
+        $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
+        $(this).children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
+        $(this).children('.' + classNameContainer).attr('data-state', 'dynamic');
     } catch (error) {
         console.log(error);
     }
-};
+});
 
-// function getObject(id) {
-//     var csrfToken = $('meta[name="csrf-token"]').attr("content");
-//     var object;
-//     $.ajax({
-//         async: false,
-//         type: "POST",
-//         dataType: "json",
-//         url: "/object/data",
-//         data: {id: id, _csrf: csrfToken},
-//         cache: false,
-//         success: function (response) {
-//             object = response;
-//         }
-//     });
-//     return object;
-// }
+function getObject(id) {
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var object;
+    $.ajax({
+        async: false,
+        type: "POST",
+        dataType: "json",
+        url: "/object/data",
+        data: {id: id, _csrf: csrfToken},
+        cache: false,
+        success: function (response) {
+            object = response;
+        }
+    });
+    return object;
+}
 
-// function getModel() {
-//     var csrfToken = $('meta[name="csrf-token"]').attr("content");
-//     var model;
-//     $.ajax({
-//         async: false,
-//         type: "POST",
-//         dataType: "json",
-//         url: "/object/setting",
-//         data: {_csrf: csrfToken},
-//         cache: false,
-//         success: function (response) {
-//             model = response;
-//         },
-//         error: function (xhr, status, error) {
-//             console.log(xhr.responseText);
-//         }
-//     });
-//     return model;
-// }
+function getModel() {
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
+    var model;
+    $.ajax({
+        async: false,
+        type: "POST",
+        dataType: "json",
+        url: "/object/setting",
+        data: {_csrf: csrfToken},
+        cache: false,
+        success: function (response) {
+            model = response;
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+    return model;
+}
 
 function menu() {
     var menu = $('<div class="btn-toolbar container-menu-object" role="toolbar"></div>'),

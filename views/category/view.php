@@ -2,9 +2,10 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$this->title = 'Категория «' . $category->name . '»';
+$this->title = Yii::t('app', 'Category') . ' «' . $category->name . '»';
+
 $this->params['breadcrumbs'] = [
-    ['label' => 'Категории', 'url' => ['/category/index']],
+    ['label' => Yii::t('app', 'Category'), 'url' => ['/category/index']],
     $category->name,
 ];
 ?>
