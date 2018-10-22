@@ -13,6 +13,7 @@ echo $this->render('_header_object', ['id' => $model->id]);
 
 $this->title = 'Редактирование модели';
 $this->params['breadcrumbs'][] = $this->title;
+
 ?>
 <h1><?= Html::encode($this->title) ?>
     <small><?= $model->name ?></small>
@@ -32,21 +33,42 @@ $this->params['breadcrumbs'][] = $this->title;
 ]); ?>
 
 <?= $form->field($model, 'visible')->checkbox() ?>
-<?= $form->field($model, 'name')->textInput(['autofocus' => true]) ?>
-<?= $form->field($model, 'description')->widget(CKEditor::className(),
-    [
-        'options' => [
-            'allowedContent' => true,
-        ],
-        'editorOptions' => ElFinder::ckeditorOptions(
-            'elfinder',
+<div class="row">
+    <div class="col-xs-6">
+        <?= $form->field($model, 'name_ru')->textInput() ?>
+        <?= $form->field($model, 'description_ru')->widget(CKEditor::className(),
             [
-                'inline' => false,
-                'skin' => 'office2013,/js/cke/skins/office2013/'
-            ]
-        ),
+                'options' => [
+                    'allowedContent' => true,
+                ],
+                'editorOptions' => ElFinder::ckeditorOptions(
+                    'elfinder',
+                    [
+                        'inline' => false,
+                        'skin' => 'office2013,/js/cke/skins/office2013/'
+                    ]
+                ),
 
-    ]) ?>
+            ]) ?>
+    </div>
+    <div class="col-xs-6">
+        <?= $form->field($model, 'name_en')->textInput(['autofocus' => true]) ?>
+        <?= $form->field($model, 'description_en')->widget(CKEditor::className(),
+            [
+                'options' => [
+                    'allowedContent' => true,
+                ],
+                'editorOptions' => ElFinder::ckeditorOptions(
+                    'elfinder',
+                    [
+                        'inline' => false,
+                        'skin' => 'office2013,/js/cke/skins/office2013/'
+                    ]
+                ),
+
+            ]) ?>
+    </div>
+</div>
 
 <?= $form->field($model, 'fileImage')->fileInput() ?>
 

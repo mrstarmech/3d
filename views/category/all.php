@@ -2,13 +2,13 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-$this->title = 'Категория «Все»';
+$this->title = Yii::t('app', 'Category') . ' «' . Yii::t('app', 'All') . '»';
 $this->params['breadcrumbs'] = [
-    ['label' => 'Категории', 'url' => ['/category/index']],
-    'Все',
+    ['label' => Yii::t('app', 'Category'), 'url' => ['/category/index']],
+    Yii::t('app', 'All'),
 ];
 ?>
-<h1>Все</h1>
+<h1><?= Yii::t('app', 'All') ?></h1>
 <?php if(!empty($objects)): ?>
 <div class="row">
     <?php foreach($objects as $object): ?>

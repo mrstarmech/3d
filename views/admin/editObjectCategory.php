@@ -27,7 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <ul>
                 <?php foreach ($objectCategories as $item): ?>
                     <?php
-                    ArrayHelper::remove($categories_, $item->id_category);
+                    ArrayHelper::remove($categories_, $item->category_id);
                     ?>
                     <li>
                         <?= $item->category->name ?>
@@ -49,8 +49,8 @@ $this->params['breadcrumbs'][] = $this->title;
         ]);
         ?>
 
-        <?= $form->field($objectCategory, 'id_category')->dropDownList($categories_, ['class' => 'form-control'])->label(false) ?>
-        <?= $form->field($objectCategory, 'id_object')->hiddenInput(['value' => $model->id])->label(false) ?>
+        <?= $form->field($objectCategory, 'category_id')->dropDownList($categories_, ['class' => 'form-control'])->label(false) ?>
+        <?= $form->field($objectCategory, 'object_id')->hiddenInput(['value' => $model->id])->label(false) ?>
 
         <div class="form-group">
             <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary']) ?>

@@ -5,7 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
-    'name' => '3D галерея',
+    'name' => '3D Gallery',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
     'aliases' => [
@@ -46,10 +46,12 @@ $config = [
         ],
         'db' => $db,
         'urlManager' => [
+            'class' => 'codemix\localeurls\UrlManager',
+            'languages' => ['en', 'ru'],
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                '' => 'gallery/index',
+                '' => 'site/index',
                 'admin/<action:(.*?)>/<id:(.*?)>' => 'admin/<action>',
                 'object/<action:(.*?)>/<id:(.*?)>' => 'object/<action>',
                 'category' => 'category/index',
@@ -59,6 +61,19 @@ $config = [
         ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
+        ],
+        'i18n' => [
+            'translations' => [
+                '*' => [
+                    'class' => 'yii\i18n\PhpMessageSource',
+                    'basePath' => '@app/messages',
+                    'sourceLanguage' => 'en_US',
+                    'fileMap' => [
+                        'app' => 'app.php',
+                        'app/error' => 'error.php',
+                    ],
+                ],
+            ],
         ],
     ],
     'controllerMap' => [
@@ -76,7 +91,7 @@ $config = [
             ],
         ]
     ],
-    'language' => 'ru',
+    'language' => 'en',
     'params' => $params,
 ];
 

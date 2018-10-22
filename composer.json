@@ -23,7 +23,9 @@
         "mihaildev/yii2-elfinder": "*",
         "newerton/yii2-fancybox-3": "dev-master",
         "kdn/yii2-json-editor": "*",
-        "conquer/codemirror": "*"
+        "conquer/codemirror": "*",
+        "cinghie/yii2-multilanguage": "*",
+        "omgdef/yii2-multilingual-behavior": "~2.0"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

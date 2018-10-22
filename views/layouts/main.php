@@ -9,6 +9,7 @@ use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
 use app\assets\AppAsset;
+use \cinghie\multilanguage\widgets\MultiLanguageWidget;
 
 AppAsset::register($this);
 ?>
@@ -29,7 +30,7 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => Yii::$app->name,
+        'brandLabel' => Yii::t('app', Yii::$app->name),
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
@@ -38,15 +39,15 @@ AppAsset::register($this);
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
-            ['label' => 'Главная', 'url' => ['/gallery/index']],
-            ['label' => 'Категории', 'url' => ['/category/index']],
+            ['label' => Yii::t('app', 'Home'), 'url' => Yii::$app->homeUrl],
+            ['label' => Yii::t('app', 'Category'), 'url' => ['/category/index']],
             Yii::$app->user->isGuest ? (
-                ['label' => 'Войти', 'url' => ['/site/login']]
+                ['label' => Yii::t('app', 'Sign in'), 'url' => ['/site/login']]
             ) : (
                 '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
-                    'Выйти (' . Yii::$app->user->identity->username . ')',
+                    Yii::t('app', 'Sign out') . ' (' . Yii::$app->user->identity->username . ')',
                     ['class' => 'btn btn-link logout']
                 )
                 . Html::endForm()
@@ -58,6 +59,18 @@ AppAsset::register($this);
     ?>
 
     <div class="container">
+
+        <div class="clearfix">
+            <div class="pull-right">
+                <?= MultiLanguageWidget::widget([
+                    'widget_type' => 'classic', // classic or selector
+                    'image_type' => 'classic', // classic or rounded
+                    'width' => '18',
+                    'calling_controller' => $this->context
+                ]) ?>
+            </div>
+        </div>
+
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
@@ -68,9 +81,7 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
-
-        <p class="pull-right"><?= Yii::powered() ?></p>
+        <p class="pull-left">&copy; <?= Yii::t('app', 'Novosibirsk State University') ?>, <?= date('Y') ?></p>
     </div>
 </footer>
 

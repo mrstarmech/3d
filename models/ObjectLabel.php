@@ -10,7 +10,7 @@ class ObjectLabel extends ActiveRecord
     public function rules()
     {
         return [
-            [['id_object'], 'required'],
+            [['object_id'], 'required'],
             [['position','description'], 'string'],
         ];
     }

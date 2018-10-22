@@ -3,8 +3,10 @@
 namespace app\controllers;
 
 use app\models\Category;
+use app\models\CategoryLanguage;
 use app\models\ObjectCategory;
 use app\models\ObjectLabel;
+use app\models\ObjectLanguage;
 use app\models\ObjectOption;
 use app\models\ObjectSetting;
 use Yii;
@@ -132,6 +134,58 @@ class AdminController extends Controller
         die;
     }
 
+    public function actionTest2()
+    {
+        $categories = Category::find()->all();
+
+        $languages = Yii::$app->urlManager->languages;
+
+        foreach ($categories as $category) {
+            if (empty($category->lang)) {
+                foreach ($languages as $language) {
+                    $lang = new CategoryLanguage();
+                    $lang->category_id = $category->id;
+                    $lang->locale = $language;
+                    $lang->name = $category->name;
+                    $lang->description = $category->description;
+
+                    if ($lang->validate()) {
+                        $lang->save();
+                    } else {
+                        var_dump($lang->errors);
+                        die;
+                    }
+                }
+            }
+        }
+        die;
+    }
+
+    public function actionTest3()
+    {
+        $objects = Object::find()->all();
+
+        $languages = Yii::$app->urlManager->languages;
+
+        foreach ($objects as $object) {
+            foreach ($languages as $language) {
+                $lang = new ObjectLanguage();
+                $lang->object_id = $object->id;
+                $lang->locale = $language;
+                $lang->name = $object->name;
+                $lang->description = $object->description;
+
+                if ($lang->validate()) {
+                    $lang->save();
+                } else {
+                    var_dump($lang->errors);
+                    die;
+                }
+            }
+        }
+        die;
+    }
+
     public function actionIndex()
     {
         $query = Object::find();
@@ -163,10 +217,10 @@ class AdminController extends Controller
 
     public function actionEditObjectGeneral($id)
     {
-        $object = Object::findOne($id);
+        $object = Object::find()->multilingual()->where(['id' => $id])->one();
 
         if (empty($object)) {
-            throw new HttpException(404);
+            throw new HttpException(500);
         }
 
         if ($object->load(Yii::$app->request->post())) {
@@ -176,6 +230,8 @@ class AdminController extends Controller
             $object->fileTexture = UploadedFile::getInstance($object, 'fileTexture');
             if ($object->upload()) {
                 $object->scenario = Object::SCENARIO_SAVE;
+//                var_dump($object);
+//                die;
                 if ($object->save()) {
                     Yii::$app->session->setFlash('success', "Модель сохранена");
                     return $this->refresh();
@@ -185,7 +241,7 @@ class AdminController extends Controller
         }
 
         $objectCategories = ObjectCategory::find()
-            ->where(['id_object' => $object->id])
+            ->where(['object_id' => $object->id])
             ->all();
         $objectCategory = new ObjectCategory();
 
@@ -215,7 +271,7 @@ class AdminController extends Controller
         }
 
         $objectCategories = ObjectCategory::find()
-            ->where(['id_object' => $object->id])
+            ->where(['object_id' => $object->id])
             ->all();
         $objectCategory = new ObjectCategory();
 
@@ -398,7 +454,7 @@ class AdminController extends Controller
         }
 
         $label = new ObjectLabel();
-        $label->id_object = $object->id;
+        $label->object_id = $object->id;
 
         if ($label->load(Yii::$app->request->post())) {
             if ($label->validate() and $label->save()) {

@@ -2,6 +2,8 @@
 
 namespace app\models;
 
+use omgdef\multilingual\MultilingualBehavior;
+use omgdef\multilingual\MultilingualQuery;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\helpers\FileHelper;
@@ -22,8 +24,12 @@ class Object extends ActiveRecord
     const LOADER_OBJ = 'objLoader';
     const LOADER_UTF8 = 'utf8Loader';
 
+    const PATH_IMAGE = 'uploads';
+    const PATH_FILE = 'objects';
+
     public $pathImage = 'uploads';
     public $pathFile = 'objects';
+
     public $defaultOption = [
         "grid" => false,
         "ruler" => false,
@@ -73,7 +79,11 @@ class Object extends ActiveRecord
     {
         return [
             'name' => 'Название',
+            'name_en' => 'Название на английском',
+            'name_ru' => 'Название на русском',
             'description' => 'Описание',
+            'description_en' => 'Описание на английском',
+            'description_ru' => 'Описание на русском',
             'image' => 'Постер',
             'visible' => 'Отображение',
             'fileImage' => 'Файл постера',
@@ -88,8 +98,27 @@ class Object extends ActiveRecord
     public function behaviors()
     {
         return [
+            'ml' => [
+                'class' => MultilingualBehavior::className(),
+                'languages' => [
+                    'ru' => 'Russian',
+                    'en' => 'English',
+                ],
+                'languageField' => 'locale',
+//                'defaultLanguage' => 'en',
+                'langForeignKey' => 'object_id',
+                'tableName' => "{{%object_language}}",
+                'attributes' => [
+                    'name', 'description',
+                ]
+            ],
             TimestampBehavior::className(),
         ];
+    }
+
+    public static function find()
+    {
+        return new MultilingualQuery(get_called_class());
     }
 
     public function scenarios()
@@ -178,7 +207,7 @@ class Object extends ActiveRecord
 
     public function getLabels()
     {
-        return $this->hasMany(ObjectLabel::className(), ['id_object' => 'id']);
+        return $this->hasMany(ObjectLabel::className(), ['object_id' => 'id']);
     }
 
     public function getOptionArray()

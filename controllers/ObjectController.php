@@ -46,7 +46,7 @@ class ObjectController extends Controller
         $id = (int)Yii::$app->request->post('id');
         $object = Object::findOne($id) ? Object::findOne($id)->toArray() : null;
         if($object){
-            $object['label'] = ObjectLabel::find()->where(['id_object' => $id])->asArray()->all();
+            $object['label'] = ObjectLabel::find()->where(['object_id' => $id])->asArray()->all();
             $object['option'] = json_decode($object['option']);
             $object['setting'] = json_decode($object['setting']);
         }
@@ -54,9 +54,9 @@ class ObjectController extends Controller
     }
 
     public function actionSetting(){
-        $model = new Object();
-        $setting['pathImage'] = $model->pathImage;
-        $setting['pathFile'] = $model->pathFile;
+        $setting['pathImage'] = Object::PATH_IMAGE;
+        $setting['pathFile'] = Object::PATH_FILE;
+
         return json_encode($setting);
     }
 }
