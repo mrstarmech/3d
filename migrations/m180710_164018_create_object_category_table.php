@@ -14,8 +14,8 @@ class m180710_164018_create_object_category_table extends Migration
     {
         $this->createTable('object_category', [
             'id' => $this->primaryKey(),
-            'id_object' => $this->integer()->notNull(),
-            'id_category' => $this->integer()->notNull(),
+            'object_id' => $this->integer()->notNull(),
+            'category_id' => $this->integer()->notNull(),
         ]);
     }
 

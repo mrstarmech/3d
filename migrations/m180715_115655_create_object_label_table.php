@@ -14,7 +14,7 @@ class m180715_115655_create_object_label_table extends Migration
     {
         $this->createTable('object_label', [
             'id' => $this->primaryKey(),
-            'id_object' => $this->string()->notNull(),
+            'object_id' => $this->string()->notNull(),
             'position' => $this->text(),
             'description' => $this->text(),
             'created_at' => $this->integer()->notNull(),

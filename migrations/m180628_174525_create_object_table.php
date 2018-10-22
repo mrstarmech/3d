@@ -14,8 +14,6 @@ class m180628_174525_create_object_table extends Migration
     {
         $this->createTable('object', [
             'id' => $this->primaryKey(),
-            'name' => $this->string(),
-            'description' => $this->text(),
             'obj' => $this->string(),
             'mtl' => $this->string(),
             'texture' => $this->string(),
