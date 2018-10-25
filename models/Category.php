@@ -11,6 +11,7 @@ use yii\helpers\FileHelper;
  * Class Category
  * @property int id
  * @property array lang
+ * @property Object[] objects
  * @package app\models
  */
 class Category extends ActiveRecord
@@ -39,6 +40,7 @@ class Category extends ActiveRecord
     public function getObjects(){
         return $this->hasMany(ObjectCategory::className(), ['category_id' => 'id'])
             ->joinWith('object')
-            ->where(['visible' => 1]);
+            ->where(['visible' => 1])
+            ->andWhere(['category_id' => $this->id]);
     }
 }

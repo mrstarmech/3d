@@ -7,28 +7,14 @@ $this->registerJsFile('js/viewer.js', ['depends' => ['yii\bootstrap\BootstrapPlu
 $this->registerJsFile('js/label.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
 $this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/loader.object-1.1.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
-$this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/tmp.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
-$labels = $object->labels;
-if (!empty($labels)) {
-    foreach ($labels as $label) {
-        $dataLabels[] = [
-            'id' => $label->id,
-            'position' => json_decode($label->position),
-            'description' => $label->description,
-        ];
-    }
-}
-
-$labelsJson = json_encode($dataLabels);
 $script = <<< JS
 object = {
     option: $object->option,
-    setting: $object->setting,
-    labels: $labelsJson
+    setting: $object->setting
 };
 
 start();

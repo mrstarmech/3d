@@ -5,9 +5,13 @@ return [
     'Novosibirsk State University' => 'Новосибирский государственный университет',
 
     'Home' => 'Главная',
-    'Category' => 'Категории',
+    'Categories' => 'Категории',
+    'Category' => 'Категория',
+    'Login' => 'Авторизоваться',
     'Sign in' => 'Войти',
     'Sign out' => 'Выйти',
 
     'All' => 'Все',
+
+    'Submit' => 'Отправить',
 ];

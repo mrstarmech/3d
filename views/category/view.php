@@ -1,27 +1,28 @@
 <?php
+
 use yii\helpers\Html;
 use yii\helpers\Url;
-
-$this->title = Yii::t('app', 'Category') . ' «' . $category->name . '»';
-
+use yii\widgets\LinkPager;
+$categoryName = empty($category->name) ? 'All' : $category->name;
+$this->title = Yii::t('app', 'Category') . ' «' . $categoryName . '»';
 $this->params['breadcrumbs'] = [
     ['label' => Yii::t('app', 'Category'), 'url' => ['/category/index']],
-    $category->name,
+    $categoryName,
 ];
 ?>
-<h1><?= $category->name ?></h1>
-<?php if(!empty($category->objects)): ?>
-   <div class="row">
-        <?php foreach($category->objects as $item): ?>
+<h1><?= $this->title ?></h1>
+<?php if (!empty($objects)): ?>
+    <div class="row">
+        <?php foreach ($objects as $object): ?>
             <div class="col-xs-12 col-sm-6 col-md-4">
                 <div class="item-object">
-                    <a href="<?= Url::to(['object/view', 'id' => $item->object->id]) ?>">
+                    <a href="<?= Url::to(['object/view', 'id' => $object->id]) ?>">
                         <div style="
                                 display: block;
                                 width: 100%;
                                 height: 250px;
-                        <?php if(!empty($item->object->image)): ?>
-                                background: url('<?= '/' . $item->object->pathImage . '/' . $item->object->id . '/' . $item->object->image ?>') no-repeat;
+                        <?php if (!empty($object->image)): ?>
+                                background: url('<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>') no-repeat;
                         <?php else: ?>
                                 background: url('/img/poster.none.png') no-repeat;
                         <?php endif; ?>
@@ -31,9 +32,15 @@ $this->params['breadcrumbs'] = [
 
                         </div>
                     </a>
-                    <span><?= $item->object->name?></span>
+                    <span><?= $object->name ?></span>
                 </div>
             </div>
         <?php endforeach; ?>
-   </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <?= LinkPager::widget([
+        'pagination' => $pages,
+    ]); ?>
 <?php endif; ?>

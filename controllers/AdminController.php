@@ -230,6 +230,7 @@ class AdminController extends Controller
             $object->fileTexture = UploadedFile::getInstance($object, 'fileTexture');
             if ($object->upload()) {
                 $object->scenario = Object::SCENARIO_SAVE;
+//                var_dump(Yii::$app->request->post());
 //                var_dump($object);
 //                die;
                 if ($object->save()) {
@@ -359,92 +360,6 @@ class AdminController extends Controller
         return $this->redirect(['admin/list-category']);
     }
 
-    public function actionListObjectOption()
-    {
-        $listObjectOption = ObjectOption::find()->all();
-
-        return $this->render('listObjectOption', [
-            'listObjectOption' => $listObjectOption,
-        ]);
-    }
-
-    public function actionAddObjectOption()
-    {
-        $objectOption = new ObjectOption();
-
-        if ($objectOption->load(Yii::$app->request->post())) {
-            if ($objectOption->validate() and $objectOption->save()) {
-                Yii::$app->session->setFlash('success', "Опция сохранена");
-                $this->redirect(['admin/list-object-option']);
-            }
-        }
-
-        return $this->render('addObjectOption', [
-            'model' => $objectOption,
-        ]);
-
-    }
-
-    public function actionEditObjectOption($id)
-    {
-        $objectOption = ObjectOption::findOne($id);
-
-        if ($objectOption->load(Yii::$app->request->post())) {
-            if ($objectOption->validate() and $objectOption->save()) {
-                Yii::$app->session->setFlash('success', "Опция сохранена");
-                $this->redirect(['admin/list-object-option']);
-            }
-        }
-
-        return $this->render('editObjectOption', [
-            'model' => $objectOption,
-        ]);
-
-    }
-
-    public function actionListObjectSetting()
-    {
-        $listObjectSetting = ObjectSetting::find()->all();
-
-        return $this->render('listObjectSetting', [
-            'listObjectSetting' => $listObjectSetting,
-        ]);
-    }
-
-    public function actionAddObjectSetting()
-    {
-        $objectSetting = new ObjectSetting();
-
-        if ($objectSetting->load(Yii::$app->request->post())) {
-            if ($objectSetting->validate() and $objectSetting->save()) {
-                Yii::$app->session->setFlash('success', "Опция сохранена");
-                return $this->redirect(['admin/list-object-setting']);
-            }
-        }
-
-        return $this->render('addObjectSetting', [
-            'model' => $objectSetting,
-        ]);
-
-    }
-
-    public function actionEditObjectSetting($id)
-    {
-        $objectSetting = ObjectSetting::findOne($id);
-
-        if ($objectSetting->load(Yii::$app->request->post())) {
-            if ($objectSetting->validate() and $objectSetting->save()) {
-                Yii::$app->session->setFlash('success', "Опция сохранена");
-                return $this->redirect(['admin/list-object-setting']);
-            }
-        }
-
-        return $this->render('editObjectSetting', [
-            'model' => $objectSetting,
-        ]);
-
-    }
-
     public function actionEditObjectLabel($id)
     {
         $object = Object::findOne($id);
@@ -453,10 +368,11 @@ class AdminController extends Controller
             throw new HttpException(404);
         }
 
-        $label = new ObjectLabel();
-        $label->object_id = $object->id;
+        $label_id = (int) Yii::$app->request->get('label_id');
+        $label =  $label_id ? ObjectLabel::findOne($label_id) : new ObjectLabel();
 
         if ($label->load(Yii::$app->request->post())) {
+            $label->object_id = $object->id;
             if ($label->validate() and $label->save()) {
                 Yii::$app->session->setFlash('success', "Метка сохранена");
                 return $this->refresh();
@@ -465,9 +381,23 @@ class AdminController extends Controller
 
         return $this->render('editObjectLabel', [
             'object' => $object,
-            'label' => $label,
+            'model' => $label,
         ]);
 
+    }
+
+    public function actionDeleteObjectLabel($id)
+    {
+        $objectLabel = ObjectLabel::findOne($id);
+
+        if (empty($objectLabel)) {
+            throw new HttpException(403);
+        }
+
+        $object = $objectLabel->object;
+        $objectLabel->delete();
+
+        return $this->redirect(['admin/edit-object-label', 'id' => $object->id]);
     }
 
     public function actionDeleteObjectCategory($id)

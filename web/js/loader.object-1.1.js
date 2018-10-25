@@ -17,15 +17,13 @@ OBJECTS.click(function () {
 
 function start() {
     try {
-        window.t = new viewer(object.setting, object.option, object.labels);
+        window.t = new viewer(object.setting, object.option);
         t.appendTo(classNameCanvas);
 
         OBJECTS.attr('data-render', 'success');
         OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
         OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
         OBJECTS.children('.' + classNameContainer).attr('data-state', 'dynamic');
-
-        return t;
     } catch (error) {
         console.log(error);
     }
@@ -174,10 +172,3 @@ $('.' + classNameContainer).on('click', '.' + classNameCanvas, function () {
         $('input[id=objectlabel-position]').val(JSON.stringify(position));
     }
 });
-// $("form").submit( function(e) {
-//     var messageLength = CKEDITOR.instances['description'].getData().replace(/<[^>]*>/gi, '').length;
-//     if( !messageLength ) {
-//         alert( 'Пожалуйста, заполните описание метки' );
-//         e.preventDefault();
-//     }
-// });

@@ -29,4 +29,8 @@ class ObjectLabel extends ActiveRecord
             'description' => 'Описание',
         ];
     }
+
+    public function getObject(){
+        return $this->hasOne(Object::className(), [ 'id' => 'object_id']);
+    }
 }

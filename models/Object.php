@@ -12,6 +12,18 @@ use yii\helpers\Url;
 /**
  * Class Object
  *
+ * @property int id
+ * @property int visible
+ * @property string name
+ * @property string description
+ * @property string image
+ * @property string obj
+ * @property string mtl
+ * @property string texture
+ * @property string option
+ * @property string setting
+ * @property array labels
+ * @property array labelsArray
  *
  * @package app\models
  */
@@ -210,6 +222,12 @@ class Object extends ActiveRecord
         return $this->hasMany(ObjectLabel::className(), ['object_id' => 'id']);
     }
 
+    public function getLabelsArray()
+    {
+        return $this->hasMany(ObjectLabel::className(), ['object_id' => 'id'])
+            ->asArray();
+    }
+
     public function getOptionArray()
     {
         return json_decode($this->option);
@@ -286,5 +304,9 @@ class Object extends ActiveRecord
         }
 
         return parent::beforeDelete();
+    }
+
+    public function getObjectCategory(){
+        return $this->hasMany(ObjectCategory::className(), ['object_id' => 'id']);
     }
 }

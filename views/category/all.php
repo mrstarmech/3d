@@ -1,6 +1,7 @@
 <?php
 use yii\helpers\Html;
 use yii\helpers\Url;
+use yii\widgets\LinkPager;
 
 $this->title = Yii::t('app', 'Category') . ' «' . Yii::t('app', 'All') . '»';
 $this->params['breadcrumbs'] = [
@@ -8,7 +9,7 @@ $this->params['breadcrumbs'] = [
     Yii::t('app', 'All'),
 ];
 ?>
-<h1><?= Yii::t('app', 'All') ?></h1>
+<h1><?= $this->title ?></h1>
 <?php if(!empty($objects)): ?>
 <div class="row">
     <?php foreach($objects as $object): ?>
@@ -35,4 +36,10 @@ $this->params['breadcrumbs'] = [
         </div>
     <?php endforeach; ?>
 </div>
+
+    <div class="clearfix"></div>
+
+    <?= LinkPager::widget([
+        'pagination' => $pages,
+    ]); ?>
 <?php endif; ?>

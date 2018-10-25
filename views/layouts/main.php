@@ -5,6 +5,7 @@
 
 use app\widgets\Alert;
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
 use yii\widgets\Breadcrumbs;
@@ -39,10 +40,11 @@ AppAsset::register($this);
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
-            ['label' => Yii::t('app', 'Home'), 'url' => Yii::$app->homeUrl],
-            ['label' => Yii::t('app', 'Category'), 'url' => ['/category/index']],
+//            ['label' => Yii::t('app', 'Home'), 'url' => Yii::$app->homeUrl],
+            ['label' => Yii::t('app', 'Category'), 'url' => ['/categories']],
             Yii::$app->user->isGuest ? (
-                ['label' => Yii::t('app', 'Sign in'), 'url' => ['/site/login']]
+                    ''
+//                ['label' => Yii::t('app', 'Sign in'), 'url' => ['/site/login']]
             ) : (
                 '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
@@ -70,10 +72,11 @@ AppAsset::register($this);
                 ]) ?>
             </div>
         </div>
+        <br>
 
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
+<!--        --><?//= Breadcrumbs::widget([
+//            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+//        ]) ?>
         <?= Alert::widget() ?>
         <?= $content ?>
     </div>
