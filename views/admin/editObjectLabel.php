@@ -74,42 +74,66 @@ echo $this->render('_header_object', ['id' => $object->id]);
 <?php else: ?>
     <h2>Добавление новой метки</h2>
     <p class="alert alert-info">
-        Чтобы изменить или удалить существующую метку, кликните на метку модели и нажмите "Редактировать метку", "Удалить" соответственно
+        Чтобы изменить или удалить существующую метку, кликните на метку модели и нажмите "Редактировать метку",
+        "Удалить" соответственно
     </p>
 <?php endif; ?>
 
-<div class="tree-object">
-    <div class="container-object" data-state="static"
-         style="background: url(<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>) center center / cover;">
-        <div class="canvas-object"></div>
+    <div class="tree-object">
+        <div class="container-object" data-state="static"
+             style="background: url(<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>) center center / cover;">
+            <div class="canvas-object"></div>
+        </div>
     </div>
-</div>
 
-<div class="col-xs-12">
     <h1><?= $this->title ?></h1>
-    <?php
-    $form = ActiveForm::begin();
-    ?>
+<?php
+$form = ActiveForm::begin();
+?>
+    <div class="row">
 
-    <?= $form->field($model, 'position')->textInput() ?>
-    <?= $form->field($model, 'description')->widget(CKEditor::className(),
-        [
-            'options' => [
-                'allowedContent' => true,
-            ],
-            'editorOptions' => ElFinder::ckeditorOptions(
-                'elfinder',
+        <div class="col-xs-12">
+            <?= $form->field($model, 'position')->textInput() ?>
+        </div>
+        <div class="col-xs-6">
+            <?= $form->field($model, 'description')->widget(CKEditor::className(),
                 [
-                    'inline' => false,
-                    'skin' => 'office2013,/js/cke/skins/office2013/'
-                ]
-            ),
+                    'options' => [
+                        'allowedContent' => true,
+                    ],
+                    'editorOptions' => ElFinder::ckeditorOptions(
+                        'elfinder',
+                        [
+                            'inline' => false,
+                            'skin' => 'office2013,/js/cke/skins/office2013/'
+                        ]
+                    ),
 
-        ]) ?>
+                ]) ?>
+        </div>
+        <div class="col-xs-6">
+            <?= $form->field($model, 'description_en')->widget(CKEditor::className(),
+                [
+                    'options' => [
+                        'allowedContent' => true,
+                    ],
+                    'editorOptions' => ElFinder::ckeditorOptions(
+                        'elfinder',
+                        [
+                            'inline' => false,
+                            'skin' => 'office2013,/js/cke/skins/office2013/'
+                        ]
+                    ),
 
-    <div class="form-group">
-        <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
+                ]) ?>
+        </div>
+
+        <div class="col-xs-12">
+            <div class="form-group">
+                <?= Html::submitButton('Send', ['class' => 'btn btn-primary']) ?>
+            </div>
+        </div>
+
     </div>
 
-    <?php ActiveForm::end(); ?>
-</div>
+<?php ActiveForm::end(); ?>

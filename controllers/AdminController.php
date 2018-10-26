@@ -329,7 +329,7 @@ class AdminController extends Controller
 
     public function actionEditCategory($id)
     {
-        $category = Category::findOne($id);
+        $category = Category::find()->multilingual()->where(['id' => $id])->one();
 
         if (empty($category)) {
             throw new HttpException(404);
@@ -362,14 +362,14 @@ class AdminController extends Controller
 
     public function actionEditObjectLabel($id)
     {
-        $object = Object::findOne($id);
+        $object = Object::find()->multilingual()->where(['id' => $id])->one();
 
         if (empty($object)) {
             throw new HttpException(404);
         }
 
         $label_id = (int) Yii::$app->request->get('label_id');
-        $label =  $label_id ? ObjectLabel::findOne($label_id) : new ObjectLabel();
+        $label =  $label_id ? ObjectLabel::find()->multilingual()->where(['id' => $label_id])->one() : new ObjectLabel();
 
         if ($label->load(Yii::$app->request->post())) {
             $label->object_id = $object->id;

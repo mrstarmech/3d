@@ -12,6 +12,7 @@ $this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\Boots
 $this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
+$dataLabels = [];
 $labels = $object->labels;
 if (!empty($labels)) {
     foreach ($labels as $label) {

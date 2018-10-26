@@ -3,6 +3,7 @@
 namespace app\models;
 
 use omgdef\multilingual\MultilingualBehavior;
+use omgdef\multilingual\MultilingualQuery;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\helpers\FileHelper;
@@ -16,6 +17,14 @@ use yii\helpers\FileHelper;
  */
 class Category extends ActiveRecord
 {
+
+    public function rules()
+    {
+        return [
+            [['name'], 'required'],
+            [['description'], 'string'],
+        ];
+    }
     public function behaviors()
     {
         return [
@@ -26,7 +35,7 @@ class Category extends ActiveRecord
                     'en' => 'English',
                 ],
                 'languageField' => 'locale',
-//                'defaultLanguage' => 'en',
+                'defaultLanguage' => 'ru',
                 'langForeignKey' => 'category_id',
                 'tableName' => "{{%category_language}}",
                 'attributes' => [
@@ -34,6 +43,21 @@ class Category extends ActiveRecord
                 ]
             ],
             TimestampBehavior::className(),
+        ];
+    }
+
+    public static function find()
+    {
+        return new MultilingualQuery(get_called_class());
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'name' => 'Название',
+            'name_en' => 'Название на английском',
+            'description' => 'Описание',
+            'description_en' => 'Описание на английском',
         ];
     }
 

@@ -39,9 +39,19 @@ function menu() {
     topmenu.append('<button class="btn menu-object" data-menu="collapse"><i class="fas fa-cog"></i></button>');
     topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
 
-    submenu.append('<button class="btn menu-object" data-menu="value-wire-frame"><i class="fas fa-globe"></i></button>');
+    submenu.append('<button class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+
+    if (object.labels.length != 0) {
+        submenu.append('<button class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
+        object.option.label = true;
+    }
     // submenu.append('<button class="btn menu-object" disabled><i class="fas fa-palette"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
+    if (object.option.autorotate) {
+        submenu.append('<button class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
+        object.option.autorotate = true;
+    }else {
+        submenu.append('<button class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
+    }
     // submenu.append('<button class="btn menu-object" disabled data-menu="share"><i class="fas fa-share-alt"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
 
@@ -58,7 +68,7 @@ function modalDialog() {
         pre = $('<pre></pre>'),
         code = $('<code></code>');
     code.text('<div class="tree-test"></div>');
-    ;
+
     pre.append(code);
     body.append(pre);
     content.append(body);
@@ -118,7 +128,7 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             t.switchEnv('autoRotate', object.option.autorotate);
             buttonActive($(this), object.option.autorotate);
             break;
-        case 'value-wire-frame':
+        case 'wire-frame':
             object.option.valuewireframe = !object.option.valuewireframe;
             t.switchEnv('wireframe', object.option.valuewireframe);
             buttonActive($(this), object.option.valuewireframe);
@@ -132,6 +142,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             object.option.ruler = !object.option.ruler;
             t.switchEnv('ruler', object.option.ruler);
             buttonActive($(this), object.option.ruler);
+            break;
+        case 'label':
+            object.option.label = !object.option.label;
+            t.switchEnv('label');
+            buttonActive($(this), object.option.label);
             break;
     }
 });
@@ -174,10 +189,3 @@ $('.' + classNameContainer).on('click', '.' + classNameCanvas, function () {
         $('input[id=objectlabel-position]').val(JSON.stringify(position));
     }
 });
-// $("form").submit( function(e) {
-//     var messageLength = CKEDITOR.instances['description'].getData().replace(/<[^>]*>/gi, '').length;
-//     if( !messageLength ) {
-//         alert( 'Пожалуйста, заполните описание метки' );
-//         e.preventDefault();
-//     }
-// });

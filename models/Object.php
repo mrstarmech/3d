@@ -92,10 +92,8 @@ class Object extends ActiveRecord
         return [
             'name' => 'Название',
             'name_en' => 'Название на английском',
-            'name_ru' => 'Название на русском',
             'description' => 'Описание',
             'description_en' => 'Описание на английском',
-            'description_ru' => 'Описание на русском',
             'image' => 'Постер',
             'visible' => 'Отображение',
             'fileImage' => 'Файл постера',
@@ -117,7 +115,7 @@ class Object extends ActiveRecord
                     'en' => 'English',
                 ],
                 'languageField' => 'locale',
-//                'defaultLanguage' => 'en',
+                'defaultLanguage' => 'ru',
                 'langForeignKey' => 'object_id',
                 'tableName' => "{{%object_language}}",
                 'attributes' => [

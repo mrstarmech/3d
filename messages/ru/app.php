@@ -1,7 +1,7 @@
 <?php
 
 return [
-    '3D Gallery' => '3D Галерия',
+    '3D Gallery' => '3D Галерея',
     'Novosibirsk State University' => 'Новосибирский государственный университет',
 
     'Home' => 'Главная',

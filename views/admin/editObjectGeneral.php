@@ -35,8 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
 <?= $form->field($model, 'visible')->checkbox() ?>
 <div class="row">
     <div class="col-xs-6">
-        <?= $form->field($model, 'name_ru')->textInput() ?>
-        <?= $form->field($model, 'description_ru')->widget(CKEditor::className(),
+        <?= $form->field($model, 'name')->textInput() ?>
+        <?= $form->field($model, 'description')->widget(CKEditor::className(),
             [
                 'options' => [
                     'allowedContent' => true,

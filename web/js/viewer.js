@@ -629,6 +629,13 @@ function viewer(model, options, labels) {
                 break;
             case 'bbox':
                 break;
+            case 'label':
+                if (label.length !== 0) {
+                    $.each(label, function (index, item) {
+                        item.visible = !item.visible;
+                    });
+                }
+                break;
         }
         ;
     };
