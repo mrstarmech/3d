@@ -32,8 +32,17 @@ $this->params['breadcrumbs'][] = $this->title;
     'options' => ['enctype' => 'multipart/form-data'],
 ]); ?>
 
-<?= $form->field($model, 'visible')->checkbox() ?>
 <div class="row">
+    <div class="clearfix">
+        <div class="col-xs-6">
+            <?= $form->field($model, 'visible')->checkbox() ?>
+        </div>
+    </div>
+    <div class="clearfix">
+        <div class="col-xs-6">
+            <?= $form->field($model, 'sef')->textInput() ?>
+        </div>
+    </div>
     <div class="col-xs-6">
         <?= $form->field($model, 'name')->textInput() ?>
         <?= $form->field($model, 'description')->widget(CKEditor::className(),

@@ -17,7 +17,10 @@ class ObjectController extends Controller
 
     public function actionView($id)
     {
-        $object = Object::find()->where(['id' => $id, 'visible' => 1])->one();
+        $object = Object::find()
+            ->where(['or', ['id' => $id], ['sef' => $id]])
+            ->andWhere([ 'visible' => 1])
+            ->one();
         if (empty($object)) {
             throw new HttpException(405);
         }
@@ -28,7 +31,11 @@ class ObjectController extends Controller
 
     public function actionTest($id)
     {
-        $object = Object::find()->where(['id' => $id, 'visible' => 1])->one();
+        $object = Object::find()
+            ->where(['or', ['id' => $id], ['sef' => $id]])
+            ->andWhere([ 'visible' => 1])
+            ->one();
+
         if (empty($object)) {
             throw new HttpException(405);
         }
@@ -42,7 +49,10 @@ class ObjectController extends Controller
         $arr = explode('-', $id);
         $id = $arr[0];
         $color = isset($arr[1]) ? $arr[1] : false;
-        $object = Object::find()->where(['id' => $id, 'visible' => 1])->one();
+        $object = Object::find()
+            ->where(['or', ['id' => $id], ['sef' => $id]])
+            ->andWhere([ 'visible' => 1])
+            ->one();
 
         if (empty($object)) {
             throw new HttpException(405);
@@ -53,26 +63,6 @@ class ObjectController extends Controller
         return $this->render('iframe', [
             'object' => $object,
         ]);
-    }
-
-    public function actionData()
-    {
-        $id = (int)Yii::$app->request->post('id');
-        $object = Object::findOne($id) ? Object::findOne($id)->toArray() : null;
-        if ($object) {
-            $object['label'] = ObjectLabel::find()->where(['object_id' => $id])->asArray()->all();
-            $object['option'] = json_decode($object['option']);
-            $object['setting'] = json_decode($object['setting']);
-        }
-        return json_encode($object);
-    }
-
-    public function actionSetting()
-    {
-        $setting['pathImage'] = Object::PATH_IMAGE;
-        $setting['pathFile'] = Object::PATH_FILE;
-
-        return json_encode($setting);
     }
 
     public function actionEdit($id)

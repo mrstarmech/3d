@@ -16,7 +16,7 @@ $this->params['breadcrumbs'] = [
         <?php foreach ($objects as $object): ?>
             <div class="col-xs-12 col-sm-6 col-md-4">
                 <div class="item-object">
-                    <a href="<?= Url::to(['object/view', 'id' => $object->id]) ?>">
+                    <a href="<?= Url::to(['object/view', 'id' => $object->link]) ?>">
                         <div style="
                                 display: block;
                                 width: 100%;

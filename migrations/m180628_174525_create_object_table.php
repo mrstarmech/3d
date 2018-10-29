@@ -21,6 +21,7 @@ class m180628_174525_create_object_table extends Migration
             'setting' => $this->text(),
             'option' => $this->text(),
             'visible' => $this->smallInteger(),
+            'sef' => $this->string(50),
             'created_at' => $this->integer()->notNull(),
             'updated_at' => $this->integer()->notNull(),
         ]);

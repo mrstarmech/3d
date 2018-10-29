@@ -22,12 +22,12 @@ use yii\helpers\Url;
  * @property string texture
  * @property string option
  * @property string setting
+ * @property string sef
  * @property array labels
  * @property array labelsArray
  *
  * @package app\models
  */
-
 class Object extends ActiveRecord
 {
     const SCENARIO_SAVE = 'save';
@@ -84,6 +84,7 @@ class Object extends ActiveRecord
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
             [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
+            ['sef', 'match', 'pattern' => '/^[a-z0-9\-]*$/iu', 'message' => 'Допустима латиница, числа и -'],
         ];
     }
 
@@ -101,7 +102,8 @@ class Object extends ActiveRecord
             'fileObj' => 'Файл формата obj',
             'fileMtl' => 'Файл формата mtl',
             'option' => 'Опции',
-            'setting' => 'Настройки'
+            'setting' => 'Настройки',
+            'sef' => 'ЧПУ'
         ];
     }
 
@@ -304,7 +306,13 @@ class Object extends ActiveRecord
         return parent::beforeDelete();
     }
 
-    public function getObjectCategory(){
+    public function getObjectCategory()
+    {
         return $this->hasMany(ObjectCategory::className(), ['object_id' => 'id']);
+    }
+
+    public function getLink()
+    {
+        return empty($this->sef) ? $this->id : $this->sef;
     }
 }

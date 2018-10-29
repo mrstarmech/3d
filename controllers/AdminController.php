@@ -186,6 +186,20 @@ class AdminController extends Controller
         die;
     }
 
+    public function actionTest4()
+    {
+        $objects = Object::find()->all();
+
+        foreach ($objects as $object) {
+            if (is_numeric($object->sef)) {
+                var_dump($object->sef);
+                $object->sef = null;
+                $object->save();
+            }
+        }
+        die;
+    }
+
     public function actionIndex()
     {
         $query = Object::find();
@@ -220,7 +234,14 @@ class AdminController extends Controller
         $object = Object::find()->multilingual()->where(['id' => $id])->one();
 
         if (empty($object)) {
-            throw new HttpException(500);
+
+            $object = Object::find()->multilingual()->where(['sef' => $id])->one();
+
+            if (empty($object)) {
+                throw new HttpException(500);
+            }
+
+            return $this->redirect(['/admin/edit-object-general', 'id' => $object->id]);
         }
 
         if ($object->load(Yii::$app->request->post())) {
@@ -285,7 +306,7 @@ class AdminController extends Controller
 
         $categories = Category::find()->all();
 
-        return $this->render('editObjectcategory', [
+        return $this->render('editObjectCategory', [
             'model' => $object,
             'objectCategories' => $objectCategories,
             'categories' => $categories,
