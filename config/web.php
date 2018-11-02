@@ -56,6 +56,7 @@ $config = [
                 'object/view/<id:(.*?)>/edit' => 'object/edit',
                 'object/<action:(.*?)>/<id:(.*?)>' => 'object/<action>',
                 'iframe/<id:(.*?)>' => 'object/iframe',
+                'formus.php' => 'object/banner',
                 'categories' => 'category/list',
                 'category/<id:(.*?)>' => 'category/view',
                 '<controller:(.*?)>/<action:(.*?)>/<id:(.*?)>' => '<controller>/<action>',

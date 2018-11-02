@@ -311,6 +311,11 @@ class Object extends ActiveRecord
         return $this->hasMany(ObjectCategory::className(), ['object_id' => 'id']);
     }
 
+    public function getObjectBanner()
+    {
+        return $this->hasOne(ObjectBanner::className(), ['object_id' => 'id']);
+    }
+
     public function getLink()
     {
         return empty($this->sef) ? $this->id : $this->sef;

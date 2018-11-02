@@ -21,22 +21,27 @@ function start() {
         t.appendTo(classNameCanvas);
 
         OBJECTS.attr('data-render', 'success');
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
-        $('pre code').each(function (i, block) {
-            hljs.highlightBlock(block);
-        });
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
-        cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
-            function (hex, hsv, rgb, mousePicker, mouseSlide) {
-                currentColor = hex;
-                ColorPicker.positionIndicators(
-                    document.getElementById('slide-indicator'),
-                    document.getElementById('picker-indicator'),
-                    mouseSlide, mousePicker
-                );
-                t.switchEnv('background', hex);
+
+        console.log(object.option.menuDisable);
+        console.log(!object.option.menuDisable);
+        if (!object.option.menuDisable) {
+            OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
+            OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
+            $('pre code').each(function (i, block) {
+                hljs.highlightBlock(block);
             });
+            OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
+            cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
+                function (hex, hsv, rgb, mousePicker, mouseSlide) {
+                    currentColor = hex;
+                    ColorPicker.positionIndicators(
+                        document.getElementById('slide-indicator'),
+                        document.getElementById('picker-indicator'),
+                        mouseSlide, mousePicker
+                    );
+                    t.switchEnv('background', hex);
+                });
+        }
         OBJECTS.children('.' + classNameContainer).attr('data-state', 'dynamic');
 
         return t;
