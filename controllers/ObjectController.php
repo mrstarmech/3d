@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\Object;
+use app\models\ObjectBanner;
 use app\models\ObjectLabel;
 use Yii;
 use yii\web\Controller;
@@ -26,6 +27,21 @@ class ObjectController extends Controller
         }
         return $this->render('view', [
             'object' => $object,
+        ]);
+    }
+
+    public function actionBanner()
+    {
+        $banners = ObjectBanner::find()->all();
+
+        $banner = $banners[array_rand($banners)];
+        if (empty($banner)) {
+            throw new HttpException(405);
+        }
+
+        $this->layout = 'clear';
+        return $this->render('banner', [
+            'banner' => $banner,
         ]);
     }
 
