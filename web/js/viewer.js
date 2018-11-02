@@ -188,8 +188,10 @@ function viewer(model, options, labels) {
             i = 0;
             setInterval(function () {
                 i = ++i % 4;
-                $(loadingBar).html("Loading " + Array(i + 1).join("."));
+                // $(loadingBar).html("Loading " + Array(i + 1).join("."));
             }, 200);
+            $(loadingBar).html("<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\"></i>\n" +
+                "<span class=\"sr-only\">Loading...</span>");
 
             init();
         }
@@ -855,7 +857,12 @@ function viewer(model, options, labels) {
     };
 
     function onContainerMouseMove(event) {
-        mouseMoveTrigger = 1;
+        if (event.movementX === 0 && event.movementY === 0) {
+            mouseMoveTrigger = 0;
+        } else {
+            mouseMoveTrigger = 1;
+
+        }
     };
 
     function onContainerMouseUp(event) {
@@ -879,7 +886,6 @@ function viewer(model, options, labels) {
             var intersects = getObjectSplite(label, mouse);
             if (intersects && intersects.object.type == 'Sprite') {
                 try {
-                    // console.log(intersects.object);
                     $.fancybox.open({
                         src: '<div class="message">' + intersects.object.description + '</div>',
                         type: 'html',

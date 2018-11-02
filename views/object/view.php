@@ -12,6 +12,12 @@ $this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\Boots
 $this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
+$this->registerCssFile('css/colorpicker.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/colorpicker.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+
+
+\dominus77\highlight\Plugin::register($this);
+
 $dataLabels = [];
 $labels = $object->labels;
 if (!empty($labels)) {
@@ -24,17 +30,20 @@ if (!empty($labels)) {
     }
 }
 
+$host = Yii::$app->params['host'];
 $labelsJson = json_encode($dataLabels);
 $script = <<< JS
 object = {
+    id: $object->id,
+    sef: '$object->link',
     option: $object->option,
     setting: $object->setting,
-    labels: $labelsJson
+    labels: $labelsJson,
 };
+host = '$host';
 
 start();
 
-// console.log(object);
 JS;
 
 $this->registerJs($script, yii\web\View::POS_READY);
@@ -54,4 +63,5 @@ $this->params['breadcrumbs'][] = $this->title;
     </div>
 <?php endif; ?>
 <h1><?= $this->title ?></h1>
+
 <?= $object->description ?>

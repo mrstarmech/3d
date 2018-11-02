@@ -58,10 +58,11 @@ class ObjectController extends Controller
             throw new HttpException(405);
         }
 
-        $this->layout = false;
+        $this->layout = 'clear';
 
         return $this->render('iframe', [
             'object' => $object,
+            'color' => $color,
         ]);
     }
 

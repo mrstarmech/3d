@@ -55,6 +55,7 @@ $config = [
                 'admin/<action:(.*?)>/<id:(.*?)>' => 'admin/<action>',
                 'object/view/<id:(.*?)>/edit' => 'object/edit',
                 'object/<action:(.*?)>/<id:(.*?)>' => 'object/<action>',
+                'iframe/<id:(.*?)>' => 'object/iframe',
                 'categories' => 'category/list',
                 'category/<id:(.*?)>' => 'category/view',
                 '<controller:(.*?)>/<action:(.*?)>/<id:(.*?)>' => '<controller>/<action>',
@@ -96,7 +97,8 @@ $config = [
     'params' => $params,
 ];
 
-if (YII_ENV_DEV) {
+//if (YII_ENV_DEV) {
+if (0) {
     // configuration adjustments for 'dev' environment
     $config['bootstrap'][] = 'debug';
     $config['modules']['debug'] = [
@@ -112,7 +114,5 @@ if (YII_ENV_DEV) {
         'allowedIPs' => ['127.0.0.1', '10.2.5.41', '84.237.52.66']
     ];
 }
-//echo '<pre>';
-//print_r($_SERVER);
-//echo '</pre>'; die;
+
 return $config;

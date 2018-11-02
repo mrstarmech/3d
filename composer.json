@@ -21,11 +21,11 @@
         "rmrevin/yii2-fontawesome": "~3.1",
         "mihaildev/yii2-ckeditor": "*",
         "mihaildev/yii2-elfinder": "*",
-        "newerton/yii2-fancybox-3": "dev-master",
         "kdn/yii2-json-editor": "*",
         "conquer/codemirror": "*",
         "cinghie/yii2-multilanguage": "*",
-        "omgdef/yii2-multilingual-behavior": "~2.0"
+        "omgdef/yii2-multilingual-behavior": "~2.0",
+        "dominus77/yii2-highlight-plugin": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

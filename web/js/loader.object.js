@@ -22,7 +22,21 @@ function start() {
 
         OBJECTS.attr('data-render', 'success');
         OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
-        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialog());
+        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
+        $('pre code').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+        OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
+        cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
+            function (hex, hsv, rgb, mousePicker, mouseSlide) {
+                currentColor = hex;
+                ColorPicker.positionIndicators(
+                    document.getElementById('slide-indicator'),
+                    document.getElementById('picker-indicator'),
+                    mouseSlide, mousePicker
+                );
+                t.switchEnv('background', hex);
+            });
         OBJECTS.children('.' + classNameContainer).attr('data-state', 'dynamic');
 
         return t;
@@ -45,29 +59,32 @@ function menu() {
         submenu.append('<button class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
         object.option.label = true;
     }
-    // submenu.append('<button class="btn menu-object" disabled><i class="fas fa-palette"></i></button>');
+
+    submenu.append('<button class="btn menu-object" data-menu="background"><i class="fas fa-palette"></i></button>');
+
     if (object.option.autorotate) {
         submenu.append('<button class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
         object.option.autorotate = true;
-    }else {
+    } else {
         submenu.append('<button class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
     }
-    // submenu.append('<button class="btn menu-object" disabled data-menu="share"><i class="fas fa-share-alt"></i></button>');
+    submenu.append('<button class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
+
     return menu;
 }
 
-function modalDialog() {
+function modalDialogShare() {
     var modal = $('<div class="modal fade" id="share-object" tabindex="-1" role="dialog" aria-labelledby="dialog_confirm_mapLabel" aria-hidden="true"></div>'),
         dialog = $('<div class="modal-dialog"></div>'),
         content = $('<div class="modal-content"></div>'),
         body = $('<div class="modal-body"></div>'),
         pre = $('<pre></pre>'),
-        code = $('<code></code>');
-    code.text('<div class="tree-test"></div>');
+        code = $('<code id="' + object.sef + '" onclick="copy()"></code>');
+    code.text('<iframe src="' + host + '/iframe/' + object.sef + '" style="width: 400px; height: 300px; scrolling: no; border: 0px;" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>');
 
     pre.append(code);
     body.append(pre);
@@ -76,6 +93,21 @@ function modalDialog() {
     modal.append(dialog);
 
     return modal;
+}
+
+function paletteColor() {
+    return $('<div id="color" style="display: none">\n' +
+        '    <div id="color-picker" class="cp-default">\n' +
+        '        <div class="picker-wrapper">\n' +
+        '            <div id="picker" class="picker"></div>\n' +
+        '            <div id="picker-indicator" class="picker-indicator"></div>\n' +
+        '        </div>\n' +
+        '        <div class="slide-wrapper">\n' +
+        '            <div id="slide" class="slide"></div>\n' +
+        '            <div id="slide-indicator" class="slide-indicator"></div>\n' +
+        '        </div>\n' +
+        '    </div>\n' +
+        '</div>');
 }
 
 function distance() {
@@ -92,6 +124,23 @@ function distance() {
     }
 }
 
+function copy() {
+    selectText(object.sef);
+    document.execCommand("copy");
+}
+
+function selectText(containerid) {
+    if (document.selection) { // IE
+        var range = document.body.createTextRange();
+        range.moveToElementText(document.getElementById(containerid));
+        range.select();
+    } else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(document.getElementById(containerid));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+    }
+}
 
 $('.' + classNameContainer).on('click', '.menu-object', function () {
     switch ($(this).attr('data-menu')) {
@@ -148,6 +197,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             t.switchEnv('label');
             buttonActive($(this), object.option.label);
             break;
+        case 'background':
+            object.option.background = !object.option.background;
+            buttonActive($(this), object.option.background);
+            $('#color').toggle();
+            break;
     }
 });
 
@@ -181,11 +235,3 @@ if (eFullscreenName) {
         buttonActive(element, !value);
     }, false);
 }
-
-$('.' + classNameContainer).on('click', '.' + classNameCanvas, function () {
-    var new_label = t.getNewLabel();
-    if (new_label) {
-        var position = new_label.position;
-        $('input[id=objectlabel-position]').val(JSON.stringify(position));
-    }
-});
