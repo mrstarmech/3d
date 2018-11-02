@@ -551,4 +551,13 @@ class AdminController extends Controller
             'object' => $object,
         ]);
     }
+
+    public function actionShot($id)
+    {
+        $object = Object::findOne($id);
+
+        return $this->render('shot', [
+            'object' => $object,
+        ]);
+    }
 }
