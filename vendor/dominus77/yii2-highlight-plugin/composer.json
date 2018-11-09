@@ -1,0 +1,31 @@
+{
+    "name": "dominus77/yii2-highlight-plugin",
+    "description": "Yii2 Syntax highlighting with support for line numbering for the Web.",
+    "type": "yii2-extension",
+    "keywords": ["dominus77","yii2","extension","plugin","highlight","highlight-line-numbers"],
+    "license": "BSD-3",
+    "authors": [
+        {
+            "name": "Alexey Schevchenko",
+            "email": "ivanovosity@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "~2.0",
+        "yiisoft/yii2-bootstrap": "~2.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "6.*"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "dominus77\\highlight\\": ""
+        }
+    }
+}

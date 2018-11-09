@@ -1,0 +1,25 @@
+{
+    "name": "omgdef/yii2-multilingual-behavior",
+    "description": "Port of the yii-multilingual-behavior for yii",
+    "type": "yii2-extension",
+    "keywords": ["yii2", "extension", " yii2-multilingual-behavior", " behavior", " multilingual", " i18"],
+    "license": "BSD-4-Clause",
+    "authors": [
+        {
+            "name": "OmgDef",
+            "email": "omgdef@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "omgdef\\multilingual\\": "src"
+        }
+    },
+    "require": {
+        "yiisoft/yii2": "*"
+    },
+    "require-dev": {
+      "phpunit/phpunit": "4.6.*",
+      "phpunit/dbunit": ">=1.2"
+    }
+}
