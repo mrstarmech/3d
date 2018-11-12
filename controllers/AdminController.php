@@ -551,4 +551,41 @@ class AdminController extends Controller
             'object' => $object,
         ]);
     }
+
+    public function actionShot($id)
+    {
+        $object = Object::findOne($id);
+
+        if (empty($object)) {
+            throw new HttpException(403);
+        }
+
+        if ($data = Yii::$app->request->post('data')) {
+//            return $data;
+            $object->dataImage = $data;
+            if ($object->upload()) {
+                $object->scenario = Object::SCENARIO_SAVE;
+
+                $object->setOption('cameraCoords', [
+                    'x' => Yii::$app->request->post('coordinateX'),
+                    'y' => Yii::$app->request->post('coordinateY'),
+                    'z' => Yii::$app->request->post('coordinateZ'),
+                ]);
+
+                $object->setOption('camera', 'manual');
+
+                if ($object->save()) {
+//                    return json_encode(['success']);
+                    Yii::$app->session->setFlash('success', "Модель сохранена");
+                    return $this->refresh();
+                }
+            }
+            Yii::$app->session->setFlash('danger', "Модель не сохранена. " . print_r($object->errors, 1));
+//            return json_encode($object->errors);
+        }
+
+        return $this->render('shot', [
+            'object' => $object,
+        ]);
+    }
 }

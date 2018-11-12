@@ -52,8 +52,7 @@ $this->title = $object->name;
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="col-xs-12 col-md-6 tree-object">
-    <div class="container-object" data-state="static"
-         style="background: url(<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>) center center / cover;">
+    <div class="container-object" data-state="static">
         <div class="canvas-object"></div>
     </div>
 </div>

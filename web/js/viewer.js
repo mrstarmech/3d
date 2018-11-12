@@ -40,7 +40,11 @@ function viewer(model, options, labels) {
     var selfObj = this,
         scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
-        renderer = new THREE.WebGLRenderer({antialias: true, alpha: true}),
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: options.preserveDrawingBuffer
+        }),
         raycaster = new THREE.Raycaster(),
         //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
         line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
@@ -165,17 +169,12 @@ function viewer(model, options, labels) {
             loadingBar = document.createElement('div');
             loadingBar.id = 'loading';
             loadingBar.style.position = 'relative';
-            loadingBar.style.fontSize = '1.1em';
-            loadingBar.style.fontFamily = 'Helvetica';
-            loadingBar.style.margin = 'auto';
-            loadingBar.style.right = 0;
-            loadingBar.style.top = '50%';
-            loadingBar.style.left = 0;
-            loadingBar.style.bottom = 0;
-            loadingBar.style.width = '5em';
-            loadingBar.style.height = '1.5em';
+            loadingBar.style.width = '100%';
+            loadingBar.style.height = '100%';
 
-
+            if (model.poster) {
+                loadingBar.style.background = "url('" + model.poster + "') center center / cover";
+            }
             alert = document.createElement('div');
             alert.id = 'webGJ_allert';
             alert.style.position = 'relative';
@@ -184,15 +183,22 @@ function viewer(model, options, labels) {
             alert.style.top = '50%';
             alert.style.textAlign = 'center';
 
-            viewerContainer.appendChild(loadingBar);
-            i = 0;
-            setInterval(function () {
-                i = ++i % 4;
-                // $(loadingBar).html("Loading " + Array(i + 1).join("."));
-            }, 200);
-            $(loadingBar).html("<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\"></i>\n" +
-                "<span class=\"sr-only\">Loading...</span>");
+            var spinner = document.createElement('div');
+            spinner.style.position = 'relative';
+            spinner.style.margin = 'auto';
+            spinner.style.top = '50%';
+            spinner.style.right = 0;
+            spinner.style.left = 0;
+            spinner.style.bottom = 0;
+            spinner.style.width = '5em';
+            spinner.style.height = '1.5em';
 
+            $(spinner).html("<i class=\"fa fa-spinner fa-spin fa-3x fa-fw\"></i><span class=\"sr-only\">Loading...</span>");
+            $(loadingBar).html(spinner);
+
+            viewerContainer.appendChild(loadingBar);
+
+            // setTimeout(init, 1500);
             init();
         }
         ;
