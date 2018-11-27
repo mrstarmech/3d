@@ -70,6 +70,7 @@ class Object extends ActiveRecord
     ];
 
     public $fileImage;
+    public $dataImage;
     public $fileObj;
     public $fileMtl;
     public $fileTexture;
@@ -209,6 +210,22 @@ class Object extends ActiveRecord
                 $this->texture = $this->fileTexture->baseName . '.' . $this->fileTexture->extension;
 
                 $this->setSetting('texture', '/' . $path . '/' . $this->texture);
+            }
+
+            if ($this->dataImage) {
+                $path = self::PATH_IMAGE . '/' . $this->id;
+//                $option = $this->getOptionArray();
+
+//                if (!empty($option->poster) and file_exists($option->poster)) {
+//                    unlink($option->poster);
+//                }
+
+                $newName = strtotime('now');
+                list($type, $data) = explode(';', $this->dataImage);
+                list(, $data)      = explode(',', $data);
+                $data = base64_decode($data);
+                file_put_contents($path . '/' . $newName . '.jpg', $data);
+                $this->setSetting('poster', '/' . $path . '/' . $newName . '.jpg');
             }
 
             return true;

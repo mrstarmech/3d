@@ -22,8 +22,6 @@ function start() {
 
         OBJECTS.attr('data-render', 'success');
 
-        console.log(object.option.menuDisable);
-        console.log(!object.option.menuDisable);
         if (!object.option.menuDisable) {
             OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
             OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
