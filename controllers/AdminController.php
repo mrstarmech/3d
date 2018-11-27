@@ -459,6 +459,19 @@ class AdminController extends Controller
         ]);
     }
 
+    public function actionEditFileUtfJs($id)
+    {
+        $object = Object::findOne($id);
+
+        if (empty($object)) {
+            throw new HttpException(404);
+        }
+
+        return $this->render('editFileUtfJs', [
+            'object' => $object,
+        ]);
+    }
+
     public function actionProcessing($id)
     {
         $object = Object::findOne($id);
