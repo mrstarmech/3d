@@ -79,7 +79,7 @@ class Object extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting'], 'string'],
+            [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting', 'tech_info'], 'string'],
             [['visible'], 'in', 'range' => [0, 1]],
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj'],
@@ -104,7 +104,8 @@ class Object extends ActiveRecord
             'fileMtl' => 'Файл формата mtl',
             'option' => 'Опции',
             'setting' => 'Настройки',
-            'sef' => 'ЧПУ'
+            'sef' => 'ЧПУ',
+            'tech_info' => 'Техническая информация'
         ];
     }
 
@@ -281,6 +282,16 @@ class Object extends ActiveRecord
     {
         if ($this->obj and file_exists($this->pathFileWR . '/' . $this->obj)) {
             return file_get_contents($this->pathFileWR . '/' . $this->obj);
+        }
+        return false;
+    }
+
+    public function getContentUtfJs()
+    {
+        if (!empty($this->contentObj)) {
+            $withoutExt = preg_replace('/\\.[^.\\s]{3,4}$/', '', $this->obj);
+
+            return file_get_contents($this->pathFileWR . '/' . $withoutExt . '_utf.js');
         }
         return false;
     }

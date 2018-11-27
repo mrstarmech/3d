@@ -77,28 +77,40 @@ $this->params['breadcrumbs'][] = $this->title;
 
             ]) ?>
     </div>
-</div>
 
-<?= $form->field($model, 'fileImage')->fileInput() ?>
+    <div class="col-xs-6">
 
-<?php
-if (!empty($model->contentObj)) {
-    echo Html::a('Редактировать файл OBJ', ['admin/edit-file-obj', 'id' => $model->id]);
-}
-?>
-<?= $form->field($model, 'fileObj')->fileInput() ?>
+        <?= $form->field($model, 'fileImage')->fileInput() ?>
 
-<?php
-if (!empty($model->contentMtl)) {
-    echo Html::a('Редактировать файл MTL', ['admin/edit-file-mtl', 'id' => $model->id]);
-}
-?>
-<?= $form->field($model, 'fileMtl')->fileInput() ?>
+        <?php
+        if (!empty($model->contentObj)) {
+            echo Html::a('Редактировать файл OBJ', ['admin/edit-file-obj', 'id' => $model->id]);
+        }
+        ?>
+        <?= $form->field($model, 'fileObj')->fileInput() ?>
+
+        <?php
+        if (!empty($model->contentMtl)) {
+            echo Html::a('Редактировать файл MTL', ['admin/edit-file-mtl', 'id' => $model->id]);
+        }
+        ?>
+        <?= $form->field($model, 'fileMtl')->fileInput() ?>
 
 
-<?= $form->field($model, 'fileTexture')->fileInput() ?>
+        <?= $form->field($model, 'fileTexture')->fileInput() ?>
 
-<div class="row">
+        <?php
+        if (!empty($model->contentUtfJs)) {
+            echo Html::a('Редактировать файл UTF JS', ['admin/edit-file-utf-js', 'id' => $model->id]);
+        }
+        ?>
+    </div>
+    <div class="col-xs-6">
+        <?= $form->field($model, 'tech_info')->textarea() ?>
+    </div>
+
+    <div class="clearfix"></div>
+
     <div class="col-xs-6">
         <?= $form->field($model, 'option')->widget(
             JsonEditor::className(),
