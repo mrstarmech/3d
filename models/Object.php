@@ -182,7 +182,7 @@ class Object extends ActiveRecord
                 $this->fileObj->saveAs($path . '/' . $this->fileObj->baseName . '.' . $this->fileObj->extension);
                 $this->obj = $this->fileObj->baseName . '.' . $this->fileObj->extension;
 
-                if ($this->optionArray->loader == Object::LOADER_OBJ) {
+                if (isset($this->optionArray['loader']) and $this->optionArray['loader'] == Object::LOADER_OBJ) {
                     $this->setSetting('mesh', '/' . $path . '/' . $this->obj);
                 }
             }
