@@ -55,10 +55,16 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="container-object" data-state="static">
         <div class="canvas-object"></div>
     </div>
+    <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
+        <div class="text-right">
+            <?= $object->tech_info ?>
+        </div>
+        <br>
+    <?php endif; ?>
 </div>
-<?php if (!Yii::$app->user->isGuest): // TODO: admin check ?>
+<?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
     <div class="pull-right">
-        <?= Html::a('Edit', ['admin/edit-object-general', 'id' => $object->id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a(Yii::t('app', 'Edit'), ['admin/edit-object-general', 'id' => $object->id], ['class' => 'btn btn-primary']) ?>
     </div>
 <?php endif; ?>
 <h1><?= $this->title ?></h1>
