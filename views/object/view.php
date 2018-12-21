@@ -55,7 +55,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="container-object" data-state="static">
         <div class="canvas-object"></div>
     </div>
-    <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
+    <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR) and !empty($object->tech_info)): ?>
         <div class="alert alert-info">
             <?= nl2br($object->tech_info) ?>
         </div>
