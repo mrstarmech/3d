@@ -43,6 +43,13 @@ AppAsset::register($this);
         'items' => [
 //            ['label' => Yii::t('app', 'Home'), 'url' => Yii::$app->homeUrl],
             ['label' => Yii::t('app', 'Category'), 'url' => ['/categories']],
+            Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR) ? (
+                '<li>'
+                . Html::a(Yii::t('app', 'Management'), ['/admin/index'], ['class' => 'btn btn-link'])
+                . '</li>'
+            ) : (
+            ''
+            ),
             Yii::$app->user->isGuest ? (
                     ''
 //                ['label' => Yii::t('app', 'Sign in'), 'url' => ['/site/login']]
@@ -55,7 +62,7 @@ AppAsset::register($this);
                 )
                 . Html::endForm()
                 . '</li>'
-            )
+            ),
         ],
     ]);
     NavBar::end();
