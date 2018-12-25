@@ -6,8 +6,7 @@ use yii\helpers\ArrayHelper;
 use mihaildev\ckeditor\CKEditor;
 use mihaildev\elfinder\ElFinder;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $model->id]);
+echo $this->render('_header_object', ['object' => $model]);
 
 $this->title = 'Редактирование категорий модели';
 $this->params['breadcrumbs'][] = $this->title;

@@ -9,7 +9,6 @@ use yii\bootstrap\ActiveForm;
 use mihaildev\ckeditor\CKEditor;
 use mihaildev\elfinder\ElFinder;
 
-echo $this->render('_header');
 
 $this->title = 'Редактировать категорию';
 $this->params['breadcrumbs'][] = $this->title;

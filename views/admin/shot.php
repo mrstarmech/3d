@@ -102,8 +102,7 @@ $this->registerJs($script, yii\web\View::POS_READY);
 $this->title = $object->name;
 $this->params['breadcrumbs'][] = $this->title;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $object->id]);
+echo $this->render('_header_object', ['object' => $object]);
 ?>
 <div class="col-xs-12 col-md-6 tree-object">
     <div class="container-object" data-state="static">
