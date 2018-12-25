@@ -39,11 +39,11 @@ object = {
     sef: '$object->link',
     option: $object->option,
     setting: $object->setting,
-    labels: $labelsJson,
 };
 host = '$host';
 object.option.preserveDrawingBuffer = true;
 object.option.menuDisable = true;
+object.option.autorotate = false;
 
 start();
 
