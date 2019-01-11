@@ -29,6 +29,22 @@ class CategoryController extends Controller
 
     public function actionView($id){
         $category = null;
+        $categories = Category::find()
+//            ->where(['!=', 'id', $id])
+            ->all();
+
+        $catMenu = [['label' => Yii::t('app', 'All'), 'url' => ['category/view', 'id' => 'all']]];
+
+        if (!empty($categories)) {
+            foreach ($categories as $category) {
+                if (!empty($category->objects)) {
+                    $catMenu[] = [
+                        'label' => $category->name,
+                        'url' => ['category/view', 'id' => $category->id],
+                    ];
+                }
+            }
+        }
 
         if($id == 'all'){
 
@@ -64,6 +80,8 @@ class CategoryController extends Controller
         return $this->render('view',[
             'objects' => $objects,
             'category' => $category,
+            'categories' => $categories,
+            'catMenu' => $catMenu,
             'pages' => $pages,
         ]);
     }

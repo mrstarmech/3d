@@ -42,7 +42,7 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
 //            ['label' => Yii::t('app', 'Home'), 'url' => Yii::$app->homeUrl],
-            ['label' => Yii::t('app', 'Category'), 'url' => ['/categories']],
+            ['label' => Yii::t('app', 'Categories'), 'url' => ['/categories']],
             Yii::$app->user->isGuest ? (
                     ''
 //                ['label' => Yii::t('app', 'Sign in'), 'url' => ['/site/login']]
