@@ -73,6 +73,7 @@ function menu() {
     }
     submenu.append('<button class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
+    submenu.append('<button class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -204,6 +205,10 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             object.option.background = !object.option.background;
             buttonActive($(this), object.option.background);
             $('#color').toggle();
+            break;
+        case 'light':
+            object.option.lights = (object.option.lights == 'Cameralight' ? 'AmbientLight' : 'Cameralight');
+            t.switchEnv('lights', object.option.lights);
             break;
     }
 });
