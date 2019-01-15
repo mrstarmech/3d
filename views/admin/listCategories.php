@@ -2,7 +2,6 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-echo $this->render('_header');
 ?>
     <div class="row">
         <div class="col-xs-12">

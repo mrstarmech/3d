@@ -8,6 +8,7 @@ return [
     'Categories' => 'Категории',
     'Category' => 'Категория',
     'Login' => 'Авторизоваться',
+    'Management' => 'Управление контентом',
     'Sign in' => 'Войти',
     'Sign out' => 'Выйти',
 

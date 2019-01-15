@@ -60,8 +60,7 @@ $this->registerJs($script, yii\web\View::POS_READY);
 $this->title = $object->name;
 $this->params['breadcrumbs'][] = $this->title;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $object->id]);
+echo $this->render('_header_object', ['object' => $object]);
 ?>
 
 <?php if (!empty($model->id)): ?>

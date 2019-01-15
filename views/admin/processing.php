@@ -4,8 +4,7 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use conquer\codemirror\CodemirrorWidget;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $object->id]);
+echo $this->render('_header_object', ['object' => $object]);
 
 $this->title = 'Обработка';
 $this->params['breadcrumbs'][] = $this->title;

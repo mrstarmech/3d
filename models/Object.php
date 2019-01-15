@@ -223,7 +223,7 @@ class Object extends ActiveRecord
 
                 $newName = strtotime('now');
                 list($type, $data) = explode(';', $this->dataImage);
-                list(, $data)      = explode(',', $data);
+                list(, $data) = explode(',', $data);
                 $data = base64_decode($data);
                 file_put_contents($path . '/' . $newName . '.jpg', $data);
                 $this->setSetting('poster', '/' . $path . '/' . $newName . '.jpg');
@@ -308,27 +308,14 @@ class Object extends ActiveRecord
     {
         $path = $this->pathImage . '/' . $this->id;
 
-        if (!empty($this->image) and file_exists($path . '/' . $this->image)) {
-            unlink($path . '/' . $this->image);
-        }
         if (is_dir($path)) {
-            rmdir($path);
+            self::deleteDir($path);
         }
-
 
         $path = $this->pathFile . '/' . $this->id;
 
-        if (!empty($this->obj) and file_exists($path . '/' . $this->obj)) {
-            unlink($path . '/' . $this->obj);
-        }
-        if (!empty($this->mtl) and file_exists($path . '/' . $this->mtl)) {
-            unlink($path . '/' . $this->mtl);
-        }
-        if (!empty($this->texture) and file_exists($path . '/' . $this->texture)) {
-            unlink($path . '/' . $this->texture);
-        }
         if (is_dir($path)) {
-            rmdir($path);
+            self::deleteDir($path);
         }
 
         return parent::beforeDelete();
@@ -347,5 +334,36 @@ class Object extends ActiveRecord
     public function getLink()
     {
         return empty($this->sef) ? $this->id : $this->sef;
+    }
+
+    public static function deleteDir($dirPath)
+    {
+        if (!is_dir($dirPath)) {
+            throw new InvalidArgumentException("$dirPath must be a directory");
+        }
+        if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
+            $dirPath .= '/';
+        }
+        $files = glob($dirPath . '*', GLOB_MARK);
+        foreach ($files as $file) {
+            if (is_dir($file)) {
+                self::deleteDir($file);
+            } else {
+                unlink($file);
+            }
+        }
+        $files = glob($dirPath . '.*', GLOB_MARK);
+        foreach ($files as $file) {
+            if ($file == $dirPath . '.\\' or $file == $dirPath . '..\\') {
+                continue;
+            }
+
+            if (is_dir($file)) {
+                self::deleteDir($file);
+            } else {
+                unlink($file);
+            }
+        }
+        rmdir($dirPath);
     }
 }
