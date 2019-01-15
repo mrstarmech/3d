@@ -428,7 +428,6 @@ function viewer(model, options, labels) {
                 break;
         }
         ;
-        // addLabels();
     };
 
     function addLabels() {
@@ -642,6 +641,91 @@ function viewer(model, options, labels) {
                     $.each(label, function (index, item) {
                         item.visible = !item.visible;
                     });
+                }
+                break;
+            case 'textureDisable':
+                var src = value ? '/img/silver.jpg' : model.texture;
+                var texture = new THREE.ImageUtils.loadTexture( src );
+
+                var material = new THREE.MeshLambertMaterial(
+                    {
+                        ambient: model.ambient,
+                        color: model.color,
+                        map: texture,
+                        specular: 0xffffff,
+                        shininess: 50,
+                        shading: THREE.SmoothShading
+                    });
+
+                var onProgress = function (progress) {
+
+                };
+
+                var onError = function (e) {
+                    console.log('loading error: ' + e);
+                };
+
+
+                switch (options.loader) {
+                    case'jsonLoader':
+                        break;
+                    case 'objLoader':
+                        loader.load(
+                            model.mesh,
+                            function (object) {
+                                object.name = model.name;
+                                if (options.objectCoords) {
+                                    object.position.x = objectDefaultCoords.x;
+                                    object.position.y = objectDefaultCoords.y;
+                                    object.position.z = objectDefaultCoords.z;
+                                }
+                                ;
+                                object.traverse(function (node) {
+                                    if (node.type == 'Mesh') {
+                                        node.geometry.computeVertexNormals();
+                                        node.geometry.normalizeNormals();
+                                        node.geometry.computeBoundingBox();
+                                        node.geometry.computeBoundingSphere();
+                                        node.material = material;
+                                        node.material.needsUpdate = true;
+                                        sceneObjectsMesh.push(node);
+                                    }
+                                    ;
+                                });
+                                scene.add(object);
+
+                            }, onProgress, onError
+                        );
+                        break;
+                    case 'objMtlLoader':
+                        break;
+                    case'utf8Loader':
+                        loader.load(
+                            model.mesh,
+                            function (object) {
+                                object.traverse(function (node) {
+                                    if (node.type == 'Mesh') {
+                                        node.geometry.computeVertexNormals();
+                                        node.geometry.normalizeNormals();
+                                        node.geometry.computeBoundingBox();
+                                        node.geometry.computeBoundingSphere();
+
+                                        if (value) {
+                                            node.material.map = texture;
+                                        }
+
+                                        node.material.needsUpdate = true;
+                                        sceneObjectsMesh.push(node);
+                                    }
+                                    ;
+                                });
+                                scene.add(object);
+                            },
+                            {
+                                normalizeRGB: true
+                            }
+                        );
+                        break;
                 }
                 break;
         }

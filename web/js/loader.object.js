@@ -74,6 +74,7 @@ function menu() {
     submenu.append('<button class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
+    submenu.append('<button class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -209,6 +210,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         case 'light':
             object.option.lights = (object.option.lights == 'Cameralight' ? 'AmbientLight' : 'Cameralight');
             t.switchEnv('lights', object.option.lights);
+            break;
+        case 'texture-disable':
+            object.option.textureDisable = !object.option.textureDisable;
+            buttonActive($(this), object.option.textureDisable);
+            t.switchEnv('textureDisable', object.option.textureDisable);
             break;
     }
 });
