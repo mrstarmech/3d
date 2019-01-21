@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 $this->registerJsFile('js/lib.tree.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/viewer.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/viewer.js?201901211834', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/label.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
 $this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
