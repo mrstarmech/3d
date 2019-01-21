@@ -515,7 +515,7 @@ function viewer(model, options, labels) {
                 ;
                 break;
             case'createLabel':
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
 
                     controllers.createLabel = value;
                 } else {
@@ -525,7 +525,7 @@ function viewer(model, options, labels) {
                 break;
             case'wireframe':
                 controllers.wireframe = value;
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
                     sceneObjectsMesh.forEach(function (elem) {
                         elem.material.wireframe = true;
                         elem.material.transparent = true;
@@ -545,7 +545,7 @@ function viewer(model, options, labels) {
                 break;
             case'grid':
                 controllers.grid = value;
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
                     gridHelper = new THREE.GridHelper(200, 10);
                     asixHelper = new THREE.AxisHelper(100);
@@ -561,7 +561,7 @@ function viewer(model, options, labels) {
                 ;
                 break;
             case'lights':
-                if (typeof(value) == 'object') {
+                if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
                     }
@@ -583,7 +583,7 @@ function viewer(model, options, labels) {
                     ;
 
                     controllers.currentLight = drivenLightsGroup;
-                } else if (typeof(value) == 'string') {
+                } else if (typeof (value) == 'string') {
 
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
@@ -610,7 +610,7 @@ function viewer(model, options, labels) {
                 ;
                 break;
             case'autoRotate':
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
 
                     control.autoRotate = value;
                     controllers.autorotate = value;
@@ -621,14 +621,14 @@ function viewer(model, options, labels) {
                 ;
                 break;
             case 'cameraFov':
-                if (value && typeof(value) == 'number') {
+                if (value && typeof (value) == 'number') {
                     camera.fov = value;
                     camera.updateProjectionMatrix();
                 }
                 ;
                 break;
             case 'focalLenght':
-                if (value && typeof(value) == 'number') {
+                if (value && typeof (value) == 'number') {
                     //console.log(camera);
                     camera.setLens(value);
                 }
@@ -645,7 +645,7 @@ function viewer(model, options, labels) {
                 break;
             case 'textureDisable':
                 var src = value ? '/img/silver.jpg' : model.texture;
-                var texture = new THREE.ImageUtils.loadTexture( src );
+                var texture = new THREE.ImageUtils.loadTexture(src);
 
                 var material = new THREE.MeshLambertMaterial(
                     {
@@ -979,8 +979,10 @@ function viewer(model, options, labels) {
                     $.fancybox.open({
                         src: '<div class="message">' + intersects.object.description + '</div>',
                         type: 'html',
-                        smallBtn: false
+                        smallBtn: false,
+                        parentEl: '.' + $(viewerContainer).attr('class')
                     });
+
                 } catch (e) {
                 }
             } else if (controllers.createLabel) {
