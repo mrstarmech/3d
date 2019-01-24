@@ -46,7 +46,7 @@ function viewer(model, options, labels) {
             preserveDrawingBuffer: options.preserveDrawingBuffer
         }),
         raycaster = new THREE.Raycaster(),
-        //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
+//sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
         line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
         lights = {
             AmbientLight: function () {
@@ -78,12 +78,12 @@ function viewer(model, options, labels) {
                 for (var i = 0; i < count; i++) {
                     var position = new THREE.Vector3();
                     position.fromArray(coords[i]);
-                    //var lightSphere = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
+//var lightSphere = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
                     var lightPoint = new THREE.DirectionalLight(0xffffff, 0.7);
                     lightPoint.name = 'light_' + i;
-                    //lightPoint.add(lightSphere);
+//lightPoint.add(lightSphere);
                     lightPoint.position.copy(position);
-                    //lightSphere.position.copy(position);
+//lightSphere.position.copy(position);
 
                     drivenLightsGroup.add(lightPoint);
                 }
@@ -198,7 +198,7 @@ function viewer(model, options, labels) {
 
             viewerContainer.appendChild(loadingBar);
 
-            // setTimeout(init, 1500);
+// setTimeout(init, 1500);
             init();
         }
         ;
@@ -277,8 +277,8 @@ function viewer(model, options, labels) {
                 }
                 ;
 
-                // projector = new THREE.Projector();
-                // document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+// projector = new THREE.Projector();
+// document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
                 renderer.domElement.addEventListener('mousedown', onContainerMouseDown, false);
                 window.addEventListener('resize', onWindowResize, false);
@@ -313,7 +313,7 @@ function viewer(model, options, labels) {
         };
 
         switch (options.loader) {
-            case'jsonLoader':
+            case 'jsonLoader':
                 loader = new THREE.JSONLoader();
 
                 loader.loadAjaxJSON(
@@ -392,7 +392,7 @@ function viewer(model, options, labels) {
                     }, onProgress, onError
                 );
                 break;
-            case'utf8Loader':
+            case 'utf8Loader':
                 loader = new THREE.UTF8Loader();
 
                 loader.load(
@@ -451,15 +451,15 @@ function viewer(model, options, labels) {
                 sprite.scale.set(n, n, n);
                 label.push(sprite);
             });
-            // var sphereRadius = 26.86820741235598;
-            // sphereRadius = (sphereRadius*5)/100;
-            // console.log(sphereRadius);
-            // $.each(labels, function (index, value) {
-            //     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
-            //     sprite.position.set(value.position.x, value.position.y, value.position.z);
-            //     label.push(sprite);
-            //     scene.add( sprite );
-            // });
+// var sphereRadius = 26.86820741235598;
+// sphereRadius = (sphereRadius*5)/100;
+// console.log(sphereRadius);
+// $.each(labels, function (index, value) {
+//     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
+//     sprite.position.set(value.position.x, value.position.y, value.position.z);
+//     label.push(sprite);
+//     scene.add( sprite );
+// });
         }
         console.log(n);
     }
@@ -474,7 +474,7 @@ function viewer(model, options, labels) {
                 try {
                     context = canvas.getContext(names[i]);
                     if (context && typeof context.getParameter == "function") {
-                        //enabled
+//enabled
                         return 0;
                     }
                     ;
@@ -483,10 +483,10 @@ function viewer(model, options, labels) {
                 ;
             }
             ;
-            //supported, but disabled
+//supported, but disabled
             return 1;
         } else {
-            //not supported
+//not supported
             return 2;
         }
         ;
@@ -495,7 +495,7 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
-            case'ruler':
+            case 'ruler':
                 controllers.ruler = value;
                 if (!value) {
                     pinsGroup.traverse(function (node) {
@@ -514,7 +514,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'createLabel':
+            case 'createLabel':
                 if (value && typeof (value) == 'boolean') {
 
                     controllers.createLabel = value;
@@ -523,7 +523,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'wireframe':
+            case 'wireframe':
                 controllers.wireframe = value;
                 if (value && typeof (value) == 'boolean') {
                     sceneObjectsMesh.forEach(function (elem) {
@@ -543,7 +543,7 @@ function viewer(model, options, labels) {
                 ;
 
                 break;
-            case'grid':
+            case 'grid':
                 controllers.grid = value;
                 if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
@@ -560,12 +560,11 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'lights':
+            case 'lights':
                 if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
-                    }
-                    ;
+                    };
 
                     switch (value.state) {
                         case'init':
@@ -579,37 +578,36 @@ function viewer(model, options, labels) {
                             el.position.copy(vec);
                             el.children[0].position.copy(vec);
                             break;
-                    }
-                    ;
+                    };
 
                     controllers.currentLight = drivenLightsGroup;
                 } else if (typeof (value) == 'string') {
+                    light = lights[value]();
+                    // light.castShadow  = true;
+                    // light.needsUpdate = true;
+                    // light._needsUpdate = true;
+                    console.log(scene);
+                    scene.add(light);
 
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
                             if (item == controllers.currentLight) {
-                                light = lights[value]();
                                 scene.remove(item);
-                                scene.add(light);
-                            }
-                            ;
+                            };
                         });
-                    } else if (scene.children.length == 0) {
-                        light = lights[value]();
-                        scene.add(light);
                     }
-                    ;
+
                     controllers.currentLight = light;
-                }
-                ;
+
+                };
                 break;
-            case'background':
+            case 'background':
                 if (value) {
                     renderer.setClearColor(value);
                 }
                 ;
                 break;
-            case'autoRotate':
+            case 'autoRotate':
                 if (value && typeof (value) == 'boolean') {
 
                     control.autoRotate = value;
@@ -629,7 +627,7 @@ function viewer(model, options, labels) {
                 break;
             case 'focalLenght':
                 if (value && typeof (value) == 'number') {
-                    //console.log(camera);
+//console.log(camera);
                     camera.setLens(value);
                 }
                 ;
@@ -646,6 +644,8 @@ function viewer(model, options, labels) {
             case 'textureDisable':
                 var src = value ? '/img/silver.jpg' : model.texture;
                 var texture = new THREE.ImageUtils.loadTexture(src);
+
+                console
 
                 var material = new THREE.MeshLambertMaterial(
                     {
