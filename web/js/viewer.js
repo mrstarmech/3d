@@ -313,7 +313,7 @@ function viewer(model, options, labels) {
         };
 
         switch (options.loader) {
-            case'jsonLoader':
+            case 'jsonLoader':
                 loader = new THREE.JSONLoader();
 
                 loader.loadAjaxJSON(
@@ -392,7 +392,7 @@ function viewer(model, options, labels) {
                     }, onProgress, onError
                 );
                 break;
-            case'utf8Loader':
+            case 'utf8Loader':
                 loader = new THREE.UTF8Loader();
 
                 loader.load(
@@ -495,7 +495,7 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
-            case'ruler':
+            case 'ruler':
                 controllers.ruler = value;
                 if (!value) {
                     pinsGroup.traverse(function (node) {
@@ -514,7 +514,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'createLabel':
+            case 'createLabel':
                 if (value && typeof (value) == 'boolean') {
 
                     controllers.createLabel = value;
@@ -523,7 +523,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'wireframe':
+            case 'wireframe':
                 controllers.wireframe = value;
                 if (value && typeof (value) == 'boolean') {
                     sceneObjectsMesh.forEach(function (elem) {
@@ -543,7 +543,7 @@ function viewer(model, options, labels) {
                 ;
 
                 break;
-            case'grid':
+            case 'grid':
                 controllers.grid = value;
                 if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
@@ -560,7 +560,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'lights':
+            case 'lights':
                 if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
@@ -588,28 +588,29 @@ function viewer(model, options, labels) {
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
                             if (item == controllers.currentLight) {
-                                light = lights[value]();
                                 scene.remove(item);
-                                scene.add(light);
                             }
-                            ;
                         });
-                    } else if (scene.children.length == 0) {
-                        light = lights[value]();
-                        scene.add(light);
                     }
-                    ;
+
+                    light = lights[value]();
+                    scene.add(light);
                     controllers.currentLight = light;
+
+                    if (sceneObjectsMesh.length > 0) {
+                        sceneObjectsMesh[0].material.needsUpdate = true
+                    }
+
                 }
                 ;
                 break;
-            case'background':
+            case 'background':
                 if (value) {
                     renderer.setClearColor(value);
                 }
                 ;
                 break;
-            case'autoRotate':
+            case 'autoRotate':
                 if (value && typeof (value) == 'boolean') {
 
                     control.autoRotate = value;
@@ -662,11 +663,15 @@ function viewer(model, options, labels) {
                         controllers.originMapSrc = mesh.material.map.image.src;
                     }
 
-                    var src = value ? silver : controllers.originMapSrc;;
+                    var src = value ? silver : controllers.originMapSrc;
+                    ;
 
                     mesh.material.map.image.src = src;
                 }
 
+                break;
+            case 'getScene':
+                return sceneObjectsMesh;
                 break;
         }
         ;
