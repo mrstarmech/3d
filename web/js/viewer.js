@@ -46,7 +46,7 @@ function viewer(model, options, labels) {
             preserveDrawingBuffer: options.preserveDrawingBuffer
         }),
         raycaster = new THREE.Raycaster(),
-//sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
+        //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
         line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
         lights = {
             AmbientLight: function () {
@@ -78,12 +78,12 @@ function viewer(model, options, labels) {
                 for (var i = 0; i < count; i++) {
                     var position = new THREE.Vector3();
                     position.fromArray(coords[i]);
-//var lightSphere = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
+                    //var lightSphere = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
                     var lightPoint = new THREE.DirectionalLight(0xffffff, 0.7);
                     lightPoint.name = 'light_' + i;
-//lightPoint.add(lightSphere);
+                    //lightPoint.add(lightSphere);
                     lightPoint.position.copy(position);
-//lightSphere.position.copy(position);
+                    //lightSphere.position.copy(position);
 
                     drivenLightsGroup.add(lightPoint);
                 }
@@ -198,7 +198,7 @@ function viewer(model, options, labels) {
 
             viewerContainer.appendChild(loadingBar);
 
-// setTimeout(init, 1500);
+            // setTimeout(init, 1500);
             init();
         }
         ;
@@ -277,8 +277,8 @@ function viewer(model, options, labels) {
                 }
                 ;
 
-// projector = new THREE.Projector();
-// document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+                // projector = new THREE.Projector();
+                // document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
                 renderer.domElement.addEventListener('mousedown', onContainerMouseDown, false);
                 window.addEventListener('resize', onWindowResize, false);
@@ -451,15 +451,15 @@ function viewer(model, options, labels) {
                 sprite.scale.set(n, n, n);
                 label.push(sprite);
             });
-// var sphereRadius = 26.86820741235598;
-// sphereRadius = (sphereRadius*5)/100;
-// console.log(sphereRadius);
-// $.each(labels, function (index, value) {
-//     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
-//     sprite.position.set(value.position.x, value.position.y, value.position.z);
-//     label.push(sprite);
-//     scene.add( sprite );
-// });
+            // var sphereRadius = 26.86820741235598;
+            // sphereRadius = (sphereRadius*5)/100;
+            // console.log(sphereRadius);
+            // $.each(labels, function (index, value) {
+            //     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
+            //     sprite.position.set(value.position.x, value.position.y, value.position.z);
+            //     label.push(sprite);
+            //     scene.add( sprite );
+            // });
         }
         console.log(n);
     }
@@ -474,7 +474,7 @@ function viewer(model, options, labels) {
                 try {
                     context = canvas.getContext(names[i]);
                     if (context && typeof context.getParameter == "function") {
-//enabled
+                        //enabled
                         return 0;
                     }
                     ;
@@ -483,10 +483,10 @@ function viewer(model, options, labels) {
                 ;
             }
             ;
-//supported, but disabled
+            //supported, but disabled
             return 1;
         } else {
-//not supported
+            //not supported
             return 2;
         }
         ;
@@ -564,7 +564,8 @@ function viewer(model, options, labels) {
                 if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
-                    };
+                    }
+                    ;
 
                     switch (value.state) {
                         case'init':
@@ -578,28 +579,30 @@ function viewer(model, options, labels) {
                             el.position.copy(vec);
                             el.children[0].position.copy(vec);
                             break;
-                    };
+                    }
+                    ;
 
                     controllers.currentLight = drivenLightsGroup;
                 } else if (typeof (value) == 'string') {
-                    light = lights[value]();
-                    // light.castShadow  = true;
-                    // light.needsUpdate = true;
-                    // light._needsUpdate = true;
-                    console.log(scene);
-                    scene.add(light);
 
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
                             if (item == controllers.currentLight) {
                                 scene.remove(item);
-                            };
+                            }
                         });
                     }
 
+                    light = lights[value]();
+                    scene.add(light);
                     controllers.currentLight = light;
 
-                };
+                    if (sceneObjectsMesh.length > 0) {
+                        sceneObjectsMesh[0].material.needsUpdate = true
+                    }
+
+                }
+                ;
                 break;
             case 'background':
                 if (value) {
@@ -627,7 +630,7 @@ function viewer(model, options, labels) {
                 break;
             case 'focalLenght':
                 if (value && typeof (value) == 'number') {
-//console.log(camera);
+                    //console.log(camera);
                     camera.setLens(value);
                 }
                 ;
@@ -635,98 +638,40 @@ function viewer(model, options, labels) {
             case 'bbox':
                 break;
             case 'label':
+
                 if (label.length !== 0) {
                     $.each(label, function (index, item) {
                         item.visible = !item.visible;
                     });
                 }
+
                 break;
             case 'textureDisable':
-                var src = value ? '/img/silver.jpg' : model.texture;
-                var texture = new THREE.ImageUtils.loadTexture(src);
 
-                console
+                if (sceneObjectsMesh.length > 0) {
 
-                var material = new THREE.MeshLambertMaterial(
-                    {
-                        ambient: model.ambient,
-                        color: model.color,
-                        map: texture,
-                        specular: 0xffffff,
-                        shininess: 50,
-                        shading: THREE.SmoothShading
+                    var silver = '/img/silver.jpg',
+                        mesh = {};
+
+                    $.each(sceneObjectsMesh, function (i, item) {
+                        if (item.type == 'Mesh') {
+                            mesh = item;
+                        }
                     });
 
-                var onProgress = function (progress) {
+                    if (!controllers.originMapSrc) {
+                        controllers.originMapSrc = mesh.material.map.image.src;
+                    }
 
-                };
+                    var src = value ? silver : controllers.originMapSrc;
+                    ;
 
-                var onError = function (e) {
-                    console.log('loading error: ' + e);
-                };
-
-
-                switch (options.loader) {
-                    case'jsonLoader':
-                        break;
-                    case 'objLoader':
-                        loader.load(
-                            model.mesh,
-                            function (object) {
-                                object.name = model.name;
-                                if (options.objectCoords) {
-                                    object.position.x = objectDefaultCoords.x;
-                                    object.position.y = objectDefaultCoords.y;
-                                    object.position.z = objectDefaultCoords.z;
-                                }
-                                ;
-                                object.traverse(function (node) {
-                                    if (node.type == 'Mesh') {
-                                        node.geometry.computeVertexNormals();
-                                        node.geometry.normalizeNormals();
-                                        node.geometry.computeBoundingBox();
-                                        node.geometry.computeBoundingSphere();
-                                        node.material = material;
-                                        node.material.needsUpdate = true;
-                                        sceneObjectsMesh.push(node);
-                                    }
-                                    ;
-                                });
-                                scene.add(object);
-
-                            }, onProgress, onError
-                        );
-                        break;
-                    case 'objMtlLoader':
-                        break;
-                    case'utf8Loader':
-                        loader.load(
-                            model.mesh,
-                            function (object) {
-                                object.traverse(function (node) {
-                                    if (node.type == 'Mesh') {
-                                        node.geometry.computeVertexNormals();
-                                        node.geometry.normalizeNormals();
-                                        node.geometry.computeBoundingBox();
-                                        node.geometry.computeBoundingSphere();
-
-                                        if (value) {
-                                            node.material.map = texture;
-                                        }
-
-                                        node.material.needsUpdate = true;
-                                        sceneObjectsMesh.push(node);
-                                    }
-                                    ;
-                                });
-                                scene.add(object);
-                            },
-                            {
-                                normalizeRGB: true
-                            }
-                        );
-                        break;
+                    mesh.material.map.image.src = src;
                 }
+
+                break;
+            case 'getScene':
+                return sceneObjectsMesh;
                 break;
         }
         ;
