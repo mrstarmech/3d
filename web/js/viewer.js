@@ -313,7 +313,7 @@ function viewer(model, options, labels) {
         };
 
         switch (options.loader) {
-            case'jsonLoader':
+            case 'jsonLoader':
                 loader = new THREE.JSONLoader();
 
                 loader.loadAjaxJSON(
@@ -392,7 +392,7 @@ function viewer(model, options, labels) {
                     }, onProgress, onError
                 );
                 break;
-            case'utf8Loader':
+            case 'utf8Loader':
                 loader = new THREE.UTF8Loader();
 
                 loader.load(
@@ -495,7 +495,7 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
-            case'ruler':
+            case 'ruler':
                 controllers.ruler = value;
                 if (!value) {
                     pinsGroup.traverse(function (node) {
@@ -514,7 +514,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'createLabel':
+            case 'createLabel':
                 if (value && typeof (value) == 'boolean') {
 
                     controllers.createLabel = value;
@@ -523,7 +523,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'wireframe':
+            case 'wireframe':
                 controllers.wireframe = value;
                 if (value && typeof (value) == 'boolean') {
                     sceneObjectsMesh.forEach(function (elem) {
@@ -543,7 +543,7 @@ function viewer(model, options, labels) {
                 ;
 
                 break;
-            case'grid':
+            case 'grid':
                 controllers.grid = value;
                 if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
@@ -560,7 +560,7 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'lights':
+            case 'lights':
                 if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
@@ -588,28 +588,29 @@ function viewer(model, options, labels) {
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
                             if (item == controllers.currentLight) {
-                                light = lights[value]();
                                 scene.remove(item);
-                                scene.add(light);
                             }
-                            ;
                         });
-                    } else if (scene.children.length == 0) {
-                        light = lights[value]();
-                        scene.add(light);
                     }
-                    ;
+
+                    light = lights[value]();
+                    scene.add(light);
                     controllers.currentLight = light;
+
+                    if (sceneObjectsMesh.length > 0) {
+                        sceneObjectsMesh[0].material.needsUpdate = true
+                    }
+
                 }
                 ;
                 break;
-            case'background':
+            case 'background':
                 if (value) {
                     renderer.setClearColor(value);
                 }
                 ;
                 break;
-            case'autoRotate':
+            case 'autoRotate':
                 if (value && typeof (value) == 'boolean') {
 
                     control.autoRotate = value;
@@ -637,96 +638,40 @@ function viewer(model, options, labels) {
             case 'bbox':
                 break;
             case 'label':
+
                 if (label.length !== 0) {
                     $.each(label, function (index, item) {
                         item.visible = !item.visible;
                     });
                 }
+
                 break;
             case 'textureDisable':
-                var src = value ? '/img/silver.jpg' : model.texture;
-                var texture = new THREE.ImageUtils.loadTexture(src);
 
-                var material = new THREE.MeshLambertMaterial(
-                    {
-                        ambient: model.ambient,
-                        color: model.color,
-                        map: texture,
-                        specular: 0xffffff,
-                        shininess: 50,
-                        shading: THREE.SmoothShading
+                if (sceneObjectsMesh.length > 0) {
+
+                    var silver = '/img/silver.jpg',
+                        mesh = {};
+
+                    $.each(sceneObjectsMesh, function (i, item) {
+                        if (item.type == 'Mesh') {
+                            mesh = item;
+                        }
                     });
 
-                var onProgress = function (progress) {
+                    if (!controllers.originMapSrc) {
+                        controllers.originMapSrc = mesh.material.map.image.src;
+                    }
 
-                };
+                    var src = value ? silver : controllers.originMapSrc;
+                    ;
 
-                var onError = function (e) {
-                    console.log('loading error: ' + e);
-                };
-
-
-                switch (options.loader) {
-                    case'jsonLoader':
-                        break;
-                    case 'objLoader':
-                        loader.load(
-                            model.mesh,
-                            function (object) {
-                                object.name = model.name;
-                                if (options.objectCoords) {
-                                    object.position.x = objectDefaultCoords.x;
-                                    object.position.y = objectDefaultCoords.y;
-                                    object.position.z = objectDefaultCoords.z;
-                                }
-                                ;
-                                object.traverse(function (node) {
-                                    if (node.type == 'Mesh') {
-                                        node.geometry.computeVertexNormals();
-                                        node.geometry.normalizeNormals();
-                                        node.geometry.computeBoundingBox();
-                                        node.geometry.computeBoundingSphere();
-                                        node.material = material;
-                                        node.material.needsUpdate = true;
-                                        sceneObjectsMesh.push(node);
-                                    }
-                                    ;
-                                });
-                                scene.add(object);
-
-                            }, onProgress, onError
-                        );
-                        break;
-                    case 'objMtlLoader':
-                        break;
-                    case'utf8Loader':
-                        loader.load(
-                            model.mesh,
-                            function (object) {
-                                object.traverse(function (node) {
-                                    if (node.type == 'Mesh') {
-                                        node.geometry.computeVertexNormals();
-                                        node.geometry.normalizeNormals();
-                                        node.geometry.computeBoundingBox();
-                                        node.geometry.computeBoundingSphere();
-
-                                        if (value) {
-                                            node.material.map = texture;
-                                        }
-
-                                        node.material.needsUpdate = true;
-                                        sceneObjectsMesh.push(node);
-                                    }
-                                    ;
-                                });
-                                scene.add(object);
-                            },
-                            {
-                                normalizeRGB: true
-                            }
-                        );
-                        break;
+                    mesh.material.map.image.src = src;
                 }
+
+                break;
+            case 'getScene':
+                return sceneObjectsMesh;
                 break;
         }
         ;
