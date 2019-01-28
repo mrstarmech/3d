@@ -40,6 +40,11 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </div>
 
+    <div class="col-xs-6 text-right">
+        <br>
+        <?= Html::a('Просмотр', ['category/view', 'id' => $model->id]) ?>
+    </div>
+
     <div class="clearfix"></div>
 
     <div class="col-xs-6">
