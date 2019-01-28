@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\models\Category;
 use app\models\Object;
+use app\models\User;
 use Yii;
 use yii\data\Pagination;
 use yii\web\Controller;
@@ -50,62 +51,48 @@ class CategoryController extends Controller
      */
     public function actionView($id)
     {
-        $category = null;
+
+        $query = Category::find()->where(['id' => $id]);
+
+        if (!Yii::$app->user->can(User::ROLE_ADMINISTRATOR)) {
+            $query = $query->andWhere(['!=', 'status', Category::NOT_AVAILABLE]);
+        }
+
+        $category = $query->one();
+
+        if (empty($category)) {
+            throw new HttpException(403);
+        } elseif ($category->status == Category::NOT_AVAILABLE) {
+            Yii::$app->session->setFlash('info', 'Эта категория недоступна пользователям');
+        }
+
         $categories = Category::find()
             ->where(['status' => Category::AVAILABLE_MENU])
             ->all();
 
-        $catMenu = [['label' => Yii::t('app', 'All'), 'url' => ['category/view', 'id' => 'all']]];
-
         if (!empty($categories)) {
-            foreach ($categories as $category) {
-                if (!empty($category->objects)) {
+            foreach ($categories as $item) {
+                if (!empty($item->objects)) {
                     $catMenu[] = [
-                        'label' => $category->name,
-                        'url' => ['category/view', 'id' => $category->id],
+                        'label' => $item->name,
+                        'url' => ['category/view', 'id' => $item->id],
                     ];
                 }
             }
         }
 
-        if ($id == 'all') {
+        $query = Object::find()
+            ->joinWith('objectCategory')
+            ->andWhere(['visible' => 1])
+            ->andWhere(['category_id' => $id]);
 
-            $query = Object::find()->where(['visible' => 1]);
-            $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 12]);
-            $objects = $query->offset($pages->offset)
-                ->limit($pages->limit)
-                ->orderBy(['id' => SORT_DESC])
-                ->all();
+        $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 9]);
 
-        } else {
-
-            $category = Category::find()
-                ->where(['id' => $id])
-                ->andWhere(['!=', 'status', Category::NOT_AVAILABLE])
-                ->one();
-
-
-            if (empty($category)) {
-                throw new HttpException(403);
-            }
-
-            $query = Object::find()
-                ->joinWith('objectCategory')
-                ->andWhere(['visible' => 1])
-                ->andWhere(['category_id' => $id]);
-
-            $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 9]);
-
-            $objects = $query
-                ->offset($pages->offset)
-                ->limit($pages->limit)
-                ->orderBy(['id' => SORT_DESC])
-                ->all();
-        }
-
-        if (empty($objects) or (!empty($category) and empty($objects))) {
-            throw new HttpException(500);
-        }
+        $objects = $query
+            ->offset($pages->offset)
+            ->limit($pages->limit)
+            ->orderBy(['id' => SORT_DESC])
+            ->all();
 
         return $this->render('view', [
             'objects' => $objects,
