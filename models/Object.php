@@ -82,9 +82,9 @@ class Object extends ActiveRecord
             [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting', 'tech_info'], 'string'],
             [['visible'], 'in', 'range' => [0, 1]],
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
-            [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj'],
+            [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj, gltf, glb'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
-            [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
+            [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bin'],
             ['sef', 'match', 'pattern' => '/^[a-z0-9\-]*$/iu', 'message' => 'Допустима латиница, числа и -'],
         ];
     }
