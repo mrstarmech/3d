@@ -44,7 +44,7 @@ function start() {
 
         return t;
     } catch (error) {
-        console.log(error);
+        // console.log(error);
     }
 };
 
