@@ -411,7 +411,7 @@ function viewer(model, options, labels) {
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
                                 node.geometry.computeBoundingSphere();
-                                node.material.testure = texture;
+                                node.material.texture = texture;
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
@@ -424,6 +424,35 @@ function viewer(model, options, labels) {
                     {
                         normalizeRGB: true
                     }
+                );
+                break;
+            case 'gltfLoader':
+                loader = new THREE.GLTFLoader();
+
+                loader.load(
+                    model.mesh,
+                    function (object) {
+                        if (options.objectCoords) {
+                            object.position.x = objectDefaultCoords.x;
+                            object.position.y = objectDefaultCoords.y;
+                            object.position.z = objectDefaultCoords.z;
+                        }
+                        ;
+                        object.scene.traverse(function (node) {
+                            if (node.type == 'Mesh') {
+                                node.geometry.computeVertexNormals();
+                                node.geometry.normalizeNormals();
+                                node.geometry.computeBoundingBox();
+                                node.geometry.computeBoundingSphere();
+                                node.material.needsUpdate = true;
+                                sceneObjectsMesh.push(node);
+                            }
+                            ;
+                        });
+                        scene.add(object.scene);
+
+                        callback(true);
+                    }, onProgress, onError
                 );
                 break;
         }
@@ -451,17 +480,7 @@ function viewer(model, options, labels) {
                 sprite.scale.set(n, n, n);
                 label.push(sprite);
             });
-            // var sphereRadius = 26.86820741235598;
-            // sphereRadius = (sphereRadius*5)/100;
-            // console.log(sphereRadius);
-            // $.each(labels, function (index, value) {
-            //     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
-            //     sprite.position.set(value.position.x, value.position.y, value.position.z);
-            //     label.push(sprite);
-            //     scene.add( sprite );
-            // });
         }
-        console.log(n);
     }
 
     function webglDetect() {
@@ -649,29 +668,27 @@ function viewer(model, options, labels) {
             case 'textureDisable':
 
                 if (sceneObjectsMesh.length > 0) {
-
-                    var silver = '/img/silver.jpg',
-                        mesh = {};
-
                     $.each(sceneObjectsMesh, function (i, item) {
-                        if (item.type == 'Mesh') {
-                            mesh = item;
+                        if (item.type === 'Mesh') {
+                            if (!controllers.originMaterial) {
+                                controllers.originMaterial = [];
+                            }
+                            if (controllers.originMaterial[i] === undefined) {
+                                controllers.originMaterial[i] = item.material;
+                            }
+
+                            if (value) {
+                                item.material = new THREE.MeshLambertMaterial({
+                                    color: 0xdddddd,
+                                    shading: THREE.SmoothShading
+                                });
+                            } else if (controllers.originMaterial[i] !== undefined) {
+                                item.material = controllers.originMaterial[i];
+                            }
                         }
                     });
-
-                    if (!controllers.originMapSrc) {
-                        controllers.originMapSrc = mesh.material.map.image.src;
-                    }
-
-                    var src = value ? silver : controllers.originMapSrc;
-                    ;
-
-                    mesh.material.map.image.src = src;
                 }
 
-                break;
-            case 'getScene':
-                return sceneObjectsMesh;
                 break;
         }
         ;
