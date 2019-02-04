@@ -39,13 +39,12 @@ function viewer(model, options, labels) {
 
     var selfObj = this,
         scene = new THREE.Scene(),
-        camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
-    // camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
-    renderer = new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: true,
-        preserveDrawingBuffer: options.preserveDrawingBuffer
-    }),
+        camera = new THREE.PerspectiveCamera();
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: options.preserveDrawingBuffer
+        }),
         raycaster = new THREE.Raycaster(),
         //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
         line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
@@ -298,6 +297,7 @@ function viewer(model, options, labels) {
             shininess: 50,
             shading: THREE.SmoothShading
         };
+
         if (model.ambient !== undefined && model.ambient !== '') {
             parametersMaterial.ambient = model.ambient;
         }
@@ -305,8 +305,12 @@ function viewer(model, options, labels) {
             parametersMaterial.color = model.color;
         }
         if (model.texture !== undefined && model.texture !== '') {
-            parametersMaterial.map = new THREE.ImageUtils.loadTexture(model.texture);
+            var texture = new THREE.ImageUtils.loadTexture(model.texture);
+            parametersMaterial.map = texture;
+        } else {
+            var texture = new THREE.ImageUtils.loadTexture();
         }
+
         var material = new THREE.MeshLambertMaterial(parametersMaterial);
 
         var onProgress = function (progress) {
@@ -416,7 +420,9 @@ function viewer(model, options, labels) {
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
                                 node.geometry.computeBoundingSphere();
-                                node.material.texture = texture;
+                                if (texture !== undefined) {
+                                    node.material.texture = texture;
+                                }
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
