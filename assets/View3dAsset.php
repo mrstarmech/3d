@@ -25,6 +25,7 @@ class View3dAsset extends AssetBundle
         'js/three/MTLLoader.js',
         'js/three/UTF8Loader.js',
         'js/three/GLTFLoader.js',
+        'js/three/DRACOLoader.js',
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',

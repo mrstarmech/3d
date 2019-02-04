@@ -39,12 +39,13 @@ function viewer(model, options, labels) {
 
     var selfObj = this,
         scene = new THREE.Scene(),
-        camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
-        renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            preserveDrawingBuffer: options.preserveDrawingBuffer
-        }),
+        camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 15);
+    // camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
+    renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: options.preserveDrawingBuffer
+    }),
         raycaster = new THREE.Raycaster(),
         //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
         line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
@@ -292,17 +293,21 @@ function viewer(model, options, labels) {
     };
 
     function loadModel(model, callback) {
-        var texture = new THREE.ImageUtils.loadTexture(model.texture);
-
-        var material = new THREE.MeshLambertMaterial(
-            {
-                ambient: model.ambient,
-                color: model.color,
-                map: texture,
-                specular: 0xffffff,
-                shininess: 50,
-                shading: THREE.SmoothShading
-            });
+        var parametersMaterial = {
+            specular: 0xffffff,
+            shininess: 50,
+            shading: THREE.SmoothShading
+        };
+        if (model.ambient !== undefined && model.ambient !== '') {
+            parametersMaterial.ambient = model.ambient;
+        }
+        if (model.color !== undefined && model.color !== '') {
+            parametersMaterial.color = model.color;
+        }
+        if (model.texture !== undefined && model.texture !== '') {
+            parametersMaterial.map = new THREE.ImageUtils.loadTexture(model.texture);
+        }
+        var material = new THREE.MeshLambertMaterial(parametersMaterial);
 
         var onProgress = function (progress) {
 
@@ -454,6 +459,40 @@ function viewer(model, options, labels) {
                         callback(true);
                     }, onProgress, onError
                 );
+                break;
+            case 'dracoLoader':
+                THREE.DRACOLoader.setDecoderPath('/js/three/draco/');
+                THREE.DRACOLoader.setDecoderConfig({type: 'js'});
+                var loader = new THREE.DRACOLoader();
+
+                loader.load(model.mesh, function (geometry) {
+                    geometry.computeVertexNormals();
+                    geometry.normalizeNormals();
+                    geometry.computeBoundingBox();
+                    geometry.computeBoundingSphere();
+
+                    var mesh = new THREE.Mesh(geometry, material);
+                    material.needsUpdate = true;
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+
+                    if (options.objectCoords) {
+                        mesh.position.x = objectDefaultCoords.x;
+                        mesh.position.y = objectDefaultCoords.y;
+                        mesh.position.z = objectDefaultCoords.z;
+                    }
+                    ;
+
+                    scene.add(mesh);
+
+                    sceneObjectsMesh.push(mesh);
+
+                    // Release decoder resources.
+                    THREE.DRACOLoader.releaseDecoderModule();
+
+                    callback(true);
+
+                }, onProgress, onError);
                 break;
         }
         ;
