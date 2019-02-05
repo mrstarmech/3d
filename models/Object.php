@@ -225,6 +225,7 @@ class Object extends ActiveRecord
                 list($type, $data) = explode(';', $this->dataImage);
                 list(, $data) = explode(',', $data);
                 $data = base64_decode($data);
+                FileHelper::createDirectory($path);
                 file_put_contents($path . '/' . $newName . '.jpg', $data);
                 $this->setSetting('poster', '/' . $path . '/' . $newName . '.jpg');
             }
