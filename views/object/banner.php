@@ -31,7 +31,7 @@ if (!empty($labels)) {
     }
 }
 
-$host = Yii::$app->params['host'];
+$host = Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $labelsJson = json_encode($dataLabels);
 $script = <<< JS
 object = {

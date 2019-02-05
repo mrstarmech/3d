@@ -2,22 +2,7 @@
 
 use yii\helpers\Html;
 use \yii\widgets\ActiveForm;
-
-$this->registerJsFile('js/lib.tree.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/viewer.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/label.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/colorpicker.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/colorpicker.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-
-\dominus77\highlight\Plugin::register($this);
+use app\assets\View3dAsset;
 
 $dataLabels = [];
 $labels = $object->labels;
@@ -31,7 +16,7 @@ if (!empty($labels)) {
     }
 }
 
-$host = Yii::$app->params['host'];
+$host = Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $labelsJson = json_encode($dataLabels);
 $script = <<< JS
 object = {
@@ -62,19 +47,6 @@ $('#saveLink').click(function() {
             $('input[name=coordinateX]').val(t.camera.position.x);
             $('input[name=coordinateY]').val(t.camera.position.y);
             $('input[name=coordinateZ]').val(t.camera.position.z);
-            
-//            var csrfToken = $('meta[name="csrf-token"]').attr("content");
-//            $.ajax({
-//               async: false,
-//               type: "POST",
-//               dataType: "json",
-//               url: "/admin/shot/$object->id",
-//               data: {data: imgData, _csrf: csrfToken},
-//               cache: false,
-//               success: function(response){
-//                   console.log(response);
-//               }
-//           });
 
         } catch (e) {
             console.log(e);
@@ -97,6 +69,8 @@ $('#saveLink').click(function() {
     }
 JS;
 
+View3dAsset::register($this);
+\dominus77\highlight\Plugin::register($this);
 $this->registerJs($script, yii\web\View::POS_READY);
 
 $this->title = $object->name;
