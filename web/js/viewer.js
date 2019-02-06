@@ -39,7 +39,7 @@ function viewer(model, options, labels) {
 
     var selfObj = this,
         scene = new THREE.Scene(),
-        camera = new THREE.PerspectiveCamera();
+        camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
         renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: true,
