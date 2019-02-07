@@ -590,6 +590,7 @@ function viewer(model, options, labels) {
             case 'wireframe':
                 controllers.wireframe = value;
                 if (value && typeof (value) == 'boolean') {
+                    options.wireframe = true;
                     sceneObjectsMesh.forEach(function (elem) {
                         elem.material.wireframe = true;
                         elem.material.transparent = true;
@@ -597,6 +598,7 @@ function viewer(model, options, labels) {
                         elem.material.opacity = 0.25;
                     });
                 } else {
+                    options.wireframe = false;
                     sceneObjectsMesh.forEach(function (elem) {
                         elem.material.wireframe = false;
                         elem.material.depthTest = true;
@@ -712,6 +714,7 @@ function viewer(model, options, labels) {
                 break;
             case 'textureDisable':
 
+                console.log(options);
                 if (sceneObjectsMesh.length > 0) {
                     $.each(sceneObjectsMesh, function (i, item) {
                         if (item.type === 'Mesh') {
@@ -727,6 +730,14 @@ function viewer(model, options, labels) {
                                     color: 0xdddddd,
                                     shading: THREE.SmoothShading
                                 });
+
+                                if (options.wireframe) {
+                                    item.material.wireframe = true;
+                                    item.material.transparent = true;
+                                    item.material.depthTest = false;
+                                    item.material.opacity = 0.25;
+                                }
+
                             } else if (controllers.originMaterial[i] !== undefined) {
                                 item.material = controllers.originMaterial[i];
                             }
