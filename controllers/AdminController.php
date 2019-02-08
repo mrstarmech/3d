@@ -462,6 +462,15 @@ class AdminController extends Controller
             throw new HttpException(404);
         }
 
+
+        if ($data = Yii::$app->request->post('data')) {
+            if(file_put_contents($object->pathFileWR . '/' . $object->mtl, $data)){
+                Yii::$app->session->setFlash('success', 'Данные успешно внесены');
+            } else {
+                Yii::$app->session->setFlash('error', 'Не удалось внести данные');
+            }
+        }
+
         return $this->render('editFileMtl', [
             'object' => $object,
         ]);
