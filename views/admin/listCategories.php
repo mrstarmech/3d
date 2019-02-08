@@ -2,7 +2,6 @@
 use yii\helpers\Html;
 use yii\helpers\Url;
 
-echo $this->render('_header');
 ?>
     <div class="row">
         <div class="col-xs-12">
@@ -17,10 +16,12 @@ echo $this->render('_header');
     <div class="list-group">
         <?php if(!empty($categories)): ?>
             <?php foreach($categories as $category): ?>
-                <a class="list-group-item" href="<?= Url::to(['admin/edit-category', 'id' => $category->id]) ?>">
+                <div class="list-group-item">
+                    <?= Html::a('<i class="fas fa-edit"></i>', ['admin/edit-category', 'id' => $category->id], ['class' => 'pull-right1']) ?>
+                    <?= Html::a(($category->status != \app\models\Category::NOT_AVAILABLE ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>'), ['category/view', 'id' => $category->id]) ?>
                     <?= $category->name ?>
                     <span class="badge"><?= count($category->objects) ?></span>
-                </a>
+                </div>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>

@@ -7,14 +7,8 @@ $this->title = Yii::t('app', 'Categories');
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <h1><?= $this->title ?></h1>
-<?php if (!empty($all) and !empty($categories)): ?>
+<?php if (!empty($categories)): ?>
     <div class="list-group">
-        <?php if (!empty($all)): ?>
-            <a class="list-group-item" href="<?= Url::to(['category/view', 'id' => 'all']) ?>">
-                <?= Yii::t('app', 'All') ?>
-                <span class="badge"><?= count($all) ?></span>
-            </a>
-        <?php endif; ?>
         <?php if (!empty($categories)): ?>
             <?php foreach ($categories as $category): ?>
                 <?php if (count($category->objects)): ?>

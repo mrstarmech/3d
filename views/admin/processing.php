@@ -4,8 +4,7 @@ use yii\helpers\Html;
 use yii\bootstrap\ActiveForm;
 use conquer\codemirror\CodemirrorWidget;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $object->id]);
+echo $this->render('_header_object', ['object' => $object]);
 
 $this->title = 'Обработка';
 $this->params['breadcrumbs'][] = $this->title;
@@ -35,6 +34,14 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="form-group">
     <?= Html::submitButton('Конвертировать OBJ в JS', [
         'name' => 'convertJs',
+        'class' => ['class' => 'btn btn-primary'],
+        'disabled' => $object->contentObj ? false : true,
+    ]) ?>
+</div>
+
+<div class="form-group">
+    <?= Html::submitButton('Конвертировать OBJ в DRACO', [
+        'name' => 'convertDraco',
         'class' => ['class' => 'btn btn-primary'],
         'disabled' => $object->contentObj ? false : true,
     ]) ?>

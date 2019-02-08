@@ -254,6 +254,27 @@ class AdminController extends Controller
 //                die;
                 if ($object->save()) {
                     Yii::$app->session->setFlash('success', "Модель сохранена");
+
+                    
+//СДЕЛАТЬ ОТДЕЛЬНЫМ МЕТОДОМ ЕСЛИ Предполагается использовать в разных местах
+                        $pathFileObj = $object->pathFileWR . '/' . $object->obj;
+                        //$drcName = $object->id.'.drc';
+                        $drcName = stristr($object->obj, '.', true) . '.drc';
+                        $pathFileDrc = $object->pathFileWR . '/' . $drcName;
+
+                        $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
+                        exec($command, $output, $return);
+
+                        if ($return != 0) {
+                            Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
+                        } else {
+                            $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
+                            $object->save();
+                            Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
+                        }
+
+//////////////////////////
+
                     return $this->refresh();
                 }
             }
@@ -518,6 +539,29 @@ class AdminController extends Controller
 
             return $this->refresh();
         }
+
+        if (Yii::$app->request->post('convertDraco') !== null) {
+            $pathFileObj = $object->pathFileWR . '/' . $object->obj;
+            //$drcName = $object->id.'.drc';
+            $drcName = stristr($object->obj, '.', true) . '.drc';
+            $pathFileDrc = $object->pathFileWR . '/' . $drcName;
+
+            $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
+            exec($command, $output, $return);
+
+            if ($return != 0) {
+                Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
+            } else {
+                $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
+                $object->save();
+
+                Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
+            }
+
+            return $this->refresh();
+        }
+
+
 
         if (Yii::$app->request->post('convertWebp') !== null) {
             $nameFileTexture = $object->pathFileWR . '/' . $object->texture;

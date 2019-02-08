@@ -292,17 +292,26 @@ function viewer(model, options, labels) {
     };
 
     function loadModel(model, callback) {
-        var texture = new THREE.ImageUtils.loadTexture(model.texture);
+        var parametersMaterial = {
+            specular: 0xffffff,
+            shininess: 50,
+            shading: THREE.SmoothShading
+        };
 
-        var material = new THREE.MeshLambertMaterial(
-            {
-                ambient: model.ambient,
-                color: model.color,
-                map: texture,
-                specular: 0xffffff,
-                shininess: 50,
-                shading: THREE.SmoothShading
-            });
+        if (model.ambient !== undefined && model.ambient !== '') {
+            parametersMaterial.ambient = model.ambient;
+        }
+        if (model.color !== undefined && model.color !== '') {
+            parametersMaterial.color = model.color;
+        }
+        if (model.texture !== undefined && model.texture !== '') {
+            var texture = new THREE.ImageUtils.loadTexture(model.texture);
+            parametersMaterial.map = texture;
+        } else {
+            var texture = new THREE.ImageUtils.loadTexture();
+        }
+
+        var material = new THREE.MeshLambertMaterial(parametersMaterial);
 
         var onProgress = function (progress) {
 
@@ -313,7 +322,7 @@ function viewer(model, options, labels) {
         };
 
         switch (options.loader) {
-            case'jsonLoader':
+            case 'jsonLoader':
                 loader = new THREE.JSONLoader();
 
                 loader.loadAjaxJSON(
@@ -392,7 +401,7 @@ function viewer(model, options, labels) {
                     }, onProgress, onError
                 );
                 break;
-            case'utf8Loader':
+            case 'utf8Loader':
                 loader = new THREE.UTF8Loader();
 
                 loader.load(
@@ -411,7 +420,9 @@ function viewer(model, options, labels) {
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
                                 node.geometry.computeBoundingSphere();
-                                node.material.testure = texture;
+                                if (texture !== undefined) {
+                                    node.material.texture = texture;
+                                }
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
@@ -426,9 +437,71 @@ function viewer(model, options, labels) {
                     }
                 );
                 break;
+            case 'gltfLoader':
+                loader = new THREE.GLTFLoader();
+
+                loader.load(
+                    model.mesh,
+                    function (object) {
+                        if (options.objectCoords) {
+                            object.position.x = objectDefaultCoords.x;
+                            object.position.y = objectDefaultCoords.y;
+                            object.position.z = objectDefaultCoords.z;
+                        }
+                        ;
+                        object.scene.traverse(function (node) {
+                            if (node.type == 'Mesh') {
+                                node.geometry.computeVertexNormals();
+                                node.geometry.normalizeNormals();
+                                node.geometry.computeBoundingBox();
+                                node.geometry.computeBoundingSphere();
+                                node.material.needsUpdate = true;
+                                sceneObjectsMesh.push(node);
+                            }
+                            ;
+                        });
+                        scene.add(object.scene);
+
+                        callback(true);
+                    }, onProgress, onError
+                );
+                break;
+            case 'dracoLoader':
+                THREE.DRACOLoader.setDecoderPath('/js/three/draco/');
+                THREE.DRACOLoader.setDecoderConfig({type: 'js'});
+                var loader = new THREE.DRACOLoader();
+
+                loader.load(model.mesh, function (geometry) {
+                    geometry.computeVertexNormals();
+                    geometry.normalizeNormals();
+                    geometry.computeBoundingBox();
+                    geometry.computeBoundingSphere();
+
+                    var mesh = new THREE.Mesh(geometry, material);
+                    material.needsUpdate = true;
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+
+                    if (options.objectCoords) {
+                        mesh.position.x = objectDefaultCoords.x;
+                        mesh.position.y = objectDefaultCoords.y;
+                        mesh.position.z = objectDefaultCoords.z;
+                    }
+                    ;
+
+                    scene.add(mesh);
+
+                    sceneObjectsMesh.push(mesh);
+
+                    // Release decoder resources.
+                    THREE.DRACOLoader.releaseDecoderModule();
+
+                    callback(true);
+
+                }, onProgress, onError);
+                break;
         }
         ;
-        // addLabels();
     };
 
     function addLabels() {
@@ -452,17 +525,7 @@ function viewer(model, options, labels) {
                 sprite.scale.set(n, n, n);
                 label.push(sprite);
             });
-            // var sphereRadius = 26.86820741235598;
-            // sphereRadius = (sphereRadius*5)/100;
-            // console.log(sphereRadius);
-            // $.each(labels, function (index, value) {
-            //     var sprite = new THREE.Mesh(new THREE.SphereGeometry( sphereRadius, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938}));
-            //     sprite.position.set(value.position.x, value.position.y, value.position.z);
-            //     label.push(sprite);
-            //     scene.add( sprite );
-            // });
         }
-        console.log(n);
     }
 
     function webglDetect() {
@@ -496,7 +559,7 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
-            case'ruler':
+            case 'ruler':
                 controllers.ruler = value;
                 if (!value) {
                     pinsGroup.traverse(function (node) {
@@ -515,8 +578,8 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'createLabel':
-                if (value && typeof(value) == 'boolean') {
+            case 'createLabel':
+                if (value && typeof (value) == 'boolean') {
 
                     controllers.createLabel = value;
                 } else {
@@ -524,9 +587,10 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'wireframe':
+            case 'wireframe':
                 controllers.wireframe = value;
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
+                    options.wireframe = true;
                     sceneObjectsMesh.forEach(function (elem) {
                         elem.material.wireframe = true;
                         elem.material.transparent = true;
@@ -534,6 +598,7 @@ function viewer(model, options, labels) {
                         elem.material.opacity = 0.25;
                     });
                 } else {
+                    options.wireframe = false;
                     sceneObjectsMesh.forEach(function (elem) {
                         elem.material.wireframe = false;
                         elem.material.depthTest = true;
@@ -544,9 +609,9 @@ function viewer(model, options, labels) {
                 ;
 
                 break;
-            case'grid':
+            case 'grid':
                 controllers.grid = value;
-                if (value && typeof(value) == 'boolean') {
+                if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
                     gridHelper = new THREE.GridHelper(200, 10);
                     asixHelper = new THREE.AxisHelper(100);
@@ -561,8 +626,8 @@ function viewer(model, options, labels) {
                 }
                 ;
                 break;
-            case'lights':
-                if (typeof(value) == 'object') {
+            case 'lights':
+                if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
                     }
@@ -584,34 +649,35 @@ function viewer(model, options, labels) {
                     ;
 
                     controllers.currentLight = drivenLightsGroup;
-                } else if (typeof(value) == 'string') {
+                } else if (typeof (value) == 'string') {
 
                     if (scene.children.length > 0) {
                         scene.children.forEach(function (item) {
                             if (item == controllers.currentLight) {
-                                light = lights[value]();
                                 scene.remove(item);
-                                scene.add(light);
                             }
-                            ;
                         });
-                    } else if (scene.children.length == 0) {
-                        light = lights[value]();
-                        scene.add(light);
                     }
-                    ;
+
+                    light = lights[value]();
+                    scene.add(light);
                     controllers.currentLight = light;
+
+                    if (sceneObjectsMesh.length > 0) {
+                        sceneObjectsMesh[0].material.needsUpdate = true
+                    }
+
                 }
                 ;
                 break;
-            case'background':
+            case 'background':
                 if (value) {
                     renderer.setClearColor(value);
                 }
                 ;
                 break;
-            case'autoRotate':
-                if (value && typeof(value) == 'boolean') {
+            case 'autoRotate':
+                if (value && typeof (value) == 'boolean') {
 
                     control.autoRotate = value;
                     controllers.autorotate = value;
@@ -622,14 +688,14 @@ function viewer(model, options, labels) {
                 ;
                 break;
             case 'cameraFov':
-                if (value && typeof(value) == 'number') {
+                if (value && typeof (value) == 'number') {
                     camera.fov = value;
                     camera.updateProjectionMatrix();
                 }
                 ;
                 break;
             case 'focalLenght':
-                if (value && typeof(value) == 'number') {
+                if (value && typeof (value) == 'number') {
                     //console.log(camera);
                     camera.setLens(value);
                 }
@@ -638,11 +704,42 @@ function viewer(model, options, labels) {
             case 'bbox':
                 break;
             case 'label':
+
                 if (label.length !== 0) {
                     $.each(label, function (index, item) {
                         item.visible = !item.visible;
                     });
                 }
+
+                break;
+            case 'textureDisable':
+
+                if (sceneObjectsMesh.length > 0) {
+                    $.each(sceneObjectsMesh, function (i, item) {
+                        if (item.type === 'Mesh') {
+                            if (!controllers.originMaterial) {
+                                controllers.originMaterial = [];
+                            }
+                            if (controllers.originMaterial[i] === undefined) {
+                                controllers.originMaterial[i] = item.material;
+                            }
+
+                            if (value) {
+                                item.material = new THREE.MeshLambertMaterial({
+                                    color: 0xdddddd,
+                                    shading: THREE.SmoothShading
+                                });
+
+                            } else if (controllers.originMaterial[i] !== undefined) {
+                                item.material = controllers.originMaterial[i];
+                            }
+
+                        }
+                    });
+                }
+
+                switchEnv('wireframe', options.wireframe);
+
                 break;
         }
         ;
@@ -895,8 +992,10 @@ function viewer(model, options, labels) {
                     $.fancybox.open({
                         src: '<div class="message">' + intersects.object.description + '</div>',
                         type: 'html',
-                        smallBtn: false
+                        smallBtn: false,
+                        parentEl: '.' + $(viewerContainer).attr('class')
                     });
+
                 } catch (e) {
                 }
             } else if (controllers.createLabel) {

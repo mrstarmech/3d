@@ -39,4 +39,7 @@ script {
     background-color: rgba(0, 0, 0, 0.4);
     padding: 10px; }
 
+.nav .active {
+  background: #e1e1e1; }
+
 /*# sourceMappingURL=style.css.map */

@@ -1,22 +1,7 @@
 <?php
 
 use yii\helpers\Html;
-
-$this->registerJsFile('js/lib.tree.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/viewer.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/label.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-$this->registerCssFile('css/colorpicker.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/colorpicker.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-
-
-\dominus77\highlight\Plugin::register($this);
+use app\assets\View3dAsset;
 
 $dataLabels = [];
 $labels = $object->labels;
@@ -30,7 +15,7 @@ if (!empty($labels)) {
     }
 }
 
-$host = Yii::$app->params['host'];
+$host = Yii::$app->urlManager->createAbsoluteUrl(['/']);
 $labelsJson = json_encode($dataLabels);
 $script = <<< JS
 object = {
@@ -46,11 +31,15 @@ start();
 
 JS;
 
-$this->registerJs($script, yii\web\View::POS_READY);
-
 $this->title = $object->name;
 $this->params['breadcrumbs'][] = $this->title;
+
+View3dAsset::register($this);
+\dominus77\highlight\Plugin::register($this);
+$this->registerJs($script, yii\web\View::POS_READY);
 ?>
+
+
 <div class="col-xs-12 col-md-6 tree-object">
     <div class="container-object" data-state="static">
         <div class="canvas-object"></div>

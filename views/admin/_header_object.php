@@ -1,12 +1,13 @@
-<div class="row">
+<div class="clearfix">
     <?= yii\bootstrap\Nav::widget([
-        'options' => ['class' => 'navbar-nav'],
+        'options' => ['class' => 'nav navbar navbar-nav'],
         'items' => [
-            ['label' => 'Общие', 'url' => ['admin/edit-object-general', 'id' => $id]],
-            ['label' => 'Метки', 'url' => ['admin/edit-object-label', 'id' => $id]],
-            ['label' => 'Категории', 'url' => ['admin/edit-object-category', 'id' => $id]],
-            ['label' => 'Обработка', 'url' => ['admin/processing', 'id' => $id]],
-            ['label' => 'Скриншот', 'url' => ['admin/shot', 'id' => $id]],
+            ('<li style="padding: 15px 15px 0 0">' . $object->name . '</li>'),
+            ['label' => 'Общие', 'url' => ['admin/edit-object-general', 'id' => $object->id]],
+            ['label' => 'Метки', 'url' => ['admin/edit-object-label', 'id' => $object->id]],
+            ['label' => 'Категории', 'url' => ['admin/edit-object-category', 'id' => $object->id]],
+            ['label' => 'Обработка', 'url' => ['admin/processing', 'id' => $object->id]],
+            ['label' => 'Скриншот', 'url' => ['admin/shot', 'id' => $object->id]],
         ],
     ]) ?>
 </div>

@@ -8,8 +8,7 @@ use mihaildev\elfinder\ElFinder;
 use kdn\yii2\JsonEditor;
 use yii\helpers\Url;
 
-echo $this->render('_header');
-echo $this->render('_header_object', ['id' => $model->id]);
+echo $this->render('_header_object', ['object' => $model]);
 
 $this->title = 'Редактирование модели';
 $this->params['breadcrumbs'][] = $this->title;
