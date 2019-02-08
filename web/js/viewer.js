@@ -714,7 +714,6 @@ function viewer(model, options, labels) {
                 break;
             case 'textureDisable':
 
-                console.log(options);
                 if (sceneObjectsMesh.length > 0) {
                     $.each(sceneObjectsMesh, function (i, item) {
                         if (item.type === 'Mesh') {
@@ -731,19 +730,15 @@ function viewer(model, options, labels) {
                                     shading: THREE.SmoothShading
                                 });
 
-                                if (options.wireframe) {
-                                    item.material.wireframe = true;
-                                    item.material.transparent = true;
-                                    item.material.depthTest = false;
-                                    item.material.opacity = 0.25;
-                                }
-
                             } else if (controllers.originMaterial[i] !== undefined) {
                                 item.material = controllers.originMaterial[i];
                             }
+
                         }
                     });
                 }
+
+                switchEnv('wireframe', options.wireframe);
 
                 break;
         }
