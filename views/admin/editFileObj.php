@@ -8,6 +8,8 @@ echo $this->render('_header_object', ['object' => $object]);
 
 $this->title = 'Редактирование файла';
 $this->params['breadcrumbs'][] = $this->title;
+
+
 ?>
 <h1><?= Html::encode($this->title) ?>
     <small><?= $object->name ?> (OBJ)</small>
@@ -17,14 +19,13 @@ $this->params['breadcrumbs'][] = $this->title;
     'options' => ['enctype' => 'multipart/form-data'],
 ]); ?>
 
-<?= $form->field($object, 'contentObj')->widget(
-    CodemirrorWidget::className(),
-    [
-        'preset' => 'php',
-        'options' => ['rows' => 20],
-    ]
-);
-?>
+<?= CodemirrorWidget::widget([
+    'name' => 'data',
+    'value' => $data,
+    'preset' => 'php',
+    'options' => ['rows' => 20],
+]) ?>
+
 <div class="form-group">
     <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
 </div>
