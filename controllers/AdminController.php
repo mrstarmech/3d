@@ -568,7 +568,7 @@ class AdminController extends Controller
 
             if (pathinfo($nameFileTexture, PATHINFO_EXTENSION) == 'jpg') {
 
-                $command = "convert $nameFileTexture quality 80 $nameFileTexture";
+                $command = "convert $nameFileTexture -quality 80 $nameFileTexture";
                 exec($command, $output, $return);
 
                 if ($return != 0) {
@@ -589,7 +589,7 @@ class AdminController extends Controller
                 $nameFileTexture = $object->pathFileWR . '/' . $object->id . '.jpg';
             }
 
-            $command = "../../utils/cwebp $nameFileTexture -q 80 -o {$object->id}.webp";
+            $command = "../../utils/cwebp $nameFileTexture -q 80 -o {$object->pathFileWR}/{$object->id}.webp";
             exec($command, $output, $return);
 
             if ($return != 0) {
