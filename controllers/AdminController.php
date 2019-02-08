@@ -568,14 +568,14 @@ class AdminController extends Controller
 
             if (pathinfo($nameFileTexture, PATHINFO_EXTENSION) == 'jpg') {
 
-                $command = "convert $nameFileTexture -quality 80 $nameFileTexture";
-                exec($command, $output, $return);
-
-                if ($return != 0) {
-                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры из jpg в jpg: $command. " . print_r($output, 1));
-
-                    return $this->refresh();
-                }
+//                $command = "convert $nameFileTexture -quality 80 $nameFileTexture";
+//                exec($command, $output, $return);
+//
+//                if ($return != 0) {
+//                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры из jpg в jpg: $command. " . print_r($output, 1));
+//
+//                    return $this->refresh();
+//                }
             } else {
 
                 $command = "cjpeg -quality 80 -progressive -optimize $nameFileTexture >{$object->id}.jpg";
@@ -589,7 +589,7 @@ class AdminController extends Controller
                 $nameFileTexture = $object->pathFileWR . '/' . $object->id . '.jpg';
             }
 
-            $command = "../../utils/cwebp $nameFileTexture -q 80 -o {$object->pathFileWR}/{$object->id}.webp";
+            $command = "cwebp $nameFileTexture -q 80 -o {$object->pathFileWR}/{$object->id}.webp";
             exec($command, $output, $return);
 
             if ($return != 0) {
