@@ -542,9 +542,9 @@ class AdminController extends Controller
 
         if (Yii::$app->request->post('convertDraco') !== null) {
             $pathFileObj = $object->pathFileWR . '/' . $object->obj;
-            //$drcName = $object->id.'.drc';
-            $drcName = stristr($object->obj, '.', true) . '.drc';
-            $pathFileDrc = $object->pathFileWR . '/' . $drcName;
+            //$drcFilename = $object->id.'.drc';
+            $drcFilename = stristr($object->obj, '.', true) . '.drc';
+            $pathFileDrc = $object->pathFileWR . '/' . $drcFilename;
 
             $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
             exec($command, $output, $return);
@@ -552,7 +552,7 @@ class AdminController extends Controller
             if ($return != 0) {
                 Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
             } else {
-                $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
+                $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcFilename);
                 $object->save();
 
                 Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
@@ -564,41 +564,29 @@ class AdminController extends Controller
 
 
         if (Yii::$app->request->post('convertWebp') !== null) {
-            $nameFileTexture = $object->pathFileWR . '/' . $object->texture;
+            $texturePath = $object->pathFileWR . '/' . $object->texture;
+            $webpFilename = stristr($object->texture, '.', true) . '.webp';
+            $jpgFailename = stristr($object->texture, '.', true) . '.jpg';
 
-            if (pathinfo($nameFileTexture, PATHINFO_EXTENSION) == 'jpg') {
-
-//                $command = "convert $nameFileTexture -quality 80 $nameFileTexture";
-//                exec($command, $output, $return);
-//
-//                if ($return != 0) {
-//                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры из jpg в jpg: $command. " . print_r($output, 1));
-//
-//                    return $this->refresh();
-//                }
-            } else {
-
-                $command = "cjpeg -quality 80 -progressive -optimize $nameFileTexture >{$object->id}.jpg";
-                exec($command, $output, $return);
-
-                if ($return != 0) {
-                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpg: $command. " . print_r($output, 1));
-
-                    return $this->refresh();
-                }
-                $nameFileTexture = $object->pathFileWR . '/' . $object->id . '.jpg';
-            }
-
-            $command = "cwebp $nameFileTexture -q 80 -o {$object->pathFileWR}/{$object->id}.webp";
+            $command = "cwebp $texturePath -q 80 -o ".$object->pathFileWR."/".$webpFilename;
             exec($command, $output, $return);
 
             if ($return != 0) {
                 Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
             } else {
-                $object->setSetting('texture', str_replace($object->pathFileWR, $object->pathFile, $nameFileTexture));
+                $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename));
                 $object->save();
-
                 Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");
+
+                $command = "dwebp ".$object->pathFileWR."/".$webpFilename." -o ".$object->pathFileWR."/".$jpgFailename;
+                exec($command, $output, $return);
+                
+                if ($return != 0) {
+                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
+                } else {
+                    Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
+                }            
+
             }
 
             return $this->refresh();
