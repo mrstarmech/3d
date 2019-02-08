@@ -56,7 +56,11 @@ function menu() {
     topmenu.append('<button class="btn menu-object" data-menu="collapse"><i class="fas fa-cog"></i></button>');
     topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
 
-    submenu.append('<button class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+    if (object.option.wireframe) {
+        submenu.append('<button class="btn menu-object active" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+    } else {
+        submenu.append('<button class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+    }
 
     if (object.labels.length != 0) {
         submenu.append('<button class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
@@ -67,7 +71,6 @@ function menu() {
 
     if (object.option.autorotate) {
         submenu.append('<button class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
-        object.option.autorotate = true;
     } else {
         submenu.append('<button class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
     }
@@ -183,9 +186,9 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.autorotate);
             break;
         case 'wire-frame':
-            object.option.valuewireframe = !object.option.valuewireframe;
-            t.switchEnv('wireframe', object.option.valuewireframe);
-            buttonActive($(this), object.option.valuewireframe);
+            object.option.wireframe = !object.option.wireframe;
+            t.switchEnv('wireframe', object.option.wireframe);
+            buttonActive($(this), object.option.wireframe);
             break;
         case 'share':
             $('#share-object').modal();
@@ -227,11 +230,15 @@ function buttonActive(element, value) {
     }
 }
 
-$('.' + classNameContainer).on('dblclick', '.' + classNameCanvas, function () {
-    object.option.autorotate = !object.option.autorotate;
-    t.switchEnv('autoRotate', object.option.autorotate);
-    buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
-});
+$('.' + classNameContainer)
+    .on('dblclick', '.' + classNameCanvas, function () {
+        object.option.autorotate = !object.option.autorotate;
+        t.switchEnv('autoRotate', object.option.autorotate);
+        buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
+    })
+    .on('dblclick', '.menu-object', function () {
+        return false;
+    })
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
