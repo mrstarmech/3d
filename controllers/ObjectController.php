@@ -16,17 +16,48 @@ class ObjectController extends Controller
         return $this->render('index');
     }
 
-    public function actionView($id)
+    public function actionView($id, $categoryId = 0)
     {
-        $object = Object::find()
-            ->where(['or', ['id' => $id], ['sef' => $id]])
-            ->andWhere([ 'visible' => 1])
-            ->one();
-        if (empty($object)) {
-            throw new HttpException(405);
+        $query = Object::find()
+            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]])
+            ->andWhere([ 'visible' => 1]);
+
+        if ($categoryId) {
+            $query->joinWith('objectCategory')->andWhere(['category_id' => $categoryId]);
         }
+
+        $object = $query->one();
+
+        if (empty($object)) {
+            throw new HttpException(404);
+        }
+
+        $objectPrev = null;
+        $objectNext = null;
+        if ($categoryId) {
+            $objectPrev = Object::find()
+                ->where(['>', Object::tableName() . '.id', $object->id])
+                ->andWhere([ 'visible' => 1])
+                ->joinWith('objectCategory')
+                ->andWhere(['category_id' => $categoryId])
+                ->orderBy([Object::tableName() . '.id' => SORT_ASC])
+                ->limit(1)
+                ->one();
+            $objectNext = Object::find()
+                ->where(['<', Object::tableName() . '.id', $object->id])
+                ->andWhere([ 'visible' => 1])
+                ->joinWith('objectCategory')
+                ->andWhere(['category_id' => $categoryId])
+                ->orderBy([Object::tableName() . '.id' => SORT_DESC])
+                ->limit(1)
+                ->one();
+        }
+
         return $this->render('view', [
             'object' => $object,
+            'categoryId' => $categoryId,
+            'objectPrev' => $objectPrev,
+            'objectNext' => $objectNext,
         ]);
     }
 
