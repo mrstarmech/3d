@@ -230,11 +230,15 @@ function buttonActive(element, value) {
     }
 }
 
-$('.' + classNameContainer).on('dblclick', '.' + classNameCanvas, function () {
-    object.option.autorotate = !object.option.autorotate;
-    t.switchEnv('autoRotate', object.option.autorotate);
-    buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
-});
+$('.' + classNameContainer)
+    .on('dblclick', '.' + classNameCanvas, function () {
+        object.option.autorotate = !object.option.autorotate;
+        t.switchEnv('autoRotate', object.option.autorotate);
+        buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
+    })
+    .on('dblclick', '.menu-object', function () {
+        return false;
+    })
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
