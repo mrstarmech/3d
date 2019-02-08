@@ -17,14 +17,13 @@ $this->params['breadcrumbs'][] = $this->title;
     'options' => ['enctype' => 'multipart/form-data'],
 ]); ?>
 
-<?= $form->field($object, 'contentMtl')->widget(
-    CodemirrorWidget::className(),
-    [
-        'preset' => 'php',
-        'options' => ['rows' => 20],
-    ]
-);
-?>
+<?= CodemirrorWidget::widget([
+    'name' => 'data',
+    'value' => $object->contentMtl,
+    'preset' => 'php',
+    'options' => ['rows' => 20],
+]) ?>
+
 <div class="form-group">
     <?= Html::submitButton('Сохранить', ['class' => 'btn btn-primary']) ?>
 </div>

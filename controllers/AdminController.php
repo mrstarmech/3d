@@ -462,6 +462,16 @@ class AdminController extends Controller
             throw new HttpException(404);
         }
 
+
+        if ($data = Yii::$app->request->post('data')) {
+            if(file_put_contents($object->pathFileWR . '/' . $object->mtl, $data)){
+                Yii::$app->session->setFlash('success', 'Данные успешно внесены');
+                return $this->refresh();
+            } else {
+                Yii::$app->session->setFlash('error', 'Не удалось внести данные');
+            }
+        }
+
         return $this->render('editFileMtl', [
             'object' => $object,
         ]);
@@ -475,8 +485,34 @@ class AdminController extends Controller
             throw new HttpException(404);
         }
 
+        $size = filesize($object->pathFileWR . '/' . $object->obj);
+
+        $limit = 5000;
+
+        if ($data = Yii::$app->request->post('data')) {
+
+            if ($size > ($limit * 8)) {
+                $data =  $data . mb_substr($object->getContentObj(), $limit, mb_strlen($object->getContentObj()));
+            }
+
+            if(file_put_contents($object->pathFileWR . '/' . $object->obj, $data)){
+                Yii::$app->session->setFlash('success', 'Данные успешно внесены');
+                return $this->refresh();
+            } else {
+                Yii::$app->session->setFlash('error', 'Не удалось внести данные');
+            }
+        }
+
+        if ($size > ($limit * 8)) {
+            $data =  mb_substr($object->getContentObj(), 0, $limit);
+            Yii::$app->session->setFlash('info', "Размер файла большой и составляет " . number_format (($size / (1024 * 1024)), 2) . " МБ. Содержимое файла будет обрезано до $limit символов.");
+        } else {
+            $data =  $object->getContentObj();
+        }
+
         return $this->render('editFileObj', [
             'object' => $object,
+            'data' => $data,
         ]);
     }
 
