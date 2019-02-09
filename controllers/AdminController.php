@@ -610,7 +610,7 @@ class AdminController extends Controller
             if ($return != 0) {
                 Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
             } else {
-                $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename));
+                $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename);
                 $object->save();
                 Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");
 
