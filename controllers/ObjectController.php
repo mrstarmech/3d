@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\models\Object;
 use app\models\ObjectBanner;
 use app\models\ObjectLabel;
+use app\models\User;
 use Yii;
 use yii\web\Controller;
 use yii\web\HttpException;
@@ -19,8 +20,11 @@ class ObjectController extends Controller
     public function actionView($id, $categoryId = 0)
     {
         $query = Object::find()
-            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]])
-            ->andWhere([ 'visible' => 1]);
+            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]]);
+
+        if (!Yii::$app->user->can(User::ROLE_ADMINISTRATOR)) {
+            $query->andWhere([ 'visible' => 1]);
+        }
 
         if ($categoryId) {
             $query->joinWith('objectCategory')->andWhere(['category_id' => $categoryId]);
