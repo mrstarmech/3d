@@ -64,15 +64,57 @@ class AdminDefaultController extends Controller
 
         if ($return != 0) {
             Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
-
             return false;
         } else {
-            $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
+            $object->setSetting('mesh', "/" . $object->pathFile . "/" . $object->id . "/" . $drcName);
             $object->setOption('loader', 'dracoLoader');
             $object->save();
             Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
-
             return true;
+        }
+    }
+
+    /**
+     * convert Image to Webp
+     * Webp converter must be installed in the system
+     *
+     * @param $id
+     * @return bool
+     * @throws HttpException
+     */
+    protected function convertWebp($id)
+    {
+        $object = Object::findOne($id);
+
+        if (empty($object)) {
+            throw new HttpException(404);
+        }
+
+        $texturePath = $object->pathFileWR . '/' . $object->texture;
+        $webpFilename = stristr($object->texture, '.', true) . '.webp';
+        $jpgFailename = stristr($object->texture, '.', true) . '.jpg';
+
+        $command = "cwebp $texturePath -q 80 -o " . $object->pathFileWR . "/" . $webpFilename;
+        exec($command, $output, $return);
+
+        if ($return != 0) {
+            Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
+            return false;
+        } else {
+            $object->setSetting('texture', "/" . $object->pathFile . "/" . $object->id . "/" . $webpFilename);
+            $object->save();
+            Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");
+
+            $command = "dwebp " . $object->pathFileWR . "/" . $webpFilename . " -o " . $object->pathFileWR . "/" . $jpgFailename;
+            exec($command, $output, $return);
+
+            if ($return != 0) {
+                Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
+                return false;
+            } else {
+                Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
+                return true;
+            }
         }
     }
 }
