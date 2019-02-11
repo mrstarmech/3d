@@ -10,28 +10,11 @@ use app\models\ObjectOption;
 use app\models\ObjectSetting;
 use Yii;
 use yii\data\Pagination;
-use yii\filters\AccessControl;
-use yii\web\Controller;
 use yii\web\HttpException;
 use yii\web\UploadedFile;
 
-class AdminController extends Controller
+class AdminController extends AdminDefaultController
 {
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     public function actionIndex()
     {
         $query = Object::find();
@@ -88,27 +71,6 @@ class AdminController extends Controller
 //                die;
                 if ($object->save()) {
                     Yii::$app->session->setFlash('success', "Модель сохранена");
-
-                    
-//СДЕЛАТЬ ОТДЕЛЬНЫМ МЕТОДОМ ЕСЛИ Предполагается использовать в разных местах
-                        $pathFileObj = $object->pathFileWR . '/' . $object->obj;
-                        //$drcName = $object->id.'.drc';
-                        $drcName = stristr($object->obj, '.', true) . '.drc';
-                        $pathFileDrc = $object->pathFileWR . '/' . $drcName;
-
-                        $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
-                        exec($command, $output, $return);
-
-                        if ($return != 0) {
-                            Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
-                        } else {
-                            $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
-                            $object->save();
-                            Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
-                        }
-
-//////////////////////////
-
                     return $this->refresh();
                 }
             }
@@ -411,23 +373,7 @@ class AdminController extends Controller
         }
 
         if (Yii::$app->request->post('convertDraco') !== null) {
-            $pathFileObj = $object->pathFileWR . '/' . $object->obj;
-            //$drcFilename = $object->id.'.drc';
-            $drcFilename = stristr($object->obj, '.', true) . '.drc';
-            $pathFileDrc = $object->pathFileWR . '/' . $drcFilename;
-
-            $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
-            } else {
-                $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcFilename);
-                $object->save();
-
-                Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
-            }
-
+            self::convertDraco($id);
             return $this->refresh();
         }
 
