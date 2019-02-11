@@ -17,6 +17,7 @@ function viewer(model, options, labels) {
         controls: 'OrbitControls',
         camera: 'auto',
         cameraDistanceMultiplier: 2,
+        scale: 1,
         cameraCoords: {
             x: 100,
             y: 100,
@@ -274,6 +275,10 @@ function viewer(model, options, labels) {
                 ;
                 if (options.cameraFov) {
                     switchEnv('cameraFov', options.cameraFov);
+                }
+                ;
+                if (options.scale) {
+                    switchEnv('scale', options.scale);
                 }
                 ;
 
@@ -704,16 +709,13 @@ function viewer(model, options, labels) {
             case 'bbox':
                 break;
             case 'label':
-
                 if (label.length !== 0) {
                     $.each(label, function (index, item) {
                         item.visible = !item.visible;
                     });
                 }
-
                 break;
             case 'textureDisable':
-
                 if (sceneObjectsMesh.length > 0) {
                     $.each(sceneObjectsMesh, function (i, item) {
                         if (item.type === 'Mesh') {
@@ -737,9 +739,16 @@ function viewer(model, options, labels) {
                         }
                     });
                 }
-
                 switchEnv('wireframe', options.wireframe);
-
+                break;
+            case 'scale':
+                if (sceneObjectsMesh.length > 0 && value && typeof (value) == 'number') {
+                    $.each(sceneObjectsMesh, function (i, item) {
+                        if (item.type === 'Mesh') {
+                            item.scale.set(value, value, value);
+                        }
+                    });
+                }
                 break;
         }
         ;
