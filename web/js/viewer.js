@@ -614,8 +614,8 @@ function viewer(model, options, labels) {
                 if (value && typeof (value) == 'boolean') {
                     gridGroup = new THREE.Group();
                     gridHelper = new THREE.GridHelper(200, 10);
-                    asixHelper = new THREE.AxisHelper(100);
-                    gridHelper.setColors(0x0000ff, 0x808080);
+                    asixHelper = new THREE.AxesHelper(100);
+                    // gridHelper.setColors(0x0000ff, 0x808080);
                     gridHelper.position.y = -100;
                     gridGroup.add(gridHelper);
                     gridGroup.add(asixHelper);

@@ -79,6 +79,12 @@ function menu() {
     submenu.append('<button class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
 
+    if (object.option.grid) {
+        submenu.append('<button class="btn menu-object active" data-menu="grid"><i class="fas fa-th-large"></i></button>');
+    } else {
+        submenu.append('<button class="btn menu-object" data-menu="grid"><i class="fas fa-th-large"></i></button>');
+    }
+
     menu.append(submenu);
     menu.append(topmenu);
 
@@ -218,6 +224,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             object.option.textureDisable = !object.option.textureDisable;
             buttonActive($(this), object.option.textureDisable);
             t.switchEnv('textureDisable', object.option.textureDisable);
+            break;
+        case 'grid':
+            object.option.grid = !object.option.grid;
+            t.switchEnv('grid', object.option.grid);
+            buttonActive($(this), object.option.grid);
             break;
     }
 });
