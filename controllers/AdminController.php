@@ -353,22 +353,7 @@ class AdminController extends AdminDefaultController
         }
 
         if (Yii::$app->request->post('convertJs') !== null) {
-            $nameFileObj = $object->pathFileWR . '/' . $object->obj;
-            $utf8 = $object->pathFileWR . '/' . $object->id . '.utf8';
-            $utfjs = $object->pathFileWR . '/' . $object->id . '_utf.js';
-
-            $command = "objcompress $nameFileObj $utf8 >$utfjs";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации в JS: $command. " . print_r($output, 1));
-            } else {
-                $object->setSetting('mesh', str_replace($object->pathFileWR, $object->pathFile, $nameFileObj));
-                $object->save();
-
-                Yii::$app->session->setFlash('success', "Конвертации в JS успешно выполнена");
-            }
-
+            self::convertUtf8($id);
             return $this->refresh();
         }
 
@@ -376,8 +361,6 @@ class AdminController extends AdminDefaultController
             self::convertDraco($id);
             return $this->refresh();
         }
-
-
 
         if (Yii::$app->request->post('convertWebp') !== null) {
             self::convertWebp($id);
