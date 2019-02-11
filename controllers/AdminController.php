@@ -600,9 +600,23 @@ class AdminController extends Controller
 
 
         if (Yii::$app->request->post('convertWebp') !== null) {
-            $texturePath = $object->pathFileWR . '/' . $object->texture;
-            $webpFilename = stristr($object->texture, '.', true) . '.webp';
+
+        	$texture_extension = stristr($object->texture, '.');
+        	$webpFilename = stristr($object->texture, '.', true) . '.webp';
             $jpgFailename = stristr($object->texture, '.', true) . '.jpg';
+            $texturePath = $object->pathFileWR . '/' . $object->texture;
+            $jpgPath = $object->pathFileWR . '/' . $jpgFailename;
+
+            if ($texture_extension != "jpg") {
+            	$command = "convert $texturePath ".$jpgPath;
+                exec($command, $output, $return);                
+             	if ($return != 0) {
+                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
+                } else {
+                    	Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
+                } 
+            }
+
 
             $command = "cwebp $texturePath -q 80 -o ".$object->pathFileWR."/".$webpFilename;
             exec($command, $output, $return);
@@ -612,16 +626,7 @@ class AdminController extends Controller
             } else {
                 $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename);
                 $object->save();
-                Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");
-
-                $command = "dwebp ".$object->pathFileWR."/".$webpFilename." -o ".$object->pathFileWR."/".$jpgFailename;
-                exec($command, $output, $return);
-                
-                if ($return != 0) {
-                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
-                } else {
-                    Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
-                }            
+                Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");       
 
             }
 
