@@ -25,6 +25,7 @@ use yii\helpers\Url;
  * @property string sef
  * @property array labels
  * @property array labelsArray
+ * @property string pathFileWR
  *
  * @package app\models
  */
