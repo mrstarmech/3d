@@ -3,201 +3,18 @@
 namespace app\controllers;
 
 use app\models\Category;
-use app\models\CategoryLanguage;
+use app\models\Object;
 use app\models\ObjectCategory;
 use app\models\ObjectLabel;
-use app\models\ObjectLanguage;
 use app\models\ObjectOption;
 use app\models\ObjectSetting;
 use Yii;
-use yii\filters\AccessControl;
-use yii\helpers\FileHelper;
-use yii\helpers\Url;
-use yii\web\Controller;
-use app\models\Object;
-use yii\web\UploadedFile;
-use yii\web\HttpException;
 use yii\data\Pagination;
+use yii\web\HttpException;
+use yii\web\UploadedFile;
 
-class AdminController extends Controller
+class AdminController extends AdminDefaultController
 {
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'roles' => ['admin'],
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    public function actionTest()
-    {
-
-        $objects = Object::find()->all();
-
-        foreach ($objects as $object) {
-
-//            $object->setting = str_replace("'", '"', $object->setting);
-//            $object->setting = str_replace("name:", '"name":', $object->setting);
-//            $object->setting = str_replace("texture:", '"texture":', $object->setting);
-//            $object->setting = str_replace("mesh:", '"mesh":', $object->setting);
-//            $object->setting = str_replace("ambient:", '"ambient":', $object->setting);
-//            $object->setting = str_replace("color:", '"color":', $object->setting);
-//            $object->setting = str_replace("specular:", '"specular":', $object->setting);
-//            $object->setting = str_replace("shininess:", '"shininess":', $object->setting);
-//            $object->setting = str_replace("mtl:", '"mtl":', $object->setting);
-//
-//            $object->option = preg_replace("/\t/", '', $object->option);
-//            $object->option = preg_replace("/;$/", '', $object->option);
-//            $object->option = str_replace('  ', '', $object->option);
-//            $object->option = str_replace("'", '"', $object->option);
-//            $object->option = str_replace("grid:", '"grid":', $object->option);
-//            $object->option = str_replace("ruler:", '"ruler":', $object->option);
-//            $object->option = str_replace("wireframe:", '"wireframe":', $object->option);
-//            $object->option = str_replace("autorotate:", '"autorotate":', $object->option);
-//            $object->option = str_replace("showgui:", '"showgui":', $object->option);
-//            $object->option = str_replace("lights:", '"lights":', $object->option);
-//            $object->option = str_replace("loader:", '"loader":', $object->option);
-//            $object->option = str_replace("controls:", '"controls":', $object->option);
-//            $object->option = str_replace("camera:", '"camera":', $object->option);
-//            $object->option = str_replace("cameraDistanceMultiplier:", '"cameraDistanceMultiplier":', $object->option);
-//            $object->option = str_replace("cameraCoords:", '"cameraCoords":', $object->option);
-//            $object->option = str_replace("x:", '"x":', $object->option);
-//            $object->option = str_replace("y:", '"y":', $object->option);
-//            $object->option = str_replace("z:", '"z":', $object->option);
-//            $object->option = str_replace("backgroundColor:", '"backgroundColor":', $object->option);
-//
-//            $object->option = str_replace("grid :", '"grid":', $object->option);
-//            $object->option = str_replace("ruler :", '"ruler":', $object->option);
-//            $object->option = str_replace("wireframe :", '"wireframe":', $object->option);
-//            $object->option = str_replace("autorotate :", '"autorotate":', $object->option);
-//            $object->option = str_replace("showgui :", '"showgui":', $object->option);
-//            $object->option = str_replace("lights :", '"lights":', $object->option);
-//            $object->option = str_replace("loader :", '"loader":', $object->option);
-//            $object->option = str_replace("controls :", '"controls":', $object->option);
-//            $object->option = str_replace("camera :", '"camera":', $object->option);
-//            $object->option = str_replace("cameraDistanceMultiplier :", '"cameraDistanceMultiplier":', $object->option);
-//            $object->option = str_replace("cameraCoords :", '"cameraCoords":', $object->option);
-//            $object->option = str_replace("x :", '"x":', $object->option);
-//            $object->option = str_replace("y :", '"y":', $object->option);
-//            $object->option = str_replace("z :", '"z":', $object->option);
-//            $object->option = str_replace("aturotateDisableByClick :", '"aturotateDisableByClick":', $object->option);
-//
-//
-//            if (!json_decode($object->option) or !json_decode($object->setting)) {
-//                var_dump($object->id);
-//                var_dump($object->option);
-//                var_dump($object->setting);
-//                die;
-//            } else {
-//                $object->option = json_encode(json_decode($object->option));
-//                $object->setting = json_encode(json_decode($object->setting));
-//                $object->save();
-//            }
-
-//            if (!$object->image) {
-//
-//                $path_ = $_SERVER['DOCUMENT_ROOT'] . '/web/uploads/' . $object->id;
-//                $path_img = $_SERVER['DOCUMENT_ROOT'] . '/web/preview/' . $object->id . '/' . $object->id . '.png';
-//
-//                if (!file_exists($path_img)) {
-//                    var_dump($path_img);
-//                    continue;
-//                }
-//
-//                if (!file_exists($path_)) {
-//                    mkdir($path_, 0777, true);
-//                }
-////
-//                $newName = strtotime('now');
-//                $object->image = $newName . '.png';
-//
-//                if(!copy($path_img, $path_ . '/' . $object->image)) {
-//                    echo "error copy";
-//                    die;
-//                } else {
-//                    $object->save();
-//                }
-//            }
-
-//            $object->setting = str_replace('\/models\/', '\/objects\/', $object->setting);
-//            $object->save();
-        }
-        die;
-    }
-
-    public function actionTest2()
-    {
-        $categories = Category::find()->all();
-
-        $languages = Yii::$app->urlManager->languages;
-
-        foreach ($categories as $category) {
-            if (empty($category->lang)) {
-                foreach ($languages as $language) {
-                    $lang = new CategoryLanguage();
-                    $lang->category_id = $category->id;
-                    $lang->locale = $language;
-                    $lang->name = $category->name;
-                    $lang->description = $category->description;
-
-                    if ($lang->validate()) {
-                        $lang->save();
-                    } else {
-                        var_dump($lang->errors);
-                        die;
-                    }
-                }
-            }
-        }
-        die;
-    }
-
-    public function actionTest3()
-    {
-        $objects = Object::find()->all();
-
-        $languages = Yii::$app->urlManager->languages;
-
-        foreach ($objects as $object) {
-            foreach ($languages as $language) {
-                $lang = new ObjectLanguage();
-                $lang->object_id = $object->id;
-                $lang->locale = $language;
-                $lang->name = $object->name;
-                $lang->description = $object->description;
-
-                if ($lang->validate()) {
-                    $lang->save();
-                } else {
-                    var_dump($lang->errors);
-                    die;
-                }
-            }
-        }
-        die;
-    }
-
-    public function actionTest4()
-    {
-        $objects = Object::find()->all();
-
-        foreach ($objects as $object) {
-            if (is_numeric($object->sef)) {
-                var_dump($object->sef);
-                $object->sef = null;
-                $object->save();
-            }
-        }
-        die;
-    }
-
     public function actionIndex()
     {
         $query = Object::find();
@@ -254,27 +71,6 @@ class AdminController extends Controller
 //                die;
                 if ($object->save()) {
                     Yii::$app->session->setFlash('success', "Модель сохранена");
-
-                    
-//СДЕЛАТЬ ОТДЕЛЬНЫМ МЕТОДОМ ЕСЛИ Предполагается использовать в разных местах
-                        $pathFileObj = $object->pathFileWR . '/' . $object->obj;
-                        //$drcName = $object->id.'.drc';
-                        $drcName = stristr($object->obj, '.', true) . '.drc';
-                        $pathFileDrc = $object->pathFileWR . '/' . $drcName;
-
-                        $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
-                        exec($command, $output, $return);
-
-                        if ($return != 0) {
-                            Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
-                        } else {
-                            $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcName);
-                            $object->save();
-                            Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
-                        }
-
-//////////////////////////
-
                     return $this->refresh();
                 }
             }
@@ -538,98 +334,22 @@ class AdminController extends Controller
         }
 
         if (Yii::$app->request->post('center') !== null) {
-            $nameFileObj = $object->pathFileWR . '/' . $object->obj;
-            $nameFileObj_ = $object->pathFileWR . '/temp.obj';
-            rename($nameFileObj, $nameFileObj_);
-
-            $command = "objnormalize $nameFileObj_ $nameFileObj";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Не удалось центрировать OBJ: $command. " . print_r($output, 1));
-                rename($nameFileObj_, $nameFileObj);
-            } else {
-                Yii::$app->session->setFlash('success', "OBJ оцентрована");
-                unlink($nameFileObj_);
-            }
-
+            self::centeringObj($id);
             return $this->refresh();
         }
 
         if (Yii::$app->request->post('convertJs') !== null) {
-            $nameFileObj = $object->pathFileWR . '/' . $object->obj;
-            $utf8 = $object->pathFileWR . '/' . $object->id . '.utf8';
-            $utfjs = $object->pathFileWR . '/' . $object->id . '_utf.js';
-
-            $command = "objcompress $nameFileObj $utf8 >$utfjs";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации в JS: $command. " . print_r($output, 1));
-            } else {
-                $object->setSetting('mesh', str_replace($object->pathFileWR, $object->pathFile, $nameFileObj));
-                $object->save();
-
-                Yii::$app->session->setFlash('success', "Конвертации в JS успешно выполнена");
-            }
-
+            self::convertUtf8($id);
             return $this->refresh();
         }
 
         if (Yii::$app->request->post('convertDraco') !== null) {
-            $pathFileObj = $object->pathFileWR . '/' . $object->obj;
-            //$drcFilename = $object->id.'.drc';
-            $drcFilename = stristr($object->obj, '.', true) . '.drc';
-            $pathFileDrc = $object->pathFileWR . '/' . $drcFilename;
-
-            $command = "draco_encoder -i $pathFileObj -o $pathFileDrc";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации в DRACO: $command. " . print_r($output, 1));
-            } else {
-                $object->setSetting('mesh', "/".$object->pathFile."/".$object->id."/".$drcFilename);
-                $object->save();
-
-                Yii::$app->session->setFlash('success', "Конвертация в DRACO успешно выполнена");
-            }
-
+            self::convertDraco($id);
             return $this->refresh();
         }
 
-
-
         if (Yii::$app->request->post('convertWebp') !== null) {
-
-        	$texture_extension = stristr($object->texture, '.');
-        	$webpFilename = stristr($object->texture, '.', true) . '.webp';
-            $jpgFailename = stristr($object->texture, '.', true) . '.jpg';
-            $texturePath = $object->pathFileWR . '/' . $object->texture;
-            $jpgPath = $object->pathFileWR . '/' . $jpgFailename;
-
-            if ($texture_extension != "jpg") {
-            	$command = "convert $texturePath ".$jpgPath;
-                exec($command, $output, $return);                
-             	if ($return != 0) {
-                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
-                } else {
-                    	Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
-                } 
-            }
-
-
-            $command = "cwebp $texturePath -q 80 -o ".$object->pathFileWR."/".$webpFilename;
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
-            } else {
-                $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename);
-                $object->save();
-                Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");       
-
-            }
-
+            self::convertWebp($id);
             return $this->refresh();
         }
 
