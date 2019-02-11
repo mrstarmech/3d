@@ -152,4 +152,35 @@ class AdminDefaultController extends Controller
             return true;
         }
     }
+
+    /**
+     * model centering
+     * format OBJ
+     *
+     * @param $id
+     * @throws HttpException
+     */
+    protected function centeringObj($id)
+    {
+        $object = Object::findOne($id);
+
+        if (empty($object)) {
+            throw new HttpException(404);
+        }
+
+        $nameFileObj = $object->pathFileWR . '/' . $object->obj;
+        $nameFileObj_ = $object->pathFileWR . '/temp.obj';
+        rename($nameFileObj, $nameFileObj_);
+
+        $command = "objnormalize $nameFileObj_ $nameFileObj";
+        exec($command, $output, $return);
+
+        if ($return != 0) {
+            Yii::$app->session->setFlash('error', "Не удалось центрировать OBJ: $command. " . print_r($output, 1));
+            rename($nameFileObj_, $nameFileObj);
+        } else {
+            Yii::$app->session->setFlash('success', "OBJ оцентрована");
+            unlink($nameFileObj_);
+        }
+    }
 }

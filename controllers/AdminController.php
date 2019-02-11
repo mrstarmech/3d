@@ -334,21 +334,7 @@ class AdminController extends AdminDefaultController
         }
 
         if (Yii::$app->request->post('center') !== null) {
-            $nameFileObj = $object->pathFileWR . '/' . $object->obj;
-            $nameFileObj_ = $object->pathFileWR . '/temp.obj';
-            rename($nameFileObj, $nameFileObj_);
-
-            $command = "objnormalize $nameFileObj_ $nameFileObj";
-            exec($command, $output, $return);
-
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Не удалось центрировать OBJ: $command. " . print_r($output, 1));
-                rename($nameFileObj_, $nameFileObj);
-            } else {
-                Yii::$app->session->setFlash('success', "OBJ оцентрована");
-                unlink($nameFileObj_);
-            }
-
+            self::centeringObj($id);
             return $this->refresh();
         }
 
