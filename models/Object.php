@@ -149,11 +149,13 @@ class Object extends ActiveRecord
     {
         if ($this->validate()) {
 
-            if (empty($this->option) or empty((array)$this->optionArray)) {
+            $testArr = (array)$this->optionArray;
+            if (empty($this->option) or empty($testArr)) {
                 $this->option = json_encode($this->defaultOption);
             }
 
-            if (empty($this->setting) or empty((array)$this->settingArray)) {
+            $testArr = (array)$this->settingArray;
+            if (empty($this->setting) or empty($testArr)) {
                 $this->setting = json_encode($this->defaultSetting);
                 $this->setSetting('name', $this->name);
             }
