@@ -742,7 +742,7 @@ function viewer(model, options, labels) {
                 switchEnv('wireframe', options.wireframe);
                 break;
             case 'scale':
-                if (sceneObjectsMesh.length > 0 && value && typeof (value) == 'number') {
+                if (sceneObjectsMesh.length > 0 && value && value * 1 === value) {
                     $.each(sceneObjectsMesh, function (i, item) {
                         if (item.type === 'Mesh') {
                             item.scale.set(value, value, value);
