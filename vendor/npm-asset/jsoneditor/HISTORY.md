@@ -3,6 +3,73 @@
 https://github.com/josdejong/jsoneditor
 
 
+## 2019-01-23, version 5.28.2
+
+- Fix #639: Occurrence of non-ES5 `const` declaration in published code.
+  Regression introduced in `v5.28.0`.
+
+
+## 2019-01-22, version 5.28.1
+
+- Fix #637: Vertical white border left/right from the main menu in some
+  specific circumstances.
+- Fix #638: Cannot expand after collapse. Regression introduced in v5.28.0.
+
+
+## 2019-01-21, version 5.28.0
+
+- Implemented new option `maxVisibleChilds` to customize the maximum number
+  childs that is rendered by default. Thanks @20goto10.
+- Implemented new option `onClassName`, allowing customized and dynamic
+  styling of nodes. See 20_custom_css_style_for_nodes.html for a demo.
+  Thanks @maestr0.
+- Make the method `refresh()` public.
+
+
+## 2019-01-16, version 5.27.1
+
+- Improved navigating deeply nested paths via the navigation bar, see #619.
+  Thanks @meirotstein.
+- Sdd title from schema description to show the tips for user input.
+  Thanks @tylerchen.
+- Fix JSON Schema not resolving refs `$ref`, and not creating enum dropdowns.
+  Thanks @tylerchen.
+
+
+## 2019-01-05, version 5.27.0
+
+- Implemented customizing object and array names via a new option
+  `onNodeName`. Thanks @bnanchen.
+- Visibility of schema validation errors at the bottom of mode code and text
+  are now toggleable. Thanks @meirotstein.
+- Fixed text of the mode switcher not being translated. Thanks @antfu.
+
+
+## 2018-12-06, version 5.26.3
+
+- Fixed #610: JSON Repair now removes trailing commas.
+- Upgraded devDependency `gulp` to v4. Thanks @maestr0.
+
+
+## 2018-11-13, version 5.26.2
+
+- Fixed dragging and selecting multiple nodes not working
+  (regression introduced in `v5.26.1`).
+
+
+## 2018-11-13, version 5.26.1
+
+- Fixed `.update()` throwing an exception when replacing a JSON object
+  with `null`. Thanks @DullReferenceException.
+- Fixed #598: Search field can't be focused in object view.
+
+
+## 2018-11-12, version 5.26.0
+
+- Implemented option `mainMenuBar` to enable/disable the main menu bar.
+  Thanks @tanmayrajani.
+
+
 ## 2018-10-29, version 5.25.0
 
 - Implemented options `enableSort` and `enableTransform` so you can turn off

@@ -1,8 +1,8 @@
 /*!
- * @sphinxxxx/color-conversion v2.1.1
+ * @sphinxxxx/color-conversion v2.2.1
  * https://github.com/Sphinxxxx/color-conversion
  *
- * Copyright 2017-2018 Joudee (https://github.com/Joudee), Andreas Borgen (https://github.com/Sphinxxxx), Michael Jackson (https://github.com/mjackson)
+ * Copyright 2017-2019 Joudee (https://github.com/Joudee), Andreas Borgen (https://github.com/Sphinxxxx), Michael Jackson (https://github.com/mjackson)
  * Released under the ISC license.
  */
 (function (global, factory) {
@@ -82,8 +82,14 @@ String.prototype.padStart = String.prototype.padStart || function (len, pad) {
 	}return str;
 };
 
-var colorNames = '735AACA770//Xub218Pj/mo5+uvX6mdAP//gtpf//Ur258P//q1d9fXcxop/+TEq9zAAAAqfg/+vN6m1AAD/ngoiiviqt6pSoqzyo3riHxvdX56grk1f/8Aax10mkeqts/39QxbtZJXttkb//jcyxm3BQ86rmAP//wl5AACLwqqAIuL3y8uIYLwv1qampniqAGQAns5vbdrmohiwCLw5uVWsvsdd/4wAsegmTLMqagiwAAsqi6ZZ6uz6j7yPxtzSD2Lxk3L09PudbAM7RwsolADT0kz/xSTfuhAL//vfhaWlpyuxHpD/43rsiIiwn9//rw39uIosi9bp/wD/6w73Nzc9s5+Pj/6v8/9cA3b42qUg6vxgICArmaAIAAtdfrf8vf9n8P/wek3/2m0xnczVxc3bvSwCCsdt///wrvp8OaMs5i5ub6iyk//D1e8ifPwAoui//rNpyxrdjmw9c8ICAq4i4P//mx9+vrSq8t09PTx1ukO6Qqlv/7bBuuy/6B690uILKqpfdh876sd9d4iZnehsMTe0dv///g71lAP8A4nmMs0ys9u+vDmg9d/wD/4pmgAAAcurZs2qzllAADN4lkulXT6txk3Db66qPLNxozre2juokuAPqalj3SNHMgdkxxWF60pGRlwxfl9f/6hr5/+Thx6q/+S1m85/96tutd/fXmszxgIAAe4ma44j8rl/6UAmu0/0UA8so2nDWji87uiqumqmPuY9xbr+7u4rs23CTsb8/+/V95a/9q577xzYU/78z/8DL7b53aDdsu1sODmb11gACAy5nZjOZ1so/wAAlvevI+Pn09QWnhm7ui0UT94q+oBy7ei9KRg5aqLotXad5oFItasmwMDAaihh87r9fdalrN9p9cICQ7gz//r6k5uAP9/4qhRoK01te0rSM7cwAICA91x2L/Yclr/2NHcw1QODQd6w7oLuua09d6zudh////t359fX1enn//8Ao0ims0y';
-var colorNamesDeser = void 0;
+var colorNames = { aliceblue: '#f0f8ff', antiquewhite: '#faebd7', aqua: '#00ffff', aquamarine: '#7fffd4', azure: '#f0ffff', beige: '#f5f5dc', bisque: '#ffe4c4', black: '#000000', blanchedalmond: '#ffebcd', blue: '#0000ff', blueviolet: '#8a2be2', brown: '#a52a2a', burlywood: '#deb887', cadetblue: '#5f9ea0', chartreuse: '#7fff00', chocolate: '#d2691e', coral: '#ff7f50', cornflowerblue: '#6495ed', cornsilk: '#fff8dc', crimson: '#dc143c', cyan: '#00ffff', darkblue: '#00008b', darkcyan: '#008b8b', darkgoldenrod: '#b8860b', darkgray: '#a9a9a9', darkgreen: '#006400', darkgrey: '#a9a9a9', darkkhaki: '#bdb76b', darkmagenta: '#8b008b', darkolivegreen: '#556b2f', darkorange: '#ff8c00', darkorchid: '#9932cc', darkred: '#8b0000', darksalmon: '#e9967a', darkseagreen: '#8fbc8f', darkslateblue: '#483d8b', darkslategray: '#2f4f4f', darkslategrey: '#2f4f4f', darkturquoise: '#00ced1', darkviolet: '#9400d3', deeppink: '#ff1493', deepskyblue: '#00bfff', dimgray: '#696969', dimgrey: '#696969', dodgerblue: '#1e90ff', firebrick: '#b22222', floralwhite: '#fffaf0', forestgreen: '#228b22', fuchsia: '#ff00ff', gainsboro: '#dcdcdc', ghostwhite: '#f8f8ff', gold: '#ffd700', goldenrod: '#daa520', gray: '#808080', green: '#008000', greenyellow: '#adff2f', grey: '#808080', honeydew: '#f0fff0', hotpink: '#ff69b4', indianred: '#cd5c5c', indigo: '#4b0082', ivory: '#fffff0', khaki: '#f0e68c', lavender: '#e6e6fa', lavenderblush: '#fff0f5', lawngreen: '#7cfc00', lemonchiffon: '#fffacd', lightblue: '#add8e6', lightcoral: '#f08080', lightcyan: '#e0ffff', lightgoldenrodyellow: '#fafad2', lightgray: '#d3d3d3', lightgreen: '#90ee90', lightgrey: '#d3d3d3', lightpink: '#ffb6c1', lightsalmon: '#ffa07a', lightseagreen: '#20b2aa', lightskyblue: '#87cefa', lightslategray: '#778899', lightslategrey: '#778899', lightsteelblue: '#b0c4de', lightyellow: '#ffffe0', lime: '#00ff00', limegreen: '#32cd32', linen: '#faf0e6', magenta: '#ff00ff', maroon: '#800000', mediumaquamarine: '#66cdaa', mediumblue: '#0000cd', mediumorchid: '#ba55d3', mediumpurple: '#9370db', mediumseagreen: '#3cb371', mediumslateblue: '#7b68ee', mediumspringgreen: '#00fa9a', mediumturquoise: '#48d1cc', mediumvioletred: '#c71585', midnightblue: '#191970', mintcream: '#f5fffa', mistyrose: '#ffe4e1', moccasin: '#ffe4b5', navajowhite: '#ffdead', navy: '#000080', oldlace: '#fdf5e6', olive: '#808000', olivedrab: '#6b8e23', orange: '#ffa500', orangered: '#ff4500', orchid: '#da70d6', palegoldenrod: '#eee8aa', palegreen: '#98fb98', paleturquoise: '#afeeee', palevioletred: '#db7093', papayawhip: '#ffefd5', peachpuff: '#ffdab9', peru: '#cd853f', pink: '#ffc0cb', plum: '#dda0dd', powderblue: '#b0e0e6', purple: '#800080', rebeccapurple: '#663399', red: '#ff0000', rosybrown: '#bc8f8f', royalblue: '#4169e1', saddlebrown: '#8b4513', salmon: '#fa8072', sandybrown: '#f4a460', seagreen: '#2e8b57', seashell: '#fff5ee', sienna: '#a0522d', silver: '#c0c0c0', skyblue: '#87ceeb', slateblue: '#6a5acd', slategray: '#708090', slategrey: '#708090', snow: '#fffafa', springgreen: '#00ff7f', steelblue: '#4682b4', tan: '#d2b48c', teal: '#008080', thistle: '#d8bfd8', tomato: '#ff6347', turquoise: '#40e0d0', violet: '#ee82ee', wheat: '#f5deb3', white: '#ffffff', whitesmoke: '#f5f5f5', yellow: '#ffff00', yellowgreen: '#9acd32' };
+
+function printNum(num) {
+	var decs = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+
+	var str = decs > 0 ? num.toFixed(decs).replace(/0+$/, '').replace(/\.$/, '') : num.toString();
+	return str || '0';
+}
 
 var Color = function () {
 	function Color(r, g, b, a) {
@@ -143,7 +149,7 @@ var Color = function () {
 			}
 
 			else if (b === undefined) {
-					var color = r && ('' + r).trim();
+					var color = r && '' + r;
 					if (color) {
 						parseString(color.toLowerCase());
 					}
@@ -154,6 +160,39 @@ var Color = function () {
 
 
 	createClass(Color, [{
+		key: 'printRGB',
+		value: function printRGB(alpha) {
+			var rgb = alpha ? this.rgba : this.rgba.slice(0, 3),
+			    vals = rgb.map(function (x, i) {
+				return printNum(x, i === 3 ? 3 : 0);
+			});
+
+			return alpha ? 'rgba(' + vals + ')' : 'rgb(' + vals + ')';
+		}
+	}, {
+		key: 'printHSL',
+		value: function printHSL(alpha) {
+			var mults = [360, 100, 100, 1],
+			    suff = ['', '%', '%', ''];
+
+			var hsl = alpha ? this.hsla : this.hsla.slice(0, 3),
+
+			vals = hsl.map(function (x, i) {
+				return printNum(x * mults[i], i === 3 ? 3 : 1) + suff[i];
+			});
+
+			return alpha ? 'hsla(' + vals + ')' : 'hsl(' + vals + ')';
+		}
+	}, {
+		key: 'printHex',
+		value: function printHex(alpha) {
+			var hex = this.hex;
+			return alpha ? hex : hex.substring(0, 7);
+		}
+
+
+
+	}, {
 		key: 'rgba',
 		get: function get$$1() {
 			if (this._rgba) {
@@ -173,18 +212,18 @@ var Color = function () {
 			this._rgba = rgb;
 			this._hsla = null;
 		}
-
-
 	}, {
 		key: 'rgbString',
 		get: function get$$1() {
-			return 'rgb(' + this.rgba.slice(0, 3) + ')';
+			return this.printRGB();
 		}
 	}, {
 		key: 'rgbaString',
 		get: function get$$1() {
-			return 'rgba(' + this.rgba + ')';
+			return this.printRGB(true);
 		}
+
+
 	}, {
 		key: 'hsla',
 		get: function get$$1() {
@@ -205,20 +244,18 @@ var Color = function () {
 			this._hsla = hsl;
 			this._rgba = null;
 		}
-
-
 	}, {
 		key: 'hslString',
 		get: function get$$1() {
-			var c = this.hsla;
-			return 'hsl(' + c[0] * 360 + ',' + c[1] * 100 + '%,' + c[2] * 100 + '%)';
+			return this.printHSL();
 		}
 	}, {
 		key: 'hslaString',
 		get: function get$$1() {
-			var c = this.hsla;
-			return 'hsla(' + c[0] * 360 + ',' + c[1] * 100 + '%,' + c[2] * 100 + '%,' + c[3] + ')';
+			return this.printHSL(true);
 		}
+
+
 	}, {
 		key: 'hex',
 		get: function get$$1() {
@@ -234,9 +271,6 @@ var Color = function () {
 		set: function set$$1(hex) {
 			this.rgba = Color.hexToRgb(hex);
 		}
-
-
-
 	}], [{
 		key: 'hexToRgb',
 		value: function hexToRgb(input) {
@@ -261,20 +295,10 @@ var Color = function () {
 	}, {
 		key: 'nameToRgb',
 		value: function nameToRgb(input) {
-
-			if (!colorNamesDeser) {
-				colorNamesDeser = {};
-				colorNames.match(/.{7}/g).forEach(function (x) {
-					return colorNamesDeser[x.slice(0, 3)] = atob(x.slice(-4)).split('').map(function (b) {
-						return b.charCodeAt(0);
-					});
-				});
+			var hex = colorNames[input];
+			if (hex) {
+				return Color.hexToRgb(hex);
 			}
-			var hash = [].reduce.call(input.replace('ey', 'ay'), function (h, c) {
-				return (h << 2) + c.charCodeAt(0);
-			}, 0).toString(36).slice(-3);
-
-			return colorNamesDeser[hash];
 		}
 
 
