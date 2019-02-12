@@ -12,24 +12,6 @@ return array (
       '@yii/swiftmailer' => $vendorDir . '/yiisoft/yii2-swiftmailer',
     ),
   ),
-  'yiisoft/yii2-bootstrap' => 
-  array (
-    'name' => 'yiisoft/yii2-bootstrap',
-    'version' => '2.0.8.0',
-    'alias' => 
-    array (
-      '@yii/bootstrap' => $vendorDir . '/yiisoft/yii2-bootstrap/src',
-    ),
-  ),
-  'yiisoft/yii2-gii' => 
-  array (
-    'name' => 'yiisoft/yii2-gii',
-    'version' => '2.0.7.0',
-    'alias' => 
-    array (
-      '@yii/gii' => $vendorDir . '/yiisoft/yii2-gii/src',
-    ),
-  ),
   'yiisoft/yii2-faker' => 
   array (
     'name' => 'yiisoft/yii2-faker',
@@ -55,15 +37,6 @@ return array (
     'alias' => 
     array (
       '@yii/jui' => $vendorDir . '/yiisoft/yii2-jui',
-    ),
-  ),
-  'newerton/yii2-fancybox-3' => 
-  array (
-    'name' => 'newerton/yii2-fancybox-3',
-    'version' => '9999999-dev',
-    'alias' => 
-    array (
-      '@newerton/fancybox3' => $vendorDir . '/newerton/yii2-fancybox-3',
     ),
   ),
   'kdn/yii2-json-editor' => 
@@ -154,6 +127,24 @@ return array (
     'alias' => 
     array (
       '@dominus77/highlight' => $vendorDir . '/dominus77/yii2-highlight-plugin',
+    ),
+  ),
+  'yiisoft/yii2-bootstrap' => 
+  array (
+    'name' => 'yiisoft/yii2-bootstrap',
+    'version' => '2.0.9.0',
+    'alias' => 
+    array (
+      '@yii/bootstrap' => $vendorDir . '/yiisoft/yii2-bootstrap/src',
+    ),
+  ),
+  'yiisoft/yii2-gii' => 
+  array (
+    'name' => 'yiisoft/yii2-gii',
+    'version' => '2.0.8.0',
+    'alias' => 
+    array (
+      '@yii/gii' => $vendorDir . '/yiisoft/yii2-gii/src',
     ),
   ),
 );
