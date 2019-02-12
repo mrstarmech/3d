@@ -53,7 +53,7 @@ function menu() {
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>'),
         submenu = $('<div class="btn-group btn-group-sm submenu" role="group"></div>');
 
-    topmenu.append('<button class="btn menu-object" data-menu="collapse"><i class="fas fa-cog"></i></button>');
+    topmenu.append('<button class="btn menu-object" data-menu="submenu"><i class="fas fa-cog"></i></button>');
     topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
 
     if (object.option.wireframe) {
@@ -84,6 +84,10 @@ function menu() {
     } else {
         submenu.append('<button class="btn menu-object" data-menu="grid"><i class="fas fa-th-large"></i></button>');
     }
+
+    var inputZoom = '<input type=\'range\' class=\'zoom-value\' step=\'0.1\' min=\'1\' max=\'20\' value=\'1\'>';
+    submenu.append('<button class="btn menu-object" data-menu="zoom" data-html="true" data-container=".submenu" data-toggle="popover" data-placement="top" data-content="' + inputZoom + '"><i class="fas fa-search-plus"></i></button>');
+
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -182,7 +186,7 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 ;
             }
             break;
-        case 'collapse':
+        case 'submenu':
             $('.' + classNameContainer + " .submenu").toggle();
             buttonActive($(this), $('.' + classNameContainer + " .submenu").is(':visible'));
             break;
@@ -230,6 +234,15 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             t.switchEnv('grid', object.option.grid);
             buttonActive($(this), object.option.grid);
             break;
+        case 'zoom':
+            object.option.zoom = !object.option.zoom;
+            if (object.option.zoom) {
+                $(this).popover('show');
+            } else {
+                $(this).popover('destroy');
+            }
+            buttonActive($(this), object.option.zoom);
+            break;
     }
 });
 
@@ -249,6 +262,10 @@ $('.' + classNameContainer)
     })
     .on('dblclick', '.menu-object', function () {
         return false;
+    })
+    .on('input change', '.zoom-value', function () {
+        t.camera.zoom = $(this).val();
+        t.camera.updateProjectionMatrix();
     })
 
 var eFullscreenName = function () {

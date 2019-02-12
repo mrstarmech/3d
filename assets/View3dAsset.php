@@ -29,13 +29,13 @@ class View3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?201902071758',
+        'js/viewer.js?201902121705',
         'js/label.js',
-        'js/loader.object.js',
+        'js/loader.object.js?201902121705',
     ];
     public $depends = [
         'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
+        'yii\bootstrap\BootstrapPluginAsset',
         'rmrevin\yii\fontawesome\AssetBundle',
     ];
 }
