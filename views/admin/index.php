@@ -34,7 +34,7 @@ use yii\widgets\LinkPager;
                                 display: block;
                                 width: 100%;
                                 height: 250px;
-                                background: url('$backgroundUrl') no-repeat;
+                                background: url('<?= $backgroundUrl; ?>') no-repeat;
                                 background-size: cover;
                                 background-position: center;
                                 ">
