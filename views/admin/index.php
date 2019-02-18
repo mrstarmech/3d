@@ -15,6 +15,18 @@ use yii\widgets\LinkPager;
 <?php if(!empty($objects)): ?>
     <div class="row">
         <?php foreach($objects as $object): ?>
+
+
+        <?php
+        // Следует решить как хранить превью к модели (должно оно совпадать с постером или нет, если нет - сделать интерфейс загрузки) 
+            if (empty($object->image)){
+                if (empty(json_decode($object->setting)->poster)) {
+                    $backgroundUrl = '/img/poster.none.jpg';
+                }
+                else $backgroundUrl = json_decode($object->setting)->poster;
+            }
+            else $backgroundUrl = '/' . $object->pathImage . '/' . $object->id . '/' . $object->image;
+        ?>
             <div class="col-xs-12 col-sm-6 col-md-4">
                 <div class="item-object">
                     <a href="<?= Url::to(['admin/edit-object-general', 'id' => $object->id]) ?>">
@@ -22,11 +34,7 @@ use yii\widgets\LinkPager;
                                 display: block;
                                 width: 100%;
                                 height: 250px;
-                        <?php if(!empty($object->image)): ?>
-                                background: url('<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>') no-repeat;
-                        <?php else: ?>
-                                background: url('/img/poster.none.jpg') no-repeat;
-                        <?php endif; ?>
+                                background: url('<?= $backgroundUrl; ?>') no-repeat;
                                 background-size: cover;
                                 background-position: center;
                                 ">

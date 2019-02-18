@@ -21,11 +21,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  *
- * Copyright (c) 2011-2017 Jos de Jong, http://jsoneditoronline.org
+ * Copyright (c) 2011-2019 Jos de Jong, http://jsoneditoronline.org
  *
  * @author  Jos de Jong, <wjosdejong@gmail.com>
- * @version 5.25.0
- * @date    2018-10-29
+ * @version 5.28.2
+ * @date    2019-01-23
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -149,11 +149,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                               {boolean} sortObjectKeys If true, object keys are
 	 *                                                        sorted before display.
 	 *                                                        false by default.
-	 *                               {function} onSelectionChange Callback method, 
+	 *                               {function} onSelectionChange Callback method,
 	 *                                                            triggered on node selection change
 	 *                                                            Only applicable for modes
 	 *                                                            'tree', 'view', and 'form'
-	 *                               {function} onTextSelectionChange Callback method, 
+	 *                               {function} onTextSelectionChange Callback method,
 	 *                                                                triggered on text selection change
 	 *                                                                Only applicable for modes
 	 *                               {HTMLElement} modalAnchor        The anchor element to apply an
@@ -167,6 +167,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                                                  Only applicable for
 	 *                                                  modes 'form', 'tree' and
 	 *                                                  'view'
+	 *                               {function} onClassName Callback method, triggered
+	 *                                                  when a Node DOM is rendered. Function returns
+	 *                                                  a css class name to be set on a node.
+	 *                                                  Only applicable for
+	 *                                                  modes 'form', 'tree' and
+	 *                                                  'view'
+	 *                               {Number} maxVisibleChilds Number of children allowed for a node 
+	 *                                                         in 'tree', 'view', or 'form' mode before 
+	 *                                                         the "show more/show all" buttons appear.  
+	 *                                                         100 by default.
+	 *
 	 * @param {Object | undefined} json JSON object
 	 */
 	function JSONEditor (container, options, json) {
@@ -247,12 +258,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  'ajv', 'schema', 'schemaRefs','templates',
 	  'ace', 'theme', 'autocomplete',
 	  'onChange', 'onChangeJSON', 'onChangeText',
-	  'onEditable', 'onError', 'onEvent', 'onModeChange', 'onValidate',
-	  'onSelectionChange', 'onTextSelectionChange',
+	  'onEditable', 'onError', 'onEvent', 'onModeChange', 'onNodeName', 'onValidate',
+	  'onSelectionChange', 'onTextSelectionChange', 'onClassName',
 	  'colorPicker', 'onColorPicker',
 	  'timestampTag',
 	  'escapeUnicode', 'history', 'search', 'mode', 'modes', 'name', 'indentation',
-	  'sortObjectKeys', 'navigationBar', 'statusBar', 'languages', 'language', 'enableSort', 'enableTransform'
+	  'sortObjectKeys', 'navigationBar', 'statusBar', 'mainMenuBar', 'languages', 'language', 'enableSort', 'enableTransform',
+	  'maxVisibleChilds'
 	];
 
 	/**
@@ -1580,8 +1592,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	treemode._setOptions = function (options) {
-	  var editor = this;
-
 	  this.options = {
 	    search: true,
 	    history: true,
@@ -1591,6 +1601,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    schemaRefs: null,
 	    autocomplete: null,
 	    navigationBar : true,
+	    mainMenuBar: true,
 	    onSelectionChange: null,
 	    colorPicker: true,
 	    onColorPicker: function (parent, color, onChange) {
@@ -1600,11 +1611,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          color: color,
 	          popup: 'bottom',
 	          onDone: function (color) {
-	            var alpha = color.rgba[3]
+	            var alpha = color.rgba[3];
 	            var hex = (alpha === 1)
 	                ? color.hex.substr(0, 7)  // return #RRGGBB
-	                : color.hex               // return #RRGGBBAA
-	            onChange(hex)
+	                : color.hex;               // return #RRGGBBAA
+	            onChange(hex);
 	          }
 	        }).show();
 	      }
@@ -2001,6 +2012,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	      console.error('Error in onChangeText callback: ', err);
 	    }
 	  }
+
+	  // trigger the onClassName callback
+	  if(this.options.onClassName) {
+	    this.node.recursivelyUpdateCssClassesOnNodes();
+	  }
+
+	  // trigger the onNodeName callback
+	  if (this.options.onNodeName && this.node.childs) {
+	    try {
+	      this.node.recursivelyUpdateNodeName();
+	    } catch (err) {
+	      console.error("Error in onNodeName callback: ", err);
+	    }  
+	  }
 	};
 
 	/**
@@ -2393,6 +2418,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.frame.className = 'jsoneditor jsoneditor-mode-' + this.options.mode;
 	  this.container.appendChild(this.frame);
 
+	  this.contentOuter = document.createElement('div');
+	  this.contentOuter.className = 'jsoneditor-outer';
+
 	  // create one global event listener to handle all events from all nodes
 	  var editor = this;
 	  function onEvent(event) {
@@ -2431,105 +2459,109 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.frame.onfocusin = onEvent;  // for IE
 	  this.frame.onfocusout = onEvent; // for IE
 
-	  // create menu
-	  this.menu = document.createElement('div');
-	  this.menu.className = 'jsoneditor-menu';
-	  this.frame.appendChild(this.menu);
+	  if (this.options.mainMenuBar) {
+	    util.addClassName(this.contentOuter, 'has-main-menu-bar');
 
-	  // create expand all button
-	  var expandAll = document.createElement('button');
-	  expandAll.type = 'button';
-	  expandAll.className = 'jsoneditor-expand-all';
-	  expandAll.title = translate('expandAll');
-	  expandAll.onclick = function () {
-	    editor.expandAll();
-	  };
-	  this.menu.appendChild(expandAll);
+	    // create menu
+	    this.menu = document.createElement('div');
+	    this.menu.className = 'jsoneditor-menu';
+	    this.frame.appendChild(this.menu);
 
-	  // create collapse all button
-	  var collapseAll = document.createElement('button');
-	  collapseAll.type = 'button';
-	  collapseAll.title = translate('collapseAll');
-	  collapseAll.className = 'jsoneditor-collapse-all';
-	  collapseAll.onclick = function () {
-	    editor.collapseAll();
-	  };
-	  this.menu.appendChild(collapseAll);
-
-	  // create sort button
-	  if (this.options.enableSort) {
-	    var sort = document.createElement('button');
-	    sort.type = 'button';
-	    sort.className = 'jsoneditor-sort';
-	    sort.title = translate('sortTitleShort');
-	    sort.onclick = function () {
-	      var anchor = editor.options.modalAnchor || DEFAULT_MODAL_ANCHOR;
-	      showSortModal(editor.node, anchor)
+	    // create expand all button
+	    var expandAll = document.createElement('button');
+	    expandAll.type = 'button';
+	    expandAll.className = 'jsoneditor-expand-all';
+	    expandAll.title = translate('expandAll');
+	    expandAll.onclick = function () {
+	      editor.expandAll();
 	    };
-	    this.menu.appendChild(sort);
+	    this.menu.appendChild(expandAll);
+
+	    // create collapse all button
+	    var collapseAll = document.createElement('button');
+	    collapseAll.type = 'button';
+	    collapseAll.title = translate('collapseAll');
+	    collapseAll.className = 'jsoneditor-collapse-all';
+	    collapseAll.onclick = function () {
+	      editor.collapseAll();
+	    };
+	    this.menu.appendChild(collapseAll);
+
+	    // create sort button
+	    if (this.options.enableSort) {
+	      var sort = document.createElement('button');
+	      sort.type = 'button';
+	      sort.className = 'jsoneditor-sort';
+	      sort.title = translate('sortTitleShort');
+	      sort.onclick = function () {
+	        var anchor = editor.options.modalAnchor || DEFAULT_MODAL_ANCHOR;
+	        showSortModal(editor.node, anchor)
+	      };
+	      this.menu.appendChild(sort);
+	    }
+
+	    // create transform button
+	    if (this.options.enableTransform) {
+	      var transform = document.createElement('button');
+	      transform.type = 'button';
+	      transform.title = translate('transformTitleShort');
+	      transform.className = 'jsoneditor-transform';
+	      transform.onclick = function () {
+	        var anchor = editor.options.modalAnchor || DEFAULT_MODAL_ANCHOR;
+	        showTransformModal(editor.node, anchor)
+	      };
+	      this.menu.appendChild(transform);
+	    }
+
+	    // create undo/redo buttons
+	    if (this.history) {
+	      // create undo button
+	      var undo = document.createElement('button');
+	      undo.type = 'button';
+	      undo.className = 'jsoneditor-undo jsoneditor-separator';
+	      undo.title = translate('undo');
+	      undo.onclick = function () {
+	        editor._onUndo();
+	      };
+	      this.menu.appendChild(undo);
+	      this.dom.undo = undo;
+
+	      // create redo button
+	      var redo = document.createElement('button');
+	      redo.type = 'button';
+	      redo.className = 'jsoneditor-redo';
+	      redo.title = translate('redo');
+	      redo.onclick = function () {
+	        editor._onRedo();
+	      };
+	      this.menu.appendChild(redo);
+	      this.dom.redo = redo;
+
+	      // register handler for onchange of history
+	      this.history.onChange = function () {
+	        undo.disabled = !editor.history.canUndo();
+	        redo.disabled = !editor.history.canRedo();
+	      };
+	      this.history.onChange();
+	    }
+
+	    // create mode box
+	    if (this.options && this.options.modes && this.options.modes.length) {
+	      var me = this;
+	      this.modeSwitcher = new ModeSwitcher(this.menu, this.options.modes, this.options.mode, function onSwitch(mode) {
+	        // switch mode and restore focus
+	        me.setMode(mode);
+	        me.modeSwitcher.focus();
+	      });
+	    }
+
+	    // create search box
+	    if (this.options.search) {
+	      this.searchBox = new SearchBox(this, this.menu);
+	    }
 	  }
 
-	  // create transform button
-	  if (this.options.enableTransform) {
-	    var transform = document.createElement('button');
-	    transform.type = 'button';
-	    transform.title = translate('transformTitleShort');
-	    transform.className = 'jsoneditor-transform';
-	    transform.onclick = function () {
-	      var anchor = editor.options.modalAnchor || DEFAULT_MODAL_ANCHOR;
-	      showTransformModal(editor.node, anchor)
-	    };
-	    this.menu.appendChild(transform);
-	  }
-
-	  // create undo/redo buttons
-	  if (this.history) {
-	    // create undo button
-	    var undo = document.createElement('button');
-	    undo.type = 'button';
-	    undo.className = 'jsoneditor-undo jsoneditor-separator';
-	    undo.title = translate('undo');
-	    undo.onclick = function () {
-	      editor._onUndo();
-	    };
-	    this.menu.appendChild(undo);
-	    this.dom.undo = undo;
-
-	    // create redo button
-	    var redo = document.createElement('button');
-	    redo.type = 'button';
-	    redo.className = 'jsoneditor-redo';
-	    redo.title = translate('redo');
-	    redo.onclick = function () {
-	      editor._onRedo();
-	    };
-	    this.menu.appendChild(redo);
-	    this.dom.redo = redo;
-
-	    // register handler for onchange of history
-	    this.history.onChange = function () {
-	      undo.disabled = !editor.history.canUndo();
-	      redo.disabled = !editor.history.canRedo();
-	    };
-	    this.history.onChange();
-	  }
-
-	  // create mode box
-	  if (this.options && this.options.modes && this.options.modes.length) {
-	    var me = this;
-	    this.modeSwitcher = new ModeSwitcher(this.menu, this.options.modes, this.options.mode, function onSwitch(mode) {
-	      // switch mode and restore focus
-	      me.setMode(mode);
-	      me.modeSwitcher.focus();
-	    });
-	  }
-
-	  // create search box
-	  if (this.options.search) {
-	    this.searchBox = new SearchBox(this, this.menu);
-	  }
-
-	  if(this.options.navigationBar) {
+	  if (this.options.navigationBar) {
 	    // create second menu row for treepath
 	    this.navBar = document.createElement('div');
 	    this.navBar.className = 'jsoneditor-navigation-bar nav-bar-empty';
@@ -2626,7 +2658,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  else {
-	    if (event.type === 'mousedown') {
+	    // filter mouse events in the contents part of the editor (not the main menu)
+	    if (event.type === 'mousedown' && util.hasParentNode(event.target, this.content)) {
 	      this.deselect();
 
 	      if (node && event.target === node.dom.drag) {
@@ -2660,7 +2693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        name: getName(node),
 	        node: node,
 	        children: []
-	      }
+	      };
 	      if (node.childs && node.childs.length) {
 	        node.childs.forEach(function (childNode) {
 	          pathObj.children.push({
@@ -2824,10 +2857,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * End of multiselect nodes by dragging
-	 * @param event
 	 * @private
 	 */
-	treemode._onMultiSelectEnd = function (event) {
+	treemode._onMultiSelectEnd = function () {
 	  // set focus to the context menu button of the first node
 	  if (this.multiselection.nodes[0]) {
 	    this.multiselection.nodes[0].dom.menu.focus();
@@ -3051,16 +3083,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	treemode._createTable = function () {
-	  var contentOuter = document.createElement('div');
-	  contentOuter.className = 'jsoneditor-outer';
-	  if(this.options.navigationBar) {
-	    util.addClassName(contentOuter, 'has-nav-bar');
+	  if (this.options.navigationBar) {
+	    util.addClassName(this.contentOuter, 'has-nav-bar');
 	  }
-	  this.contentOuter = contentOuter;
 
 	  this.scrollableContent = document.createElement('div');
 	  this.scrollableContent.className = 'jsoneditor-tree';
-	  contentOuter.appendChild(this.scrollableContent);
+	  this.contentOuter.appendChild(this.scrollableContent);
 
 	  // the jsoneditor-tree-inner div with bottom padding is here to
 	  // keep space for the action menu dropdown. It's created as a
@@ -3094,7 +3123,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.tbody = document.createElement('tbody');
 	  this.table.appendChild(this.tbody);
 
-	  this.frame.appendChild(contentOuter);
+	  this.frame.appendChild(this.contentOuter);
 	};
 
 	/**
@@ -3158,12 +3187,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Callback registraion for selection change
-	 * @param {selectionCallback} callback 
-	 * 
+	 * Callback registration for selection change
+	 * @param {selectionCallback} callback
+	 *
 	 * @callback selectionCallback
-	 * @param {SerializableNode=} start
-	 * @param {SerializableNode=} end
 	 */
 	treemode.onSelectionChange = function (callback) {
 	  if (typeof callback === 'function') {
@@ -3176,18 +3203,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * For selecting single node send only the start parameter
 	 * For clear the selection do not send any parameter
 	 * If the nodes are not from the same level the first common parent will be selected
-	 * @param {{path: Array.<String>}} start object contains the path for selection start 
+	 * @param {{path: Array.<String>}} start object contains the path for selection start
 	 * @param {{path: Array.<String>}} end object contains the path for selection end
 	 */
 	treemode.setSelection = function (start, end) {
 	  // check for old usage
 	  if (start && start.dom && start.range) {
-	    console.warn('setSelection/getSelection usage for text selection is depracated and should not be used, see documantaion for supported selection options');
+	    console.warn('setSelection/getSelection usage for text selection is deprecated and should not be used, see documentation for supported selection options');
 	    this.setDomSelection(start);
 	  }
 
 	  var nodes = this._getNodeInstancesByRange(start, end);
-	  
+
 	  nodes.forEach(function(node) {
 	    node.expandTo();
 	  });
@@ -3196,9 +3223,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Returns a set of Nodes according to a range of selection
-	 * @param {{path: Array.<String>}} start object contains the path for range start 
+	 * @param {{path: Array.<String>}} start object contains the path for range start
 	 * @param {{path: Array.<String>}=} end object contains the path for range end
-	 * @return {Array.<Node>} Node intances on the given range
+	 * @return {Array.<Node>} Node instances on the given range
 	 * @private
 	 */
 	treemode._getNodeInstancesByRange = function (start, end) {
@@ -4261,10 +4288,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Attach the menu to an anchor
-	 * @param {HTMLElement} anchor  Anchor where the menu will be attached as sibling.
-	 * @param {HTMLElement} frame   The root of the JSONEditor window
+	 * @param {HTMLElement} anchor    Anchor where the menu will be attached as sibling.
+	 * @param {HTMLElement} frame     The root of the JSONEditor window
+	 * @param {Boolean=} ignoreParent ignore anchor parent in regard to the calculation of the position, needed when the parent position is absolute
 	 */
-	ContextMenu.prototype.show = function (anchor, frame) {
+	ContextMenu.prototype.show = function (anchor, frame, ignoreParent) {
 	  this.hide();
 
 	  // determine whether to display the menu below or above the anchor
@@ -4290,7 +4318,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // doesn't fit above nor below -> show below
 	  }
 
-	  var topGap = anchorRect.top - parentRect.top;
+	  var topGap = ignoreParent ? 0 : (anchorRect.top - parentRect.top);
 
 	  // position the menu
 	  if (showBelow) {
@@ -4657,19 +4685,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function next()  { return jsString.charAt(i + 1); }
 	  function prev()  { return jsString.charAt(i - 1); }
 
+	  function isWhiteSpace(c) {
+	    return c === ' ' || c === '\n' || c === '\r' || c === '\t';
+	  }
+
 	  // get the last parsed non-whitespace character
 	  function lastNonWhitespace () {
 	    var p = chars.length - 1;
 
 	    while (p >= 0) {
 	      var pp = chars[p];
-	      if (pp !== ' ' && pp !== '\n' && pp !== '\r' && pp !== '\t') { // non whitespace
+	      if (!isWhiteSpace(pp)) {
 	        return pp;
 	      }
 	      p--;
 	    }
 
 	    return '';
+	  }
+
+	  // get at the first next non-white space character
+	  function nextNonWhiteSpace() {
+	    var iNext = i + 1;
+	    while (iNext < jsString.length && isWhiteSpace(jsString[iNext])) {
+	      iNext++;
+	    }
+
+	    return jsString[iNext];
 	  }
 
 	  // skip a block comment '/* ... */'
@@ -4758,7 +4800,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    else if (c === '\u00A0' || (c >= '\u2000' && c <= '\u200A') || c === '\u202F' || c === '\u205F' || c === '\u3000') {
 	      // special white spaces (like non breaking space)
-	      chars.push(' ')
+	      chars.push(' ');
 	      i++
 	    }
 	    else if (c === quote) {
@@ -4775,6 +4817,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    else if (c === quoteDblLeft) {
 	      parseString(quoteDblRight);
+	    }
+	    else if (c === ',' && [']', '}'].indexOf(nextNonWhiteSpace()) !== -1) {
+	      // skip trailing commas
+	      i++;
 	    }
 	    else if (/[a-zA-Z_$]/.test(c) && ['{', ','].indexOf(lastNonWhitespace()) !== -1) {
 	      // an unquoted object key (like a in '{a:2}')
@@ -4933,6 +4979,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    classes.push(className); // add the class to the array
 	    elem.className = classes.join(' ');
 	  }
+	};
+
+	/**
+	 * remove all classes from the given elements style
+	 * @param {Element} elem 
+	 */
+	exports.removeAllClassNames = function removeAllClassNames(elem) {
+	    elem.className = "";
 	};
 
 	/**
@@ -5171,6 +5225,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // br or unknown
 	  return '';
 	};
+
+	/**
+	 * Test whether an element has the provided parent node somewhere up the node tree.
+	 * @param {Element} elem
+	 * @param {Element} parent
+	 * @return {boolean}
+	 */
+	exports.hasParentNode = function (elem, parent) {
+	  var e = elem ? elem.parentNode : undefined;
+
+	  while (e) {
+	    if (e === parent) {
+	      return true;
+	    }
+	    e = e.parentNode;
+	  }
+
+	  return false;
+	}
 
 	/**
 	 * Returns the version of Internet Explorer or a -1
@@ -6502,178 +6575,188 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _locales = ['en', 'pt-BR'];
 	var _defs = {
 	  en: {
-	    'array': 'Array',
-	    'auto': 'Auto',
-	    'appendText': 'Append',
-	    'appendTitle': 'Append a new field with type \'auto\' after this field (Ctrl+Shift+Ins)',
-	    'appendSubmenuTitle': 'Select the type of the field to be appended',
-	    'appendTitleAuto': 'Append a new field with type \'auto\' (Ctrl+Shift+Ins)',
-	    'ascending': 'Ascending',
-	    'ascendingTitle': 'Sort the childs of this ${type} in ascending order',
-	    'actionsMenu': 'Click to open the actions menu (Ctrl+M)',
-	    'collapseAll': 'Collapse all fields',
-	    'descending': 'Descending',
-	    'descendingTitle': 'Sort the childs of this ${type} in descending order',
-	    'drag': 'Drag to move this field (Alt+Shift+Arrows)',
-	    'duplicateKey': 'duplicate key',
-	    'duplicateText': 'Duplicate',
-	    'duplicateTitle': 'Duplicate selected fields (Ctrl+D)',
-	    'duplicateField': 'Duplicate this field (Ctrl+D)',
-	    'empty': 'empty',
-	    'expandAll': 'Expand all fields',
-	    'expandTitle': 'Click to expand/collapse this field (Ctrl+E). \n' +
-	    'Ctrl+Click to expand/collapse including all childs.',
-	    'insert': 'Insert',
-	    'insertTitle': 'Insert a new field with type \'auto\' before this field (Ctrl+Ins)',
-	    'insertSub': 'Select the type of the field to be inserted',
-	    'object': 'Object',
-	    'ok': 'Ok',
-	    'redo': 'Redo (Ctrl+Shift+Z)',
-	    'removeText': 'Remove',
-	    'removeTitle': 'Remove selected fields (Ctrl+Del)',
-	    'removeField': 'Remove this field (Ctrl+Del)',
-	    'selectNode': 'Select a node...',
-	    'showAll': 'show all',
-	    'showMore': 'show more',
-	    'showMoreStatus': 'displaying ${visibleChilds} of ${totalChilds} items.',
-	    'sort': 'Sort',
-	    'sortTitle': 'Sort the childs of this ${type}',
-	    'sortTitleShort': 'Sort contents',
-	    'sortFieldLabel': 'Field:',
-	    'sortDirectionLabel': 'Direction:',
-	    'sortFieldTitle': 'Select the nested field by which to sort the array or object',
-	    'sortAscending': 'Ascending',
-	    'sortAscendingTitle': 'Sort the selected field in ascending order',
-	    'sortDescending': 'Descending',
-	    'sortDescendingTitle': 'Sort the selected field in descending order',
-	    'string': 'String',
-	    'transform': 'Transform',
-	    'transformTitle': 'Filter, sort, or transform the childs of this ${type}',
-	    'transformTitleShort': 'Filter, sort, or transform contents',
-	    'transformQueryTitle': 'Enter a JMESPath query',
-	    'transformWizardLabel': 'Wizard',
-	    'transformWizardFilter': 'Filter',
-	    'transformWizardSortBy': 'Sort by',
-	    'transformWizardSelectFields': 'Select fields',
-	    'transformQueryLabel': 'Query',
-	    'transformPreviewLabel': 'Preview',
-	    'type': 'Type',
-	    'typeTitle': 'Change the type of this field',
-	    'openUrl': 'Ctrl+Click or Ctrl+Enter to open url in new window',
-	    'undo': 'Undo last action (Ctrl+Z)',
-	    'validationCannotMove': 'Cannot move a field into a child of itself',
-	    'autoType': 'Field type "auto". ' +
-	    'The field type is automatically determined from the value ' +
-	    'and can be a string, number, boolean, or null.',
-	    'objectType': 'Field type "object". ' +
-	    'An object contains an unordered set of key/value pairs.',
-	    'arrayType': 'Field type "array". ' +
-	    'An array contains an ordered collection of values.',
-	    'stringType': 'Field type "string". ' +
-	    'Field type is not determined from the value, ' +
-	    'but always returned as string.'
+	    array: 'Array',
+	    auto: 'Auto',
+	    appendText: 'Append',
+	    appendTitle: 'Append a new field with type \'auto\' after this field (Ctrl+Shift+Ins)',
+	    appendSubmenuTitle: 'Select the type of the field to be appended',
+	    appendTitleAuto: 'Append a new field with type \'auto\' (Ctrl+Shift+Ins)',
+	    ascending: 'Ascending',
+	    ascendingTitle: 'Sort the childs of this ${type} in ascending order',
+	    actionsMenu: 'Click to open the actions menu (Ctrl+M)',
+	    collapseAll: 'Collapse all fields',
+	    descending: 'Descending',
+	    descendingTitle: 'Sort the childs of this ${type} in descending order',
+	    drag: 'Drag to move this field (Alt+Shift+Arrows)',
+	    duplicateKey: 'duplicate key',
+	    duplicateText: 'Duplicate',
+	    duplicateTitle: 'Duplicate selected fields (Ctrl+D)',
+	    duplicateField: 'Duplicate this field (Ctrl+D)',
+	    empty: 'empty',
+	    expandAll: 'Expand all fields',
+	    expandTitle: 'Click to expand/collapse this field (Ctrl+E). \n' +
+	      'Ctrl+Click to expand/collapse including all childs.',
+	    insert: 'Insert',
+	    insertTitle: 'Insert a new field with type \'auto\' before this field (Ctrl+Ins)',
+	    insertSub: 'Select the type of the field to be inserted',
+	    object: 'Object',
+	    ok: 'Ok',
+	    redo: 'Redo (Ctrl+Shift+Z)',
+	    removeText: 'Remove',
+	    removeTitle: 'Remove selected fields (Ctrl+Del)',
+	    removeField: 'Remove this field (Ctrl+Del)',
+	    selectNode: 'Select a node...',
+	    showAll: 'show all',
+	    showMore: 'show more',
+	    showMoreStatus: 'displaying ${visibleChilds} of ${totalChilds} items.',
+	    sort: 'Sort',
+	    sortTitle: 'Sort the childs of this ${type}',
+	    sortTitleShort: 'Sort contents',
+	    sortFieldLabel: 'Field:',
+	    sortDirectionLabel: 'Direction:',
+	    sortFieldTitle: 'Select the nested field by which to sort the array or object',
+	    sortAscending: 'Ascending',
+	    sortAscendingTitle: 'Sort the selected field in ascending order',
+	    sortDescending: 'Descending',
+	    sortDescendingTitle: 'Sort the selected field in descending order',
+	    string: 'String',
+	    transform: 'Transform',
+	    transformTitle: 'Filter, sort, or transform the childs of this ${type}',
+	    transformTitleShort: 'Filter, sort, or transform contents',
+	    transformQueryTitle: 'Enter a JMESPath query',
+	    transformWizardLabel: 'Wizard',
+	    transformWizardFilter: 'Filter',
+	    transformWizardSortBy: 'Sort by',
+	    transformWizardSelectFields: 'Select fields',
+	    transformQueryLabel: 'Query',
+	    transformPreviewLabel: 'Preview',
+	    type: 'Type',
+	    typeTitle: 'Change the type of this field',
+	    openUrl: 'Ctrl+Click or Ctrl+Enter to open url in new window',
+	    undo: 'Undo last action (Ctrl+Z)',
+	    validationCannotMove: 'Cannot move a field into a child of itself',
+	    autoType: 'Field type "auto". ' +
+	      'The field type is automatically determined from the value ' +
+	      'and can be a string, number, boolean, or null.',
+	    objectType: 'Field type "object". ' +
+	      'An object contains an unordered set of key/value pairs.',
+	    arrayType: 'Field type "array". ' +
+	      'An array contains an ordered collection of values.',
+	    stringType: 'Field type "string". ' +
+	      'Field type is not determined from the value, ' +
+	      'but always returned as string.',
+	    modeCodeText: 'Code',
+	    modeCodeTitle: 'Switch to code highlighter',
+	    modeFormText: 'Form',
+	    modeFormTitle: 'Switch to form editor',
+	    modeTextText: 'Text',
+	    modeTextTitle: 'Switch to plain text editor',
+	    modeTreeText: 'Tree',
+	    modeTreeTitle: 'Switch to tree editor',
+	    modeViewText: 'View',
+	    modeViewTitle: 'Switch to tree view',
 	  },
 	  'pt-BR': {
-	    'array': 'Lista',
-	    'auto': 'Automatico',
-	    'appendText': 'Adicionar',
-	    'appendTitle': 'Adicionar novo campo com tipo \'auto\' depois deste campo (Ctrl+Shift+Ins)',
-	    'appendSubmenuTitle': 'Selecione o tipo do campo a ser adicionado',
-	    'appendTitleAuto': 'Adicionar novo campo com tipo \'auto\' (Ctrl+Shift+Ins)',
-	    'ascending': 'Ascendente',
-	    'ascendingTitle': 'Organizar filhor do tipo ${type} em crescente',
-	    'actionsMenu': 'Clique para abrir o menu de ações (Ctrl+M)',
-	    'collapseAll': 'Fechar todos campos',
-	    'descending': 'Descendente',
-	    'descendingTitle': 'Organizar o filhos do tipo ${type} em decrescente',
-	    'duplicateKey': 'chave duplicada',
-	    'drag': 'Arraste para mover este campo (Alt+Shift+Arrows)',
-	    'duplicateText': 'Duplicar',
-	    'duplicateTitle': 'Duplicar campos selecionados (Ctrl+D)',
-	    'duplicateField': 'Duplicar este campo (Ctrl+D)',
-	    'empty': 'vazio',
-	    'expandAll': 'Expandir todos campos',
-	    'expandTitle': 'Clique para expandir/encolher este campo (Ctrl+E). \n' +
-	    'Ctrl+Click para expandir/encolher incluindo todos os filhos.',
-	    'insert': 'Inserir',
-	    'insertTitle': 'Inserir um novo campo do tipo \'auto\' antes deste campo (Ctrl+Ins)',
-	    'insertSub': 'Selecionar o tipo de campo a ser inserido',
-	    'object': 'Objeto',
-	    'ok': 'Ok',
-	    'redo': 'Refazer (Ctrl+Shift+Z)',
-	    'removeText': 'Remover',
-	    'removeTitle': 'Remover campos selecionados (Ctrl+Del)',
-	    'removeField': 'Remover este campo (Ctrl+Del)',
+	    array: 'Lista',
+	    auto: 'Automatico',
+	    appendText: 'Adicionar',
+	    appendTitle: 'Adicionar novo campo com tipo \'auto\' depois deste campo (Ctrl+Shift+Ins)',
+	    appendSubmenuTitle: 'Selecione o tipo do campo a ser adicionado',
+	    appendTitleAuto: 'Adicionar novo campo com tipo \'auto\' (Ctrl+Shift+Ins)',
+	    ascending: 'Ascendente',
+	    ascendingTitle: 'Organizar filhor do tipo ${type} em crescente',
+	    actionsMenu: 'Clique para abrir o menu de ações (Ctrl+M)',
+	    collapseAll: 'Fechar todos campos',
+	    descending: 'Descendente',
+	    descendingTitle: 'Organizar o filhos do tipo ${type} em decrescente',
+	    duplicateKey: 'chave duplicada',
+	    drag: 'Arraste para mover este campo (Alt+Shift+Arrows)',
+	    duplicateText: 'Duplicar',
+	    duplicateTitle: 'Duplicar campos selecionados (Ctrl+D)',
+	    duplicateField: 'Duplicar este campo (Ctrl+D)',
+	    empty: 'vazio',
+	    expandAll: 'Expandir todos campos',
+	    expandTitle: 'Clique para expandir/encolher este campo (Ctrl+E). \n' +
+	      'Ctrl+Click para expandir/encolher incluindo todos os filhos.',
+	    insert: 'Inserir',
+	    insertTitle: 'Inserir um novo campo do tipo \'auto\' antes deste campo (Ctrl+Ins)',
+	    insertSub: 'Selecionar o tipo de campo a ser inserido',
+	    object: 'Objeto',
+	    ok: 'Ok',
+	    redo: 'Refazer (Ctrl+Shift+Z)',
+	    removeText: 'Remover',
+	    removeTitle: 'Remover campos selecionados (Ctrl+Del)',
+	    removeField: 'Remover este campo (Ctrl+Del)',
 	    // TODO: correctly translate
-	    'selectNode': 'Select a node...',
+	    selectNode: 'Select a node...',
 	    // TODO: correctly translate
-	    'showAll': 'mostre tudo',
+	    showAll: 'mostre tudo',
 	    // TODO: correctly translate
-	    'showMore': 'mostre mais',
+	    showMore: 'mostre mais',
 	    // TODO: correctly translate
-	    'showMoreStatus': 'exibindo ${visibleChilds} de ${totalChilds} itens.',
-	    'sort': 'Organizar',
-	    'sortTitle': 'Organizar os filhos deste ${type}',
+	    showMoreStatus: 'exibindo ${visibleChilds} de ${totalChilds} itens.',
+	    sort: 'Organizar',
+	    sortTitle: 'Organizar os filhos deste ${type}',
 	    // TODO: correctly translate
-	    'sortTitleShort': 'Organizar os filhos',
+	    sortTitleShort: 'Organizar os filhos',
 	    // TODO: correctly translate
-	    'sortFieldLabel': 'Field:',
+	    sortFieldLabel: 'Field:',
 	    // TODO: correctly translate
-	    'sortDirectionLabel': 'Direction:',
+	    sortDirectionLabel: 'Direction:',
 	    // TODO: correctly translate
-	    'sortFieldTitle': 'Select the nested field by which to sort the array or object',
+	    sortFieldTitle: 'Select the nested field by which to sort the array or object',
 	    // TODO: correctly translate
-	    'sortAscending': 'Ascending',
+	    sortAscending: 'Ascending',
 	    // TODO: correctly translate
-	    'sortAscendingTitle': 'Sort the selected field in ascending order',
+	    sortAscendingTitle: 'Sort the selected field in ascending order',
 	    // TODO: correctly translate
-	    'sortDescending': 'Descending',
+	    sortDescending: 'Descending',
 	    // TODO: correctly translate
-	    'sortDescendingTitle': 'Sort the selected field in descending order',
-	    'string': 'Texto',
+	    sortDescendingTitle: 'Sort the selected field in descending order',
+	    string: 'Texto',
 	    // TODO: correctly translate
-	    'transform': 'Transform',
+	    transform: 'Transform',
 	    // TODO: correctly translate
-	    'transformTitle': 'Filter, sort, or transform the childs of this ${type}',
+	    transformTitle: 'Filter, sort, or transform the childs of this ${type}',
 	    // TODO: correctly translate
-	    'transformTitleShort': 'Filter, sort, or transform contents',
+	    transformTitleShort: 'Filter, sort, or transform contents',
 	    // TODO: correctly translate
-	    'transformQueryTitle': 'Enter a JMESPath query',
+	    transformQueryTitle: 'Enter a JMESPath query',
 	    // TODO: correctly translate
-	    'transformWizardLabel': 'Wizard',
+	    transformWizardLabel: 'Wizard',
 	    // TODO: correctly translate
-	    'transformWizardFilter': 'Filter',
+	    transformWizardFilter: 'Filter',
 	    // TODO: correctly translate
-	    'transformWizardSortBy': 'Sort by',
+	    transformWizardSortBy: 'Sort by',
 	    // TODO: correctly translate
-	    'transformWizardSelectFields': 'Select fields',
+	    transformWizardSelectFields: 'Select fields',
 	    // TODO: correctly translate
-	    'transformQueryLabel': 'Query',
+	    transformQueryLabel: 'Query',
 	    // TODO: correctly translate
-	    'transformPreviewLabel': 'Preview',
-	    'type': 'Tipo',
-	    'typeTitle': 'Mudar o tipo deste campo',
-	    'openUrl': 'Ctrl+Click ou Ctrl+Enter para abrir link em nova janela',
-	    'undo': 'Desfazer último ação (Ctrl+Z)',
-	    'validationCannotMove': 'Não pode mover um campo como filho dele mesmo',
-	    'autoType': 'Campo do tipo "auto". ' +
-	    'O tipo do campo é determinao automaticamente a partir do seu valor ' +
-	    'e pode ser texto, número, verdade/falso ou nulo.',
-	    'objectType': 'Campo do tipo "objeto". ' +
-	    'Um objeto contém uma lista de pares com chave e valor.',
-	    'arrayType': 'Campo do tipo "lista". ' +
-	    'Uma lista contem uma coleção de valores ordenados.',
-	    'stringType': 'Campo do tipo "string". ' +
-	    'Campo do tipo nao é determinado através do seu valor, ' +
-	    'mas sempre retornara um texto.'
+	    transformPreviewLabel: 'Preview',
+	    type: 'Tipo',
+	    typeTitle: 'Mudar o tipo deste campo',
+	    openUrl: 'Ctrl+Click ou Ctrl+Enter para abrir link em nova janela',
+	    undo: 'Desfazer último ação (Ctrl+Z)',
+	    validationCannotMove: 'Não pode mover um campo como filho dele mesmo',
+	    autoType: 'Campo do tipo "auto". ' +
+	      'O tipo do campo é determinao automaticamente a partir do seu valor ' +
+	      'e pode ser texto, número, verdade/falso ou nulo.',
+	    objectType: 'Campo do tipo "objeto". ' +
+	      'Um objeto contém uma lista de pares com chave e valor.',
+	    arrayType: 'Campo do tipo "lista". ' +
+	      'Uma lista contem uma coleção de valores ordenados.',
+	    stringType: 'Campo do tipo "string". ' +
+	      'Campo do tipo nao é determinado através do seu valor, ' +
+	      'mas sempre retornara um texto.'
 	  }
 	};
 
 	var _defaultLang = 'en';
 	var _lang;
-	var userLang = typeof navigator !== 'undefined'
-	    ? navigator.language || navigator.userLanguage
-	    : undefined;
+	var userLang = typeof navigator !== 'undefined' ?
+	  navigator.language || navigator.userLanguage :
+	  undefined;
 	_lang = _locales.find(function (l) {
 	  return l === userLang;
 	});
@@ -6735,6 +6818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ContextMenu = __webpack_require__(10);
 	var translate = __webpack_require__(15).translate;
+	var util = __webpack_require__(12);
 
 	/**
 	 * Creates a component that visualize path selection in tree based editors
@@ -6747,6 +6831,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.root = root;
 	    this.path = document.createElement('div');
 	    this.path.className = 'jsoneditor-treepath';
+	    this.path.setAttribute('tabindex',0);
+	    this.contentMenuClicked;
 	    container.appendChild(this.path);
 	    this.reset();
 	  }
@@ -6785,6 +6871,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        sepEl.innerHTML = '&#9658;';
 
 	        sepEl.onclick = function () {
+	          me.contentMenuClicked = true;
 	          var items = [];
 	          pathObj.children.forEach(function (child) {
 	            items.push({
@@ -6794,19 +6881,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	          });
 	          var menu = new ContextMenu(items);
-	          menu.show(sepEl, me.root);
+	          menu.show(sepEl, me.root, true);
 	        };
 
 	        me.path.appendChild(sepEl);
 	      }
 
 	      if(idx === pathObjs.length - 1) {
-	        var leftRectPos = (sepEl || pathEl).getBoundingClientRect().left;
+	        var leftRectPos = (sepEl || pathEl).getBoundingClientRect().right;
 	        if(me.path.offsetWidth < leftRectPos) {
 	          me.path.scrollLeft = leftRectPos;
 	        }
+
+	        if (me.path.scrollLeft) {
+	          var showAllBtn = document.createElement('span');
+	          showAllBtn.className = 'jsoneditor-treepath-show-all-btn';
+	          showAllBtn.title = 'show all path';
+	          showAllBtn.innerHTML = '...';
+	          showAllBtn.onclick = _onShowAllClick.bind(me, pathObjs);
+	          me.path.insertBefore(showAllBtn, me.path.firstChild);
+	        }
 	      }
 	    });
+	  }
+
+	  function _onShowAllClick(pathObjs) {
+	    me.contentMenuClicked = false;
+	    util.addClassName(me.path, 'show-all');
+	    me.path.style.width = me.path.parentNode.getBoundingClientRect().width - 10 + 'px';
+	    me.path.onblur = function() {
+	      if (me.contentMenuClicked) {
+	        me.contentMenuClicked = false;
+	        me.path.focus();
+	        return;
+	      }
+	      util.removeClassName(me.path, 'show-all');
+	      me.path.onblur = undefined;
+	      me.path.style.width = '';
+	      me.setPath(pathObjs);
+	    };
 	  }
 
 	  function _onSegmentClick(pathObj) {
@@ -6898,6 +7011,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  this._debouncedOnChangeValue = util.debounce(this._onChangeValue.bind(this), Node.prototype.DEBOUNCE_INTERVAL);
 	  this._debouncedOnChangeField = util.debounce(this._onChangeField.bind(this), Node.prototype.DEBOUNCE_INTERVAL);
+
+	  // starting value for visible children
+	  this.visibleChilds = this.getMaxVisibleChilds();
 	}
 
 	// debounce interval for keyboard input in milliseconds
@@ -6906,11 +7022,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	// search will stop iterating as soon as the max is reached
 	Node.prototype.MAX_SEARCH_RESULTS = 999;
 
-	// number of visible childs rendered initially in large arrays/objects (with a "show more" button to show more)
-	Node.prototype.MAX_VISIBLE_CHILDS = 100;
+	// default number of child nodes to display 
+	var DEFAULT_MAX_VISIBLE_CHILDS = 100;
 
-	// default value for the max visible childs of large arrays
-	Node.prototype.visibleChilds = Node.prototype.MAX_VISIBLE_CHILDS;
+	Node.prototype.getMaxVisibleChilds = function() {
+	  return (this.editor && this.editor.options && this.editor.options.maxVisibleChilds)
+	      ? this.editor.options.maxVisibleChilds
+	      : DEFAULT_MAX_VISIBLE_CHILDS;
+	}
 
 	/**
 	 * Determine whether the field and/or value of this node are editable
@@ -6994,7 +7113,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Find child node by serializable path
-	 * @param {Array<String>} path 
+	 * @param {Array<String>} path
 	 */
 	Node.prototype.findNodeByPath = function (path) {
 	  if (!path) {
@@ -7036,7 +7155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typedef {{value: String|Object|Number|Boolean, path: Array.<String|Number>}} SerializableNode
-	 * 
+	 *
 	 * Returns serializable representation for the node
 	 * @return {SerializableNode}
 	 */
@@ -7172,7 +7291,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    tdError.appendChild(button);
 	  }
 	  else {
-	    util.removeClassName(this.dom.tr, 'jsoneditor-validation-error');
+	    if (this.dom.tr) {
+	      util.removeClassName(this.dom.tr, 'jsoneditor-validation-error');
+	    }
 
 	    if (tdError) {
 	      this.dom.tdError.parentNode.removeChild(this.dom.tdError);
@@ -7275,7 +7396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          child = new Node(this.editor, {
 	            value: childValue
 	          });
-	          visible = i < this.MAX_VISIBLE_CHILDS;
+	          visible = i < this.getMaxVisibleChilds();
 	          this.appendChild(child, visible, notUpdateDom);
 	        }
 	      }
@@ -7319,7 +7440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              field: childField,
 	              value: childValue
 	            });
-	            visible = i < this.MAX_VISIBLE_CHILDS;
+	            visible = i < this.getMaxVisibleChilds();
 	            this.appendChild(child, visible, notUpdateDom);
 	          }
 	        }
@@ -7392,7 +7513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          child = new Node(this.editor, {
 	            internalValue: childValue
 	          });
-	          visible = i < this.MAX_VISIBLE_CHILDS;
+	          visible = i < this.getMaxVisibleChilds();
 	          this.appendChild(child, visible, notUpdateDom);
 	        }
 	      }
@@ -7427,7 +7548,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            field: childValue.field,
 	            internalValue: childValue.value
 	          });
-	          visible = i < this.MAX_VISIBLE_CHILDS;
+	          visible = i < this.getMaxVisibleChilds();
 	          this.appendChild(child, visible, notUpdateDom);
 	        }
 	      }
@@ -7753,10 +7874,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  // reset max visible childs
 	  if (!options || options.resetVisibleChilds) {
-	    delete this.visibleChilds;
+	    this.visibleChilds = this.getMaxVisibleChilds();
 	  }
 	};
 
+	/**
+	 * set custom css classes on a node
+	 */
+	Node.prototype._updateCssClassName = function () {
+	  if(this.dom.field
+	    && this.editor 
+	    && this.editor.options 
+	    && typeof this.editor.options.onClassName ==='function'
+	    && this.dom.tree){              
+	      util.removeAllClassNames(this.dom.tree);              
+	      var addClasses = this.editor.options.onClassName({ path: this.getPath(), field: this.field, value: this.value }) || "";
+	      util.addClassName(this.dom.tree, "jsoneditor-values " + addClasses);
+	  }
+	};
+
+	Node.prototype.recursivelyUpdateCssClassesOnNodes = function () {  
+	  this._updateCssClassName();
+	  if (this.childs !== 'undefined') {
+	    for (var i = 0; i < this.childs.length; i++) {
+	      this.childs[i].recursivelyUpdateCssClassesOnNodes();
+	    }
+	  }  
+	}
 
 	/**
 	 * Goes through the path from the node to the root and ensures that it is expanded
@@ -8023,7 +8167,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ? node.index
 	        : node.parent.childs.indexOf(node);
 	    while (node.parent.visibleChilds < index + 1) {
-	      node.parent.visibleChilds += Node.prototype.MAX_VISIBLE_CHILDS;
+	      node.parent.visibleChilds += this.getMaxVisibleChilds();
 	    }
 
 	    // expand the parent itself
@@ -8246,7 +8390,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.childs = [];
 	      }
 
-	      this.childs.forEach(function (child, index) {
+	      this.childs.forEach(function (child) {
 	        child.clearDom();
 	        delete child.index;
 	        child.fieldEditable = true;
@@ -8319,7 +8463,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  else if (this.type === 'object') {
-	    if (typeof json !== 'object') {
+	    if (typeof json !== 'object' || !json) {
 	      return false;
 	    }
 
@@ -9280,6 +9424,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      domField.contentEditable = this.editable.field;
 	      domField.spellcheck = false;
 	      domField.className = 'jsoneditor-field';
+	      // add title from schema description to show the tips for user input
+	      domField.title = Node._findSchema(this.editor.options.schema || {}, this.editor.options.schemaRefs || {}, this.getPath())['description'] || '';
 	    }
 	    else {
 	      // parent is an array this is the root node
@@ -9308,13 +9454,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // apply value to DOM
 	  var domValue = this.dom.value;
 	  if (domValue) {
-	    var count = this.childs ? this.childs.length : 0;
 	    if (this.type == 'array') {
-	      domValue.innerHTML = '[' + count + ']';
+	      this.updateNodeName();
 	      util.addClassName(this.dom.tr, 'jsoneditor-expandable');
 	    }
 	    else if (this.type == 'object') {
-	      domValue.innerHTML = '{' + count + '}';
+	      this.updateNodeName();
 	      util.addClassName(this.dom.tr, 'jsoneditor-expandable');
 	    }
 	    else {
@@ -9326,6 +9471,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // update field and value
 	  this._updateDomField();
 	  this._updateDomValue();
+	   
+	  this._updateCssClassName();
 
 	  // update childs indexes
 	  if (options && options.updateIndexes === true) {
@@ -9366,8 +9513,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  //Locating the schema of the node and checking for any enum type
 	  if(this.editor && this.editor.options) {
 	    // find the part of the json schema matching this nodes path
-	    this.schema = this.editor.options.schema 
-	        ? Node._findSchema(this.editor.options.schema, this.getPath())
+	    this.schema = this.editor.options.schema
+	        // fix childSchema with $ref, and not display the select element on the child schema because of not found enum
+	        ? Node._findSchema(this.editor.options.schema, this.editor.options.schemaRefs || {}, this.getPath())
 	        : null;
 	    if (this.schema) {
 	      this.enum = Node._findEnum(this.schema);
@@ -9404,11 +9552,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Return the part of a JSON schema matching given path.
 	 * @param {Object} schema
+	 * @param {Object} schemaRefs
 	 * @param {Array.<string | number>} path
 	 * @return {Object | null}
 	 * @private
 	 */
-	Node._findSchema = function (schema, path) {
+	Node._findSchema = function (schema, schemaRefs, path) {
 	  var childSchema = schema;
 	  var foundSchema = childSchema;
 
@@ -9423,27 +9572,34 @@ return /******/ (function(modules) { // webpackBootstrap
 	    for (var i = 0; i < path.length && childSchema; i++) {
 	      var key = path[i];
 
-	      if (typeof key === 'string' && childSchema.patternProperties && i == path.length - 1) {
+	      // fix childSchema with $ref, and not display the select element on the child schema because of not found enum
+	      if (typeof key === 'string' && childSchema['$ref']) {
+	        childSchema = schemaRefs[childSchema['$ref']];
+	        if (childSchema) {
+	          foundSchema = Node._findSchema(childSchema, schemaRefs, path.slice(i, path.length));
+	        }
+	      }
+	      else if (typeof key === 'string' && childSchema.patternProperties && i == path.length - 1) {
 	        for (var prop in childSchema.patternProperties) {
-	          foundSchema = Node._findSchema(childSchema.patternProperties[prop], path.slice(i, path.length));
+	          foundSchema = Node._findSchema(childSchema.patternProperties[prop], schemaRefs, path.slice(i, path.length));
 	        }
 	      }
 	      else if (childSchema.items && childSchema.items.properties) {
 	        childSchema = childSchema.items.properties[key];
 	        if (childSchema) {
-	          foundSchema = Node._findSchema(childSchema, path.slice(i, path.length));
+	          foundSchema = Node._findSchema(childSchema, schemaRefs, path.slice(i, path.length));
 	        }
 	      }
 	      else if (typeof key === 'string' && childSchema.properties) {
 	        childSchema = childSchema.properties[key] || null;
 	        if (childSchema) {
-	          foundSchema = Node._findSchema(childSchema, path.slice(i, path.length));
+	          foundSchema = Node._findSchema(childSchema, schemaRefs, path.slice(i, path.length));
 	        }
 	      }
 	      else if (typeof key === 'number' && childSchema.items) {
 	        childSchema = childSchema.items;
 	        if (childSchema) {
-	          foundSchema = Node._findSchema(childSchema, path.slice(i, path.length));
+	          foundSchema = Node._findSchema(childSchema, schemaRefs, path.slice(i, path.length));
 	        }
 	      }
 	    }
@@ -9807,7 +9963,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    // For leaf values, include value
 	    if (!this._hasChilds() &&element === this.dom.value) {
-	      info.value = this.getValue();  
+	      info.value = this.getValue();
 	    }
 	    this.editor.options.onEvent(info, event);
 	  }
@@ -10222,7 +10378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    });
 	  }
-	}
+	};
 
 	/**
 	 * Remove nodes
@@ -10720,7 +10876,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  return false;
-	}
+	};
 
 	/**
 	 * Remove the focus of given nodes, and move the focus to the (a) node before,
@@ -11313,6 +11469,49 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  return escaped;
 	};
+
+	/**
+	 * update the object name according to the callback onNodeName
+	 * @private
+	 */
+	Node.prototype.updateNodeName = function () {
+	  var count = this.childs ? this.childs.length : 0;
+	  var nodeName;
+	  if (this.type === 'object' || this.type === 'array') {
+	    if (this.editor.options.onNodeName) {
+	      try {
+	        nodeName = this.editor.options.onNodeName({
+	          path: this.getPath(),
+	          size: count,
+	          type: this.type
+	        });
+	      }
+	      catch (err) {
+	        console.error('Error in onNodeName callback: ', err);
+	      }
+	    }
+
+	    this.dom.value.innerHTML = (this.type === 'object')
+	      ? ('{' + (nodeName || count) + '}')
+	      : ('[' + (nodeName || count) + ']');
+	  }
+	}
+
+	/**
+	 * update recursively the object's and its children's name.
+	 * @private
+	 */
+	Node.prototype.recursivelyUpdateNodeName = function () {
+	  if (this.expanded) {
+	    this.updateNodeName();
+	    if (this.childs !== 'undefined') {
+	      var i;
+	      for (i in this.childs) {
+	        this.childs[i].recursivelyUpdateNodeName();
+	      }
+	    }
+	  }
+	}
 
 	// helper function to get the internal path of a node
 	function getInternalPath (node) {
@@ -13361,8 +13560,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	      showMoreButton.href = '#';
 	      showMoreButton.onclick = function (event) {
 	        // TODO: use callback instead of accessing a method of the parent
-	        parent.visibleChilds = Math.floor(parent.visibleChilds / parent.MAX_VISIBLE_CHILDS + 1) *
-	            parent.MAX_VISIBLE_CHILDS;
+	        parent.visibleChilds = Math.floor(parent.visibleChilds / parent.getMaxVisibleChilds() + 1) *
+	            parent.getMaxVisibleChilds();
 	        me.updateDom();
 	        parent.showChilds();
 
@@ -16696,6 +16895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var ContextMenu = __webpack_require__(10);
+	var translate = __webpack_require__(15).translate;
 
 	/**
 	 * Create a select box to be used in the editor menu's, which allows to switch mode
@@ -16709,36 +16909,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // available modes
 	  var availableModes = {
 	    code: {
-	      'text': 'Code',
-	      'title': 'Switch to code highlighter',
+	      'text': translate('modeCodeText'),
+	      'title': translate('modeCodeTitle'),
 	      'click': function () {
 	        onSwitch('code')
 	      }
 	    },
 	    form: {
-	      'text': 'Form',
-	      'title': 'Switch to form editor',
+	      'text': translate('modeFormText'),
+	      'title': translate('modeFormTitle'),
 	      'click': function () {
 	        onSwitch('form');
 	      }
 	    },
 	    text: {
-	      'text': 'Text',
-	      'title': 'Switch to plain text editor',
+	      'text': translate('modeTextText'),
+	      'title': translate('modeTextTitle'),
 	      'click': function () {
 	        onSwitch('text');
 	      }
 	    },
 	    tree: {
-	      'text': 'Tree',
-	      'title': 'Switch to tree editor',
+	      'text': translate('modeTreeText'),
+	      'title': translate('modeTreeTitle'),
 	      'click': function () {
 	        onSwitch('tree');
 	      }
 	    },
 	    view: {
-	      'text': 'View',
-	      'title': 'Switch to tree view',
+	      'text': translate('modeViewText'),
+	      'title': translate('modeViewTitle'),
 	      'click': function () {
 	        onSwitch('view');
 	      }
@@ -16808,7 +17008,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	module.exports = ModeSwitcher;
-
 
 /***/ },
 /* 27 */
@@ -17244,9 +17443,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // read options
 	  options = options || {};
 	  
-	  if(typeof options.statusBar === 'undefined') {
+	  if (typeof options.statusBar === 'undefined') {
 	    options.statusBar = true;
 	  }
+
+	  // setting default for textmode
+	  options.mainMenuBar = options.mainMenuBar !== false;
 
 	  this.options = options;
 
@@ -17295,6 +17497,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.validateSchema = null;
 	  this.validationSequence = 0;
 	  this.annotations = [];
+	  /**
+	   * Visibility of validation error table
+	   * @type {Boolean|undefined} undefined means default behavior for mode
+	   */
+	  this.errorTableVisible = undefined;
 
 	  // create a debounced validate function
 	  this._debouncedValidate = util.debounce(this.validate.bind(this), this.DEBOUNCE_INTERVAL);
@@ -17311,67 +17518,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.frame.onkeydown = function (event) {
 	    me._onKeyDown(event);
 	  };
-	  
-	  // create menu
-	  this.menu = document.createElement('div');
-	  this.menu.className = 'jsoneditor-menu';
-	  this.frame.appendChild(this.menu);
 
-	  // create format button
-	  var buttonFormat = document.createElement('button');
-	  buttonFormat.type = 'button';
-	  buttonFormat.className = 'jsoneditor-format';
-	  buttonFormat.title = 'Format JSON data, with proper indentation and line feeds (Ctrl+\\)';
-	  this.menu.appendChild(buttonFormat);
-	  buttonFormat.onclick = function () {
-	    try {
-	      me.format();
-	      me._onChange();
-	    }
-	    catch (err) {
-	      me._onError(err);
-	    }
-	  };
+	  this.content = document.createElement('div');
+	  this.content.className = 'jsoneditor-outer';
 
-	  // create compact button
-	  var buttonCompact = document.createElement('button');
-	  buttonCompact.type = 'button';
-	  buttonCompact.className = 'jsoneditor-compact';
-	  buttonCompact.title = 'Compact JSON data, remove all whitespaces (Ctrl+Shift+\\)';
-	  this.menu.appendChild(buttonCompact);
-	  buttonCompact.onclick = function () {
-	    try {
-	      me.compact();
-	      me._onChange();
-	    }
-	    catch (err) {
-	      me._onError(err);
-	    }
-	  };
+	  if (this.options.mainMenuBar) {
+	    util.addClassName(this.content, 'has-main-menu-bar');
 
-	  // create repair button
-	  var buttonRepair = document.createElement('button');
-	  buttonRepair.type = 'button';
-	  buttonRepair.className = 'jsoneditor-repair';
-	  buttonRepair.title = 'Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON.';
-	  this.menu.appendChild(buttonRepair);
-	  buttonRepair.onclick = function () {
-	    try {
-	      me.repair();
-	      me._onChange();
-	    }
-	    catch (err) {
-	      me._onError(err);
-	    }
-	  };
+	    // create menu
+	    this.menu = document.createElement('div');
+	    this.menu.className = 'jsoneditor-menu';
+	    this.frame.appendChild(this.menu);
 
-	  // create mode box
-	  if (this.options && this.options.modes && this.options.modes.length) {
-	    this.modeSwitcher = new ModeSwitcher(this.menu, this.options.modes, this.options.mode, function onSwitch(mode) {
-	      // switch mode and restore focus
-	      me.setMode(mode);
-	      me.modeSwitcher.focus();
-	    });
+	    // create format button
+	    var buttonFormat = document.createElement('button');
+	    buttonFormat.type = 'button';
+	    buttonFormat.className = 'jsoneditor-format';
+	    buttonFormat.title = 'Format JSON data, with proper indentation and line feeds (Ctrl+\\)';
+	    this.menu.appendChild(buttonFormat);
+	    buttonFormat.onclick = function () {
+	      try {
+	        me.format();
+	        me._onChange();
+	      }
+	      catch (err) {
+	        me._onError(err);
+	      }
+	    };
+
+	    // create compact button
+	    var buttonCompact = document.createElement('button');
+	    buttonCompact.type = 'button';
+	    buttonCompact.className = 'jsoneditor-compact';
+	    buttonCompact.title = 'Compact JSON data, remove all whitespaces (Ctrl+Shift+\\)';
+	    this.menu.appendChild(buttonCompact);
+	    buttonCompact.onclick = function () {
+	      try {
+	        me.compact();
+	        me._onChange();
+	      }
+	      catch (err) {
+	        me._onError(err);
+	      }
+	    };
+
+	    // create repair button
+	    var buttonRepair = document.createElement('button');
+	    buttonRepair.type = 'button';
+	    buttonRepair.className = 'jsoneditor-repair';
+	    buttonRepair.title = 'Repair JSON: fix quotes and escape characters, remove comments and JSONP notation, turn JavaScript objects into JSON.';
+	    this.menu.appendChild(buttonRepair);
+	    buttonRepair.onclick = function () {
+	      try {
+	        me.repair();
+	        me._onChange();
+	      }
+	      catch (err) {
+	        me._onError(err);
+	      }
+	    };
+
+	    // create mode box
+	    if (this.options && this.options.modes && this.options.modes.length) {
+	      this.modeSwitcher = new ModeSwitcher(this.menu, this.options.modes, this.options.mode, function onSwitch(mode) {
+	        // switch mode and restore focus
+	        me.setMode(mode);
+	        me.modeSwitcher.focus();
+	      });
+	    }
+
+	    if (this.mode == 'code') {
+	      var poweredBy = document.createElement('a');
+	      poweredBy.appendChild(document.createTextNode('powered by ace'));
+	      poweredBy.href = 'http://ace.ajax.org';
+	      poweredBy.target = '_blank';
+	      poweredBy.className = 'jsoneditor-poweredBy';
+	      poweredBy.onclick = function () {
+	        // TODO: this anchor falls below the margin of the content,
+	        // therefore the normal a.href does not work. We use a click event
+	        // for now, but this should be fixed.
+	        window.open(poweredBy.href, poweredBy.target);
+	      };
+	      this.menu.appendChild(poweredBy);
+	    }
 	  }
 
 	  var emptyNode = {};
@@ -17379,10 +17608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  && typeof(this.options.onEditable === 'function')
 	  && !this.options.onEditable(emptyNode));
 
-	  this.content = document.createElement('div');
-	  this.content.className = 'jsoneditor-outer';
 	  this.frame.appendChild(this.content);
-
 	  this.container.appendChild(this.frame);
 
 	  if (this.mode == 'code') {
@@ -17427,19 +17653,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	    }
 
-	    var poweredBy = document.createElement('a');
-	    poweredBy.appendChild(document.createTextNode('powered by ace'));
-	    poweredBy.href = 'http://ace.ajax.org';
-	    poweredBy.target = '_blank';
-	    poweredBy.className = 'jsoneditor-poweredBy';
-	    poweredBy.onclick = function () {
-	      // TODO: this anchor falls below the margin of the content,
-	      // therefore the normal a.href does not work. We use a click event
-	      // for now, but this should be fixed.
-	      window.open(poweredBy.href, poweredBy.target);
-	    };
-	    this.menu.appendChild(poweredBy);
-
 	    // register onchange event
 	    aceEditor.on('change', this._onChange.bind(this));
 	    aceEditor.on('changeSelection', this._onSelect.bind(this));
@@ -17472,12 +17685,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  this.dom.validationErrorsContainer = validationErrorsContainer;
 	  this.frame.appendChild(validationErrorsContainer);
 
-	  var additinalErrorsIndication = document.createElement('div');
-	  additinalErrorsIndication.style.display = 'none';
-	  additinalErrorsIndication.className = "jsoneditor-additional-errors fadein";
-	  additinalErrorsIndication.innerHTML = "Scroll for more &#9663;";
-	  this.dom.additinalErrorsIndication = additinalErrorsIndication;
-	  validationErrorsContainer.appendChild(additinalErrorsIndication);
+	  var additionalErrorsIndication = document.createElement('div');
+	  additionalErrorsIndication.style.display = 'none';
+	  additionalErrorsIndication.className = "jsoneditor-additional-errors fadein";
+	  additionalErrorsIndication.innerHTML = "Scroll for more &#9663;";
+	  this.dom.additionalErrorsIndication = additionalErrorsIndication;
+	  validationErrorsContainer.appendChild(additionalErrorsIndication);
 
 	  if (options.statusBar) {
 	    util.addClassName(this.content, 'has-status-bar');
@@ -17631,20 +17844,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * Event handler for mousedown.
-	 * @param {Event} event
 	 * @private
 	 */
-	textmode._onMouseDown = function (event) {
+	textmode._onMouseDown = function () {
 	  this._updateCursorInfo();
 	  this._emitSelectionChange();
 	};
 
 	/**
 	 * Event handler for blur.
-	 * @param {Event} event
 	 * @private
 	 */
-	textmode._onBlur = function (event) {
+	textmode._onBlur = function () {
 	  var me = this;
 	  // this allows to avoid blur when clicking inner elements (like the errors panel)
 	  // just make sure to set the isFocused to true on the inner element onclick callback
@@ -17684,7 +17895,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        line: line,
 	        column: col,
 	        count: count
-	      }
+	      };
 
 	      if(me.options.statusBar) {
 	        updateDisplay();
@@ -17703,7 +17914,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      line: line,
 	      column: col,
 	      count: count
-	    }
+	    };
 
 	    if(this.options.statusBar) {
 	      updateDisplay();
@@ -17731,7 +17942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var currentSelection = this.getTextSelection();
 	    this._selectionChangedHandler(currentSelection.start, currentSelection.end, currentSelection.text);
 	  }
-	}
+	};
 
 	/**
 	 * refresh ERROR annotations state
@@ -17746,7 +17957,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var errEnnotations = session.getAnnotations().filter(function(annotation) {return annotation.type === 'error' });
 	    session.setAnnotations(errEnnotations);
 	  }
-	}
+	};
 
 	/**
 	 * Destroy the editor. Clean up DOM, event listeners, and web workers.
@@ -17990,7 +18201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }
 	  else {
-	    this._renderErrors(parseErrors || []);
+	    this._renderErrors(parseErrors || [], true);
 	  }
 	};
 
@@ -18043,15 +18254,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return Promise.resolve(null);
 	};
 
-	textmode._renderErrors = function(errors) {
+	textmode._renderErrors = function(errors, noValidation) {
 	  // clear all current errors
 	  var me = this;
 	  var validationErrorsCount = 0;
 
+	  this.errorTableVisible = (typeof this.errorTableVisible === 'undefined') ? !this.aceEditor : this.errorTableVisible;
+
 	  if (this.dom.validationErrors) {
 	    this.dom.validationErrors.parentNode.removeChild(this.dom.validationErrors);
 	    this.dom.validationErrors = null;
-	    this.dom.additinalErrorsIndication.style.display = 'none';
+	    this.dom.additionalErrorsIndication.style.display = 'none';
 
 	    this.content.style.marginBottom = '';
 	    this.content.style.paddingBottom = '';
@@ -18087,8 +18300,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      this._refreshAnnotations();
 
-	    } else {
-	      var validationErrors = document.createElement('div');
+	    }
+
+	    // keep default behavior for parse errors
+	    if (noValidation ? !this.aceEditor : this.errorTableVisible) {
+	       var validationErrors = document.createElement('div');
 	      validationErrors.innerHTML = '<table class="jsoneditor-text-errors"><tbody></tbody></table>';
 	      var tbody = validationErrors.getElementsByTagName('tbody')[0];
 
@@ -18136,12 +18352,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	      this.dom.validationErrors = validationErrors;
 	      this.dom.validationErrorsContainer.appendChild(validationErrors);
-	      this.dom.additinalErrorsIndication.title = errors.length + " errors total";
+	      this.dom.additionalErrorsIndication.title = errors.length + " errors total";
 
 	      if (this.dom.validationErrorsContainer.clientHeight < this.dom.validationErrorsContainer.scrollHeight) {
-	        this.dom.additinalErrorsIndication.style.display = 'block';
+	        this.dom.additionalErrorsIndication.style.display = 'block';
 	        this.dom.validationErrorsContainer.onscroll = function () {
-	          me.dom.additinalErrorsIndication.style.display = 
+	          me.dom.additionalErrorsIndication.style.display =
 	            (me.dom.validationErrorsContainer.clientHeight > 0 && me.dom.validationErrorsContainer.scrollTop === 0) ? 'block' : 'none';
 	        }
 	      } else {
@@ -18151,7 +18367,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var height = this.dom.validationErrorsContainer.clientHeight + (this.dom.statusBar ? this.dom.statusBar.clientHeight : 0);
 	      this.content.style.marginBottom = (-height) + 'px';
 	      this.content.style.paddingBottom = height + 'px';
+	    } else {
+	      validationErrorsCount = errors.reduce(function (acc, curr) {return (curr.type === 'validation' ? ++acc: acc)}, 0);
 	    }
+	    
 	  } else {
 	    if (this.aceEditor) {
 	      this.annotations = [];
@@ -18167,6 +18386,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (showIndication) {
 	      this.validationErrorIndication.validationErrorCount.innerText = validationErrorsCount;
 	      this.validationErrorIndication.validationErrorIcon.title = validationErrorsCount + ' schema validation error(s) found';
+	      this.validationErrorIndication.validationErrorCount.onclick = this.validationErrorIndication.validationErrorIcon.onclick = this._toggleErrorTableVisibility.bind(this);
 	    }
 	  }
 
@@ -18175,6 +18395,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var force = false;
 	    this.aceEditor.resize(force);
 	  }
+	};
+
+	textmode._toggleErrorTableVisibility = function () {
+	  this.errorTableVisible = !this.errorTableVisible;
+	  this.validate();
 	};
 
 	/**
@@ -18230,13 +18455,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	/**
-	 * Callback registraion for selection change
+	 * Callback registration for selection change
 	 * @param {selectionCallback} callback
 	 * 
 	 * @callback selectionCallback
-	 * @param {{row:Number, column:Number}} startPos selection start position
-	 * @param {{row:Number, column:Number}} endPos selected end position
-	 * @param {String} text selected text
 	 */
 	textmode.onTextSelectionChange = function (callback) {
 	  if (typeof callback === 'function') {
@@ -18284,6 +18506,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    };
 	    this.aceEditor.selection.setRange(range);
+	    this.aceEditor.scrollToLine(startPos.row - 1, true);
 	  }
 	};
 

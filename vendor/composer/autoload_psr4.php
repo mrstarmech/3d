@@ -17,7 +17,6 @@ return array(
     'rmrevin\\yii\\fontawesome\\' => array($vendorDir . '/rmrevin/yii2-fontawesome'),
     'phpDocumentor\\Reflection\\' => array($vendorDir . '/phpdocumentor/reflection-common/src', $vendorDir . '/phpdocumentor/reflection-docblock/src', $vendorDir . '/phpdocumentor/type-resolver/src'),
     'omgdef\\multilingual\\' => array($vendorDir . '/omgdef/yii2-multilingual-behavior/src'),
-    'newerton\\fancybox3\\' => array($vendorDir . '/newerton/yii2-fancybox-3'),
     'mihaildev\\elfinder\\' => array($vendorDir . '/mihaildev/yii2-elfinder'),
     'mihaildev\\ckeditor\\' => array($vendorDir . '/mihaildev/yii2-ckeditor'),
     'kdn\\yii2\\' => array($vendorDir . '/kdn/yii2-json-editor/src'),
