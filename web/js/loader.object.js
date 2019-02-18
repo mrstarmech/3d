@@ -263,6 +263,9 @@ $('.' + classNameContainer)
     .on('dblclick', '.menu-object', function () {
         return false;
     })
+    .on('dblclick', '.zoom-value', function () {
+        return false;
+    })
     .on('input change', '.zoom-value', function () {
         t.camera.zoom = $(this).val();
         t.camera.updateProjectionMatrix();
