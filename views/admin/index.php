@@ -41,7 +41,7 @@ use yii\widgets\LinkPager;
 
                         </div>
                     </a>
-                    <span><?= $object->name?></span><? print_r(json_decode($object->setting)->poster);?>
+                    <span><?= $object->name?></span>
                 </div>
             </div>
         <?php endforeach; ?>
