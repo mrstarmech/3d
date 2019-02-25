@@ -144,7 +144,13 @@ function viewer(model, options, labels) {
         disabledError: 'webGL disabled.'
     };
 
-    function appendTo(object) {
+    var externalCallback = function () {};
+
+    function appendTo(object, callback) {
+        if (typeof callback === "function") {
+            externalCallback = callback;
+        }
+
         if (document.getElementById(object)) {
             viewerContainer = document.getElementById(object);
         } else if (document.getElementsByClassName(object)) {
@@ -291,6 +297,7 @@ function viewer(model, options, labels) {
 
                 addLabels();
                 animate();
+                externalCallback();
             }
             ;
         });

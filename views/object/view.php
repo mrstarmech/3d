@@ -40,33 +40,32 @@ $this->registerJs($script, yii\web\View::POS_READY);
 ?>
 
 
-<div class="clearfix">
-    <div class="col-xs-12 col-md-6 tree-object">
-        <div class="container-object" data-state="static">
-            <div class="canvas-object"></div>
-        </div>
-        <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR) and !empty($object->tech_info)): ?>
-            <div class="alert alert-info">
-                <?= nl2br($object->tech_info) ?>
-            </div>
-        <?php endif; ?>
+<div class="pull-left tree-object">
+    <div class="container-object" data-state="static">
+        <div class="canvas-object"></div>
     </div>
-    <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
-        <div class="pull-right">
-            <?= Html::a(Yii::t('app', 'Edit'), ['admin/edit-object-general', 'id' => $object->id], ['class' => 'btn btn-primary']) ?>
-        </div>
-    <?php endif; ?>
-    <h1><?= $this->title ?></h1>
-    <?= $object->description ?>
 </div>
+<?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
+    <div class="pull-right">
+        <?= Html::a(Yii::t('app', 'Edit'), ['admin/edit-object-general', 'id' => $object->id], ['class' => 'btn btn-primary']) ?>
+    </div>
+<?php endif; ?>
+<h1><?= $this->title ?></h1>
+<?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR) and !empty($object->tech_info)): ?>
+    <div class="tech-info">
+        <i><?= nl2br($object->tech_info) ?></i>
+    </div>
+<?php endif; ?>
+<?= $object->description ?>
+<div class="clearfix"></div>
 
-<?php if($categoryId): ?>
+<?php if ($categoryId): ?>
     <div class="clearfix">
-        <?php if($objectPrev): ?>
-            <?= Html::a('<i class="fas fa-backward"></i> ' . $objectPrev->name, ['/object/view', 'categoryId' => $categoryId, 'id' => $objectPrev->link], ['class' => 'pull-left btn btn-default'])?>
+        <?php if ($objectPrev): ?>
+            <?= Html::a('<i class="fas fa-backward"></i> ' . $objectPrev->name, ['/object/view', 'categoryId' => $categoryId, 'id' => $objectPrev->link], ['class' => 'pull-left btn btn-default']) ?>
         <?php endif; ?>
-        <?php if($objectNext): ?>
-            <?= Html::a($objectNext->name . ' <i class="fas fa-forward"></i>', ['/object/view', 'categoryId' => $categoryId, 'id' => $objectNext->link], ['class' => 'pull-right btn btn-default'])?>
+        <?php if ($objectNext): ?>
+            <?= Html::a($objectNext->name . ' <i class="fas fa-forward"></i>', ['/object/view', 'categoryId' => $categoryId, 'id' => $objectNext->link], ['class' => 'pull-right btn btn-default']) ?>
         <?php endif; ?>
 
     </div>

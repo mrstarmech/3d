@@ -13,7 +13,7 @@ class View3dAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/loader.object.css',
+        'css/loader.object.css?201902251625',
         'css/jquery.fancybox.min.css',
         'css/colorpicker.css',
     ];
