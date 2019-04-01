@@ -340,34 +340,15 @@ class Object extends ActiveRecord
         return empty($this->sef) ? $this->id : $this->sef;
     }
 
-    public static function deleteDir($dirPath)
+    public static function deleteDir($dir)
     {
-        if (!is_dir($dirPath)) {
-            throw new InvalidArgumentException("$dirPath must be a directory");
+        if (!is_dir($dir)) {
+            throw new InvalidArgumentException("$dir must be a directory");
         }
-        if (substr($dirPath, strlen($dirPath) - 1, 1) != '/') {
-            $dirPath .= '/';
-        }
-        $files = glob($dirPath . '*', GLOB_MARK);
+        $files = array_diff(scandir($dir), array('.','..'));
         foreach ($files as $file) {
-            if (is_dir($file)) {
-                self::deleteDir($file);
-            } else {
-                unlink($file);
-            }
+            (is_dir("$dir/$file") && !is_link($dir)) ? self::deleteDir("$dir/$file") : unlink("$dir/$file");
         }
-        $files = glob($dirPath . '.*', GLOB_MARK);
-        foreach ($files as $file) {
-            if ($file == $dirPath . '.\\' or $file == $dirPath . '..\\') {
-                continue;
-            }
-
-            if (is_dir($file)) {
-                self::deleteDir($file);
-            } else {
-                unlink($file);
-            }
-        }
-        rmdir($dirPath);
+        return rmdir($dir);
     }
 }
