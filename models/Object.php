@@ -133,7 +133,8 @@ class Object extends ActiveRecord
 
     public static function find()
     {
-        return new MultilingualQuery(get_called_class());
+        $called = get_called_class();
+        return new MultilingualQuery($called);
     }
 
     public function scenarios()
