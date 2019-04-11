@@ -80,6 +80,29 @@ class ObjectController extends Controller
         ]);
     }
 
+    public function actionPoster($id)
+    {
+        $query = Object::find()
+            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]]);
+
+        if (!Yii::$app->user->can(User::ROLE_ADMINISTRATOR)) {
+            $query->andWhere([ 'visible' => 1]);
+        }
+        $object = $query->one();
+
+        if (empty($object)) {
+            throw new HttpException(404);
+        }
+        // Следует решить как хранить превью к модели (должно оно совпадать с постером или нет, если нет - сделать интерфейс загрузки)
+        if (empty($object->image)) {
+            if (empty(json_decode($object->setting)->poster)) {
+                $backgroundUrl = '/img/poster.none.jpg';
+            } else $backgroundUrl = json_decode($object->setting)->poster;
+        } else $backgroundUrl = '/' . $object->pathImage . '/' . $object->id . '/' . $object->image;
+        //echo $backgroundUrl;
+        header("Location: " . $backgroundUrl); exit;
+    }
+
     public function actionTest($id)
     {
         $object = Object::find()
