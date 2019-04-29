@@ -13,7 +13,7 @@ class GalleryController extends Controller
     {
         $objects = Object::find()
             ->where(['visible' => 1])
-            ->all();
+            ->all()->orderBy(['id' => SORT_DESC]);
         return $this->render('index',[
             'objects' => $objects,
         ]);
