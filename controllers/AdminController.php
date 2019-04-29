@@ -21,7 +21,7 @@ class AdminController extends AdminDefaultController
         $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 12]);
         $objects = $query->offset($pages->offset)
             ->limit($pages->limit)
-            ->orderBy(['created_at' => SORT_DESC])
+            ->orderBy(['id' => SORT_DESC])
             ->all();
 
         return $this->render('index', [
