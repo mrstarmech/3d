@@ -87,7 +87,7 @@ function menu() {
 
     var inputZoom = '<input type=\'range\' class=\'zoom-value\' step=\'0.1\' min=\'1\' max=\'20\' value=\'1\'>';
     submenu.append('<button class="btn menu-object" data-menu="zoom" data-html="true" data-container=".submenu" data-toggle="popover" data-placement="top" data-content="' + inputZoom + '"><i class="fas fa-search-plus"></i></button>');
-
+    submenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -242,6 +242,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 $(this).popover('destroy');
             }
             buttonActive($(this), object.option.zoom);
+            break;
+        case 'texture-change': 
+            object.option.textureChange = !object.option.textureChange;
+            t.switchEnv('textureChange', object.option.textureChange);
+            
             break;
     }
 });
