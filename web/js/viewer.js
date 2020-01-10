@@ -131,7 +131,8 @@ function viewer(model, options, labels) {
         grid: 'false',
         autorotate: 'false',
         currentLight: '',
-        createLabel: false
+        createLabel: false,
+        textures: []
     };
 
     var label = [],
@@ -316,11 +317,21 @@ function viewer(model, options, labels) {
         if (model.color !== undefined && model.color !== '') {
             parametersMaterial.color = model.color;
         }
+        if(!controllers.currentTexture)
+            controllers.currentTexture = [];
+        
         if (model.texture !== undefined && model.texture !== '') {
-            var texture = new THREE.ImageUtils.loadTexture(model.texture);
+            var modelTextures = model.texture.split(' ');
+            var texture = new THREE.ImageUtils.loadTexture(modelTextures[0]);
             parametersMaterial.map = texture;
+            
+            controllers.currentTexture.push(modelTextures[0]);
+            controllers.textures.push(modelTextures);
+
         } else {
             var texture = new THREE.ImageUtils.loadTexture();
+            controllers.textures.push(['']);
+            controllers.currentTexture.push('');
         }
 
         var material = new THREE.MeshLambertMaterial(parametersMaterial);
@@ -756,6 +767,32 @@ function viewer(model, options, labels) {
                         }
                     });
                 }
+                break;
+            case 'textureChange':
+                if (sceneObjectsMesh.length > 0) {
+                    $.each(sceneObjectsMesh, function (i, item) {
+                        if (item.type === 'Mesh') {
+                            ind = controllers.textures[i].indexOf(controllers.currentTexture[i]);
+                            ind = (ind+1 === controllers.textures[i].length)? 0: ind+1; 
+
+                            newtexture = controllers.textures[i][ind];
+                            controllers.currentTexture[i] = newtexture;
+                            if(newtexture !== '')
+                                newtexture = new THREE.ImageUtils.loadTexture(newtexture);
+                            else
+                                newtexture = new THREE.ImageUtils.loadTexture();   
+                            
+                            item.material = new THREE.MeshLambertMaterial({
+                                specular: 0xffffff,
+                                shininess: 50,
+                                shading: THREE.SmoothShading,
+                                map: newtexture
+                            });
+
+                        }
+                    });
+                }
+                switchEnv('wireframe', options.wireframe);
                 break;
         }
         ;
