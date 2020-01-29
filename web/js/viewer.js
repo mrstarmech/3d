@@ -321,7 +321,11 @@ function viewer(model, options, labels) {
             controllers.currentTexture = [];
         
         if (model.texture !== undefined && model.texture !== '') {
-            var modelTextures = model.texture.split(' ');
+            var modelTextures = [];
+            if(typeof model.texture === 'string')
+                modelTextures[0] = model.texture;
+            else
+                modelTextures = model.texture;
             var texture = new THREE.ImageUtils.loadTexture(modelTextures[0]);
             parametersMaterial.map = texture;
             
