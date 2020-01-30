@@ -207,36 +207,32 @@ class Object extends ActiveRecord
                 $path = $this->pathFile . '/' . $this->id;
                 
                 if (!empty($this->texture) and file_exists($path)) {
-                    if(gettype($this->texture) == 'string')
-                    {
-                        if(file_exists($path . '/' . $this->texture))
-                            unlink($path . '/' . $this->texture);
-                    }
-                    else if(file_exists($path . '/' . 'textures')) {
-                            $this->deleteDir($path . '/' . 'textures');
-                    }
+                        if(file_exists($path . '/' . $this->pathTexture))
+                            $this->deleteDir($path . '/' . $this->pathTexture);
                 }
 
                 $texarray = array();
                 FileHelper::createDirectory($path);
+                FileHelper::createDirectory($path .'/'. $this->pathTexture);
                 if(count($this->fileTexture)==1)
                 {
-                    $this->fileTexture[0]->saveAs($path . '/' . $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension);
+                    $this->fileTexture[0]->saveAs($path . '/'. $this->pathTexture .'/' . $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension);
                     $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
                 }
                 else {
-                    FileHelper::createDirectory($path . '/' . 'textures');
-                    $indx = 0;
+                    $indx = 0;                 
                     foreach ($this->fileTexture as $texfile) {
-                        $texfile->saveAs($path . '/' . 'textures' . '/' . $texfile->baseName . '.' . $texfile->extension);
-                        $texarray[$indx] = '/' . $path . '/' . 'textures' . '/' . $texfile->baseName . '.' . $texfile->extension;
+                        $texfile->saveAs($path .'/'.$this->pathTexture . '/' . $texfile->baseName . '.' . $texfile->extension);
+                        $texarray[$indx] = $texfile->baseName . '.' . $texfile->extension;
                         $indx++;
                     }
                     $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
+                     
                 }
-                $this->setSetting('texture', count($texarray)>0? $texarray: '/' . $path .'/' . $this->texture);
+                $this->setSetting('texture', count($texarray)>0? $texarray: $this->texture);
+                $this->setSetting('pathTexture', '/' . $path . '/' . $this->pathTexture);                 
             }
-
+            
             if ($this->dataImage) {
                 $path = self::PATH_IMAGE . '/' . $this->id;
 //                $option = $this->getOptionArray();
