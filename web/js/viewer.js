@@ -326,8 +326,10 @@ function viewer(model, options, labels) {
                 modelTextures[0] = model.texture;
             else
                 modelTextures = model.texture;
-            for(var i =0; i< modelTextures.length;i++)
-                modelTextures[i] = model.pathTexture + '/' + modelTextures[i];
+            for(var i =0; i< modelTextures.length;i++) {
+                if(modelTextures[i].search('/') == -1)
+                    modelTextures[i] = model.pathTexture + '/' + modelTextures[i];
+            }
             
             var texture = new THREE.ImageUtils.loadTexture(modelTextures[0]);
             parametersMaterial.map = texture;
