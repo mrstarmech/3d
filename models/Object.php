@@ -223,14 +223,13 @@ class Object extends ActiveRecord
                     $indx = 0;                 
                     foreach ($this->fileTexture as $texfile) {
                         $texfile->saveAs($path .'/'.$this->pathTexture . '/' . $texfile->baseName . '.' . $texfile->extension);
-                        $texarray[$indx] = $texfile->baseName . '.' . $texfile->extension;
+                        $texarray[$indx] = '/'.$path .'/'.$this->pathTexture . '/' .$texfile->baseName . '.' . $texfile->extension;
                         $indx++;
                     }
                     $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
                      
                 }
-                $this->setSetting('texture', count($texarray)>0? $texarray: $this->texture);
-                $this->setSetting('pathTexture', '/' . $path . '/' . $this->pathTexture);                 
+                $this->setSetting('texture', count($texarray)>0? '/'.$path .'/'.$this->pathTexture . '/' .$texarray: $this->texture);
             }
             
             if ($this->dataImage) {

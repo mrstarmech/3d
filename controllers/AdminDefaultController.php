@@ -14,6 +14,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\HttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 /**
  * parent controller
@@ -105,8 +106,8 @@ class AdminDefaultController extends Controller
             $texture_extension = stristr($tex, '.');
             $webpFilename = stristr($tex, '.', true) . '.webp';
             $jpgFailename = stristr($tex, '.', true) . '.jpg';
-            $texturePath = $object->pathFileWR . '/' . $object->pathTexture . '/' . $tex;
-            $jpgPath = $object->pathFileWR . '/' .  $object->pathTexture . '/' . $jpgFailename;
+            $texturePath = Url::to('@webroot' .  $tex);
+            $jpgPath = Url::to('@webroot' . $jpgFailename);
 
             if ($texture_extension != "jpg") {
                 $command = "convert $texturePath ".$jpgPath;
@@ -117,7 +118,7 @@ class AdminDefaultController extends Controller
                     Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
                 }
             }
-            $command = "cwebp $texturePath -q 80 -o ".$object->pathFileWR."/". $object->pathTexture . "/" .$webpFilename;
+            $command = "cwebp $texturePath -q 80 -o ".Url::to('@webroot' . $webpFilename);
             exec($command, $output, $return);
 
             if($return !=0){
