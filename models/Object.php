@@ -42,6 +42,7 @@ class Object extends ActiveRecord
 
     public $pathImage = 'uploads';
     public $pathFile = 'objects';
+    public $pathTexture = 'textures';
 
     public $defaultOption = [
         "grid" => false,
