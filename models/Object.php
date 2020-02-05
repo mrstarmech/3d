@@ -230,7 +230,7 @@ class Object extends ActiveRecord
                     $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
                      
                 }
-                $this->setSetting('texture', count($texarray)>0? '/'.$path .'/'.$this->pathTexture . '/' .$texarray: $this->texture);
+                $this->setSetting('texture', count($texarray)>0? $texarray: '/'.$path .'/'.$this->pathTexture . '/' .$this->texture);
             }
             
             if ($this->dataImage) {
