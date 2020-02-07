@@ -14,6 +14,7 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\HttpException;
 use yii\web\UploadedFile;
+use yii\helpers\Url;
 
 /**
  * parent controller
@@ -90,35 +91,51 @@ class AdminDefaultController extends Controller
             throw new HttpException(404);
         }
 
-        $texture_extension = stristr($object->texture, '.');
-        $webpFilename = stristr($object->texture, '.', true) . '.webp';
-        $jpgFailename = stristr($object->texture, '.', true) . '.jpg';
-        $texturePath = $object->pathFileWR . '/' . $object->texture;
-        $jpgPath = $object->pathFileWR . '/' . $jpgFailename;
+        $tex_array = $object->getSettingArray()->texture;
+        if(gettype($tex_array) == 'string'){
+            $te = $tex_array;
+            $tex_array = [];
+            $tex_array[0] = $te;
+        }
+           
+        $webp_array = [];
+        $idx = 0;
+        $ok_count = 0;
+        
+        foreach($tex_array as $tex){        
+            $texture_extension = stristr($tex, '.');
+            $webpFilename = stristr($tex, '.', true) . '.webp';
+            $jpgFailename = stristr($tex, '.', true) . '.jpg';
+            $texturePath = Url::to('@webroot' .  $tex);
+            $jpgPath = Url::to('@webroot' . $jpgFailename);
 
-        if ($texture_extension != "jpg") {
-            $command = "convert $texturePath ".$jpgPath;
-            exec($command, $output, $return);
-            if ($return != 0) {
-                Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
-            } else {
-                Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
+            if ($texture_extension != "jpg") {
+                $command = "convert $texturePath ".$jpgPath;
+                exec($command, $output, $return);
+                if ($return != 0) {
+                    Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в jpeg: $command. " . print_r($output, 1));
+                } else {
+                    Yii::$app->session->setFlash('success', "Конвертации в jpeg успешно выполнена");
+                }
             }
+            $command = "cwebp $texturePath -q 80 -o ".Url::to('@webroot' . $webpFilename);
+            exec($command, $output, $return);
+
+            if($return !=0){
+                $webp_array[$idx] = $tex;
+                Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
+            }
+            else {
+                $ok_count += 1;
+                $webp_array[$idx] = $webpFilename;
+            }
+            $idx++;
         }
 
-
-        $command = "cwebp $texturePath -q 80 -o ".$object->pathFileWR."/".$webpFilename;
-        exec($command, $output, $return);
-
-        if ($return != 0) {
-            Yii::$app->session->setFlash('error', "Ошибка конвертации текстуры в webp: $command. " . print_r($output, 1));
-            return false;
-        } else {
-            $object->setSetting('texture', "/".$object->pathFile."/".$object->id."/". $webpFilename);
-            $object->save();
-            Yii::$app->session->setFlash('success', "Конвертации в WEBP успешно выполнена");
-            return true;
-        }
+        $object->setSetting('texture', $webp_array);
+        $object->save();
+        Yii::$app->session->setFlash('success', "Конвертации в WEBP выполнена. Сконвертировано $ok_count из $idx изображений." );
+        return true;
     }
 
     /**

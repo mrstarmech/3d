@@ -42,6 +42,7 @@ class Object extends ActiveRecord
 
     public $pathImage = 'uploads';
     public $pathFile = 'objects';
+    public $pathTexture = 'textures';
 
     public $defaultOption = [
         "grid" => false,
@@ -85,7 +86,7 @@ class Object extends ActiveRecord
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj, gltf, glb, drc'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
-            [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bin'],
+            [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bin', 'maxFiles' => 10],
             ['sef', 'match', 'pattern' => '/^[a-z0-9\-]*$/iu', 'message' => 'Допустима латиница, числа и -'],
         ];
     }
@@ -205,18 +206,33 @@ class Object extends ActiveRecord
 
             if ($this->fileTexture) {
                 $path = $this->pathFile . '/' . $this->id;
-
-                if (!empty($this->texture) and file_exists($path . '/' . $this->texture)) {
-                    unlink($path . '/' . $this->texture);
+                
+                if (!empty($this->texture) and file_exists($path)) {
+                        if(file_exists($path . '/' . $this->pathTexture))
+                            $this->deleteDir($path . '/' . $this->pathTexture);
                 }
 
+                $texarray = array();
                 FileHelper::createDirectory($path);
-                $this->fileTexture->saveAs($path . '/' . $this->fileTexture->baseName . '.' . $this->fileTexture->extension);
-                $this->texture = $this->fileTexture->baseName . '.' . $this->fileTexture->extension;
-
-                $this->setSetting('texture', '/' . $path . '/' . $this->texture);
+                FileHelper::createDirectory($path .'/'. $this->pathTexture);
+                if(count($this->fileTexture)==1)
+                {
+                    $this->fileTexture[0]->saveAs($path . '/'. $this->pathTexture .'/' . $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension);
+                    $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
+                }
+                else {
+                    $indx = 0;                 
+                    foreach ($this->fileTexture as $texfile) {
+                        $texfile->saveAs($path .'/'.$this->pathTexture . '/' . $texfile->baseName . '.' . $texfile->extension);
+                        $texarray[$indx] = '/'.$path .'/'.$this->pathTexture . '/' .$texfile->baseName . '.' . $texfile->extension;
+                        $indx++;
+                    }
+                    $this->texture = $this->fileTexture[0]->baseName . '.' . $this->fileTexture[0]->extension;
+                     
+                }
+                $this->setSetting('texture', count($texarray)>0? $texarray: '/'.$path .'/'.$this->pathTexture . '/' .$this->texture);
             }
-
+            
             if ($this->dataImage) {
                 $path = self::PATH_IMAGE . '/' . $this->id;
 //                $option = $this->getOptionArray();
