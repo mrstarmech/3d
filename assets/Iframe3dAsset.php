@@ -30,7 +30,7 @@ class Iframe3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?201902061508',
+        'js/viewer.js?20200210',
         'js/label.js',
         'js/loader.object.iframe.js',
     ];
