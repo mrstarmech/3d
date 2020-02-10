@@ -4,6 +4,17 @@ var OBJECT,
 
 OBJECT = $('.tree-object');
 
+OBJECT.click(function () {
+
+    if ($(this).attr('data-render') == 'success') {
+        distance();
+    }
+
+    if ($(this).attr('data-render')) {
+        return false;
+    }
+});
+
 function start() {
     try {
         window.t = new viewer(object.setting, object.option, object.labels);
@@ -31,6 +42,20 @@ function menu() {
 
     menu.append(topmenu);
     return menu;
+}
+
+function distance() {
+    if (object.option.ruler && t.rulerDistance() !== 0) {
+        $('.menu-object[data-menu=ruler]').attr({
+            'data-toggle': 'tooltip',
+            'data-html': 'true',
+            'data-placement': 'top',
+            'title': t.rulerDistance() + '&nbsp;мм'
+        });
+        $('.menu-object[data-menu=ruler]').tooltip('show');
+    } else {
+        $('.menu-object[data-menu=ruler]').tooltip('destroy');
+    }
 }
 
 
