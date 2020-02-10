@@ -31,7 +31,7 @@ class View3dAsset extends AssetBundle
         'js/colorpicker.min.js',
         'js/viewer.js?20200210',
         'js/label.js',
-        'js/loader.object.js?201902121705',
+        'js/loader.object.js?20200210',
     ];
     public $depends = [
         'yii\web\YiiAsset',
