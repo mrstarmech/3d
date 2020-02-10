@@ -17,12 +17,16 @@ function start() {
     } catch (error) {
         console.log(error);
     }
-};
+}
 
 function menu() {
     var menu = $('<div class="btn-toolbar container-menu-object" role="toolbar"></div>'),
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>');
 
+    topmenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
+    topmenu.append('<button class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
+    topmenu.append('<button class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
+    topmenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
     topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
 
     menu.append(topmenu);
@@ -53,8 +57,26 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 } else if (i.msRequestFullscreen) {
                     i.msRequestFullscreen();
                 }
-                ;
             }
+            break;
+        case 'ruler':
+            object.option.ruler = !object.option.ruler;
+            t.switchEnv('ruler', object.option.ruler);
+            buttonActive($(this), object.option.ruler);
+            break;
+        case 'light':
+            object.option.lights = (object.option.lights == 'Cameralight' ? 'AmbientLight' : 'Cameralight');
+            t.switchEnv('lights', object.option.lights);
+            break;
+        case 'texture-disable':
+            object.option.textureDisable = !object.option.textureDisable;
+            buttonActive($(this), object.option.textureDisable);
+            t.switchEnv('textureDisable', object.option.textureDisable);
+            break;
+        case 'texture-change':
+            object.option.textureChange = !object.option.textureChange;
+            t.switchEnv('textureChange', object.option.textureChange);
+
             break;
     }
 });
@@ -67,11 +89,15 @@ function buttonActive(element, value) {
     }
 }
 
-$('.' + classNameContainer).on('dblclick', '.' + classNameCanvas, function () {
-    object.option.autorotate = !object.option.autorotate;
-    t.switchEnv('autoRotate', object.option.autorotate);
-    buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
-});
+$('.' + classNameContainer)
+    .on('dblclick', '.' + classNameCanvas, function () {
+        object.option.autorotate = !object.option.autorotate;
+        t.switchEnv('autoRotate', object.option.autorotate);
+        buttonActive($('.menu-object[data-menu=rotate]'), object.option.autorotate);
+    })
+    .on('dblclick', '.menu-object', function () {
+        return false;
+    });
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
@@ -84,7 +110,7 @@ var eFullscreenName = function () {
 if (eFullscreenName) {
     document.addEventListener(eFullscreenName, function () {
         var element = $('.menu-object[data-menu=full-screen]'),
-            value = element.attr('data-full-screen') === 'true'
+            value = element.attr('data-full-screen') === 'true';
         element.attr('data-full-screen', !value);
         buttonActive(element, !value);
     }, false);

@@ -32,11 +32,11 @@ class Iframe3dAsset extends AssetBundle
         'js/colorpicker.min.js',
         'js/viewer.js?20200210',
         'js/label.js',
-        'js/loader.object.iframe.js',
+        'js/loader.object.iframe.js?20200210',
     ];
     public $depends = [
         'yii\web\YiiAsset',
-        'yii\bootstrap\BootstrapAsset',
+        'yii\bootstrap\BootstrapPluginAsset',
         'rmrevin\yii\fontawesome\AssetBundle',
     ];
 }
