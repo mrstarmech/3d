@@ -98,6 +98,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <?= $form->field($model, 'fileTexture[]')->fileInput(['multiple' => true]) ?>
 
+        <?= $form->field($model, 'fileDrawing[]')->fileInput(['multiple' => true]) ?>
+
+        <?= $form->field($model, 'fileCleaner')->fileInput() ?>
+
         <?php
         if (!empty($model->contentUtfJs)) {
             echo Html::a('Редактировать файл UTF JS', ['admin/edit-file-utf-js', 'id' => $model->id]);

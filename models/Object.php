@@ -43,6 +43,7 @@ class Object extends ActiveRecord
     public $pathImage = 'uploads';
     public $pathFile = 'objects';
     public $pathTexture = 'textures';
+    public $pathDrawing = 'drawings';
 
     public $defaultOption = [
         "grid" => false,
@@ -76,6 +77,8 @@ class Object extends ActiveRecord
     public $fileObj;
     public $fileMtl;
     public $fileTexture;
+    public $fileDrawing;
+    public $fileCleaner;
 
     public function rules()
     {
@@ -87,6 +90,8 @@ class Object extends ActiveRecord
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj, gltf, glb, drc'],
             [['fileMtl'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'mtl'],
             [['fileTexture'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg, bin', 'maxFiles' => 10],
+            [['fileDrawing'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, gif, webp', 'maxFiles' => 10],
+            [['fileCleaner'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'png, webp'],
             ['sef', 'match', 'pattern' => '/^[a-z0-9\-]*$/iu', 'message' => 'Допустима латиница, числа и -'],
         ];
     }
@@ -231,6 +236,28 @@ class Object extends ActiveRecord
                      
                 }
                 $this->setSetting('texture', count($texarray)>0? $texarray: '/'.$path .'/'.$this->pathTexture . '/' .$this->texture);
+            }
+
+            if ($this->fileDrawing) {
+                $path = $this->pathFile . '/' . $this->id;
+
+                $drawingArray = array();
+                FileHelper::createDirectory($path);
+                FileHelper::createDirectory($path .'/'. $this->pathDrawing);
+
+                foreach ($this->fileDrawing as $fileDrawing) {
+                    $fileDrawing->saveAs($path .'/'.$this->pathDrawing . '/' . $fileDrawing->baseName . '.' . $fileDrawing->extension);
+                    $drawingArray[] = '/'.$path .'/'.$this->pathDrawing . '/' .$fileDrawing->baseName . '.' . $fileDrawing->extension;
+                }
+                $this->setSetting('drawing', $drawingArray);
+            }
+
+            if ($this->fileCleaner) {
+                $path = $this->pathFile . '/' . $this->id;
+
+                FileHelper::createDirectory($path);
+                $this->fileCleaner->saveAs($path . '/' . $this->fileCleaner->baseName . '.' . $this->fileCleaner->extension);
+                $this->setSetting('cleaner', '/' . $path . '/' . $this->fileCleaner->baseName . '.' . $this->fileCleaner->extension);
             }
             
             if ($this->dataImage) {

@@ -50,6 +50,16 @@
     }
   }
 
+  .container-supermenu-object{
+    position: absolute;
+    z-index: 999;
+    top: 0;
+    right: 0;
+    & .submenu{
+      display: none;
+    }
+  }
+
   .modal{
     .modal-dialog {
       width: 90% !important;

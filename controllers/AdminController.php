@@ -64,6 +64,8 @@ class AdminController extends AdminDefaultController
             $object->fileObj = UploadedFile::getInstance($object, 'fileObj');
             $object->fileMtl = UploadedFile::getInstance($object, 'fileMtl');
             $object->fileTexture = UploadedFile::getInstances($object, 'fileTexture');
+            $object->fileDrawing = UploadedFile::getInstances($object, 'fileDrawing');
+            $object->fileCleaner = UploadedFile::getInstance($object, 'fileCleaner');
             if ($object->upload()) {
                 $object->scenario = Object::SCENARIO_SAVE;
 //                var_dump(Yii::$app->request->post());

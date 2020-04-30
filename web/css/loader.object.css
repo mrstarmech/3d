@@ -39,6 +39,13 @@
     right: 0; }
     .container-object .container-menu-object .submenu {
       display: none; }
+  .container-object .container-supermenu-object {
+    position: absolute;
+    z-index: 999;
+    top: 0;
+    right: 0; }
+    .container-object .container-supermenu-object .submenu {
+      display: none; }
   .container-object .modal .modal-dialog {
     width: 90% !important;
     margin: auto !important;

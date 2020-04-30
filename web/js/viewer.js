@@ -304,6 +304,89 @@ function viewer(model, options, labels) {
         });
     };
 
+    function redrawTexture(){
+        for (var i = 0; i < backgrounds.length; i++) {
+            if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0
+                && typeof backgrounds[i].ctx === 'undefined') {
+                backgrounds[i].ctx = document.createElement('canvas').getContext('2d');
+                backgrounds[i].ctx.canvas.width = backgrounds[i].image.width;
+                backgrounds[i].ctx.canvas.height = backgrounds[i].image.height;
+                backgrounds[i].ctx.drawImage(backgrounds[i].image, 0, 0);
+            }
+        }
+        for (var i = 0; i < backgrounds.length; i++) {
+            if (backgrounds[i].path == controllers.currentTexture[0]) {
+                if (typeof backgrounds[i].ctx == 'undefined') return;
+                canvasWidth = backgrounds[i].ctx.canvas.width;
+                canvasHeight = backgrounds[i].ctx.canvas.height;
+                ctx.canvas.width = canvasWidth;
+                ctx.canvas.height = canvasHeight;
+                ctx.globalAlpha = 1;
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.drawImage(backgrounds[i].ctx.canvas, 0, 0);
+
+                if (typeof cleaner !== 'undefined' && typeof cleaner.ctx === 'undefined') {
+                    cleaner.ctx = document.createElement('canvas').getContext('2d');
+                    cleaner.ctx.canvas.width = canvasWidth;
+                    cleaner.ctx.canvas.height = canvasHeight;
+                    cleaner.ctx.drawImage(cleaner, 0, 0);
+                }
+                for (var i = 0; i < drawings.length; i++) {
+                    if (typeof drawings[i].ctx === 'undefined') {
+                        drawings[i].ctx = document.createElement('canvas').getContext('2d');
+                        drawings[i].ctx.canvas.width = canvasWidth;
+                        drawings[i].ctx.canvas.height = canvasHeight;
+                        drawings[i].ctx.drawImage(drawings[i].image, 0, 0);
+
+                        drawings[i].coloredCtx = document.createElement('canvas').getContext('2d');
+                        var coloredCtx = drawings[i].coloredCtx;
+                        coloredCtx.canvas.width = canvasWidth;
+                        coloredCtx.canvas.height = canvasHeight;
+                        coloredCtx.clearRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
+                        coloredCtx.drawImage(drawings[i].ctx.canvas, 0, 0);
+                        if (typeof drawings[i].color === 'string') {
+                            coloredCtx.fillStyle = drawings[i].color;
+                            coloredCtx.globalCompositeOperation = "source-in";
+                            coloredCtx.fillRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
+                            coloredCtx.globalCompositeOperation = "source-over";
+                        }
+                    }
+                }
+                for (var i = 0; i < drawings.length; i++) {
+                    if (typeof cleaner == 'undefined') drawings[i].minusedCtx = null;
+                    if (typeof cleaner != 'undefined' && drawings[i].minusedCtx == null) {
+                        drawings[i].minusedCtx = document.createElement('canvas').getContext('2d');
+                        var minusedCtx = drawings[i].minusedCtx;
+                        minusedCtx.canvas.width = canvasWidth;
+                        minusedCtx.canvas.height = canvasHeight;
+                        minusedCtx.clearRect(0, 0, minusedCtx.canvas.width, minusedCtx.canvas.height);
+                        minusedCtx.drawImage(drawings[i].ctx.canvas, 0, 0);
+                        minusedCtx.globalCompositeOperation = "source-in";
+                        minusedCtx.drawImage(cleaner.ctx.canvas, 0, 0);
+                        minusedCtx.globalCompositeOperation = "source-over";
+                    }
+                }
+                for (var i = 0; i < drawings.length; i++) {
+                    if (drawings[i].alpha < 0) {
+                        if (drawings[i].minusedCtx) {
+                            ctx.globalAlpha = -drawings[i].alpha;
+                            ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
+                        }
+                    }
+                }
+                for (var i = 0; i < drawings.length; i++) {
+                    if (drawings[i].alpha > 0) {
+                        ctx.globalAlpha = drawings[i].alpha;
+                        ctx.drawImage(drawings[i].coloredCtx.canvas, 0, 0);
+                    }
+                }
+                if (texture) texture.needsUpdate = true;
+                if (material) material.needsUpdate = true;
+                return;
+            }
+        }
+    }
+
     function loadModel(model, callback) {
         var parametersMaterial = {
             specular: 0xffffff,
@@ -317,29 +400,74 @@ function viewer(model, options, labels) {
         if (model.color !== undefined && model.color !== '') {
             parametersMaterial.color = model.color;
         }
-        if(!controllers.currentTexture)
+        if (!controllers.currentTexture)
             controllers.currentTexture = [];
-        
+
         if (model.texture !== undefined && model.texture !== '') {
             var modelTextures = [];
-            if(typeof model.texture === 'string')
+            if (typeof model.texture === 'string')
                 modelTextures[0] = model.texture;
             else
                 modelTextures = model.texture;
-                        
-            var texture = new THREE.ImageUtils.loadTexture(modelTextures[0]);
-            parametersMaterial.map = texture;
-            
+
+            //var texture = new THREE.ImageUtils.loadTexture(modelTextures[0]);
+            //parametersMaterial.map = texture;
+
             controllers.currentTexture.push(modelTextures[0]);
             controllers.textures.push(modelTextures);
 
         } else {
-            var texture = new THREE.ImageUtils.loadTexture();
+            //var texture = new THREE.ImageUtils.loadTexture();
             controllers.textures.push(['']);
             controllers.currentTexture.push('');
         }
 
-        var material = new THREE.MeshLambertMaterial(parametersMaterial);
+        var modelDrawings = null;
+        if (model.drawing !== undefined && model.drawing !== '') {
+            modelDrawings = model.drawing;
+        }
+
+        var modelCleaner = null;
+        if (model.cleaner !== undefined && model.cleaner !== '') {
+            modelCleaner = model.cleaner;
+        }
+        ctx = document.createElement('canvas').getContext('2d');
+
+        backgrounds = [];
+        if (controllers.textures[0].length >0)
+        {
+            for (var i = 0; i < controllers.textures[0].length; i++) {
+                bgItem = new Image();
+                backgrounds.push({"image": bgItem, "path": controllers.textures[0][i]});
+                bgItem.src = controllers.textures[0][i];
+                bgItem.onload = () => {
+                    redrawTexture();
+                }
+            }
+            drawings = [];
+            if (modelDrawings) {
+                for (var i = 0; i < modelDrawings.length; i++) {
+                    drawing = new Image();
+                    drawings.push({"image": drawing, "alpha": 1/*, "color": "#00ff00"*/});
+                    drawing.src = modelDrawings[i];
+                    drawing.onload = () => {
+                        redrawTexture();
+                    }
+                }
+            }
+            if (modelCleaner) {
+                img_cleaner = new Image();
+                img_cleaner.src = modelCleaner;
+                img_cleaner.onload = () => {
+                    cleaner = img_cleaner;
+                    redrawTexture();
+                }
+            }
+            texture = new THREE.CanvasTexture(ctx.canvas);
+            parametersMaterial.map = texture;
+        }
+
+        material = new THREE.MeshLambertMaterial(parametersMaterial);
 
         var onProgress = function (progress) {
 
@@ -530,6 +658,7 @@ function viewer(model, options, labels) {
                 break;
         }
         ;
+
     };
 
     function addLabels() {
@@ -782,7 +911,7 @@ function viewer(model, options, labels) {
 
                             newtexture = controllers.textures[i][ind];
                             controllers.currentTexture[i] = newtexture;
-                            if(newtexture !== '')
+ /*                           if(newtexture !== '')
                                 newtexture = new THREE.ImageUtils.loadTexture(newtexture);
                             else
                                 newtexture = new THREE.ImageUtils.loadTexture();   
@@ -792,8 +921,8 @@ function viewer(model, options, labels) {
                                 shininess: 50,
                                 shading: THREE.SmoothShading,
                                 map: newtexture
-                            });
-
+                            });*/
+                            redrawTexture();
                         }
                     });
                 }
@@ -1096,11 +1225,12 @@ function viewer(model, options, labels) {
     return {
         appendTo: appendTo,
         switchEnv: switchEnv,
+        redrawTexture: redrawTexture,
         rulerDistance: getDistance,
         saveOptions: saveOptions,
         getNewLabel: getNewLabel,
         addLabels: addLabels,
         camera: camera,
-        renderer: renderer
+        renderer: renderer,
     };
 };

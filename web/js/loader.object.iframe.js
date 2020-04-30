@@ -22,6 +22,7 @@ function start() {
 
         OBJECT.attr('data-render', 'success');
         OBJECT.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
+        OBJECT.children('.' + classNameContainer).children('.' + classNameCanvas).append(supermenu());
         OBJECT.children('.' + classNameContainer).attr('data-state', 'dynamic');
 
         return t;
@@ -30,6 +31,27 @@ function start() {
     }
 }
 
+function supermenu() {
+    var supermenu = $('<div class="container-supermenu-object" role="toolbar" style="width:200px"></div>');
+    if (Array.isArray(object.setting.texture) && object.setting.texture.length > 1)
+        supermenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book fa-2x" style="color:blue"></i></button>');
+
+    if (Array.isArray(object.setting.drawing)) {
+        var inputAlpha = '<div id="rt_popover">';
+        for (var i = 0; i < object.setting.drawing.length; i++)
+            inputAlpha += i + ' : <input type=\'range\' id=\'' + i + '\'class=\'alpha-value\' step=\'0.05\' min=\'-1\' max=\'1\' value=\'1\'><br>';
+        inputAlpha += '</div>'
+
+        rt_popover = $(inputAlpha);
+
+        var rt = $('<button id="rt" class="btn menu-object" data-menu="reconstruction-tools" data-html="true" data-container=".container-supermenu-object"'
+            + 'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:green"></i></button>');
+        supermenu.append(rt);
+
+    }
+
+    return supermenu;
+}
 function menu() {
     var menu = $('<div class="btn-toolbar container-menu-object" role="toolbar"></div>'),
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>');
@@ -98,6 +120,21 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.textureDisable);
             t.switchEnv('textureDisable', object.option.textureDisable);
             break;
+        case 'reconstruction-tools':
+            object.option.rt = !object.option.rt;
+            if (object.option.rt) {
+                $(this).popover({
+                    content: function(){
+                        return '<div id="rt_popover">' + rt_popover.html() + '</div>';
+                    }
+                });
+                $(this).popover('show');
+            } else {
+                rt_popover.html($('#rt_popover').html());
+                $(this).popover('destroy');
+            }
+            buttonActive($(this), object.option.rt);
+            break;
         case 'texture-change':
             object.option.textureChange = !object.option.textureChange;
             t.switchEnv('textureChange', object.option.textureChange);
@@ -122,6 +159,11 @@ $('.' + classNameContainer)
     })
     .on('dblclick', '.menu-object', function () {
         return false;
+    })
+    .on('input change', '.alpha-value', function () {
+        $(this).attr('value', $(this).val());
+        drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
+        t.redrawTexture();
     });
 
 var eFullscreenName = function () {
