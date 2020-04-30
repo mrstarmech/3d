@@ -13,7 +13,7 @@ class View3dAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/loader.object.css?201902251625',
+        'css/loader.object.css?20200430',
         'css/jquery.fancybox.min.css',
         'css/colorpicker.css',
     ];
@@ -29,9 +29,9 @@ class View3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?20200210',
+        'js/viewer.js?20200430',
         'js/label.js',
-        'js/loader.object.js?20200210',
+        'js/loader.object.js?20200430',
     ];
     public $depends = [
         'yii\web\YiiAsset',

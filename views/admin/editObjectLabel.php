@@ -8,11 +8,11 @@ use mihaildev\ckeditor\CKEditor;
 use mihaildev\elfinder\ElFinder;
 
 $this->registerJsFile('js/lib.tree.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/viewer.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/viewer.js?20200430', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/label.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
-$this->registerCssFile('css/loader.object.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
-$this->registerJsFile('js/loader.object.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerCssFile('css/loader.object.css?20200430', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
+$this->registerJsFile('js/loader.object.js?20200430', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 
 $this->registerCssFile('css/jquery.fancybox.min.css', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);
 $this->registerJsFile('js/jquery.fancybox.min.js', ['depends' => ['yii\bootstrap\BootstrapPluginAsset']]);

@@ -51,10 +51,6 @@ $this->registerJs($script, yii\web\View::POS_READY);
     </div>
 <?php endif; ?>
 <h1><?= $this->title ?></h1>
-<div id="reconstruction_tools">
-    tools
-
-</div>
 <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR) and !empty($object->tech_info)): ?>
     <div class="tech-info">
         <i><?= nl2br($object->tech_info) ?></i>
