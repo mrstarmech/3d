@@ -332,7 +332,8 @@ function viewer(model, options, labels) {
                     cleaner.ctx.drawImage(cleaner, 0, 0);
                 }
                 for (var i = 0; i < drawings.length; i++) {
-                    if (typeof drawings[i].ctx === 'undefined') {
+                    if (drawings[i].image.complete && drawings[i].image.naturalHeight !== 0
+                        && typeof drawings[i].ctx === 'undefined') {
                         drawings[i].ctx = document.createElement('canvas').getContext('2d');
                         drawings[i].ctx.canvas.width = canvasWidth;
                         drawings[i].ctx.canvas.height = canvasHeight;
