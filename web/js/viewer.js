@@ -305,6 +305,7 @@ function viewer(model, options, labels) {
     };
 
     function redrawTexture(){
+        //1. For each background: if loaded - create backgrounds[i].ctx canvas with background image
         for (var i = 0; i < backgrounds.length; i++) {
             if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0
                 && typeof backgrounds[i].ctx === 'undefined') {
@@ -314,8 +315,11 @@ function viewer(model, options, labels) {
                 backgrounds[i].ctx.drawImage(backgrounds[i].image, 0, 0);
             }
         }
+
+        //2. Draw
         for (var i = 0; i < backgrounds.length; i++) {
             if (backgrounds[i].path == controllers.currentTexture[0]) {
+                //2a. draw current background in main ctx
                 if (typeof backgrounds[i].ctx == 'undefined') return;
                 canvasWidth = backgrounds[i].ctx.canvas.width;
                 canvasHeight = backgrounds[i].ctx.canvas.height;
@@ -325,12 +329,15 @@ function viewer(model, options, labels) {
                 ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 ctx.drawImage(backgrounds[i].ctx.canvas, 0, 0);
 
+                //2b. if loaded - create cleaner.ctx canvas with cleaner image
                 if (typeof cleaner !== 'undefined' && typeof cleaner.ctx === 'undefined') {
                     cleaner.ctx = document.createElement('canvas').getContext('2d');
                     cleaner.ctx.canvas.width = canvasWidth;
                     cleaner.ctx.canvas.height = canvasHeight;
                     cleaner.ctx.drawImage(cleaner, 0, 0);
                 }
+                //2c. For each drawing: if loaded - create drawings[i].ctx canvas with drawing image
+                // and drawings[i].coloredCtx with colored drawing image
                 for (var i = 0; i < drawings.length; i++) {
                     if (drawings[i].image.complete && drawings[i].image.naturalHeight !== 0
                         && typeof drawings[i].ctx === 'undefined') {
@@ -353,9 +360,25 @@ function viewer(model, options, labels) {
                         }
                     }
                 }
+                //2d. For each drawing: if color changed - redraw drawings[i].coloredCtx
                 for (var i = 0; i < drawings.length; i++) {
-                    if (typeof cleaner == 'undefined') drawings[i].minusedCtx = null;
-                    if (typeof cleaner != 'undefined' && drawings[i].minusedCtx == null) {
+                    if (drawings[i].ctx && typeof drawings[i].color === 'string' &&
+                        (typeof drawings[i].currentColor == undefined || drawings[i].currentColor != drawings[i].color)) {
+                            var coloredCtx = drawings[i].coloredCtx;
+                            coloredCtx.clearRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
+                            coloredCtx.drawImage(drawings[i].ctx.canvas, 0, 0);
+                            if (typeof drawings[i].color === 'string') {
+                                coloredCtx.fillStyle = drawings[i].color;
+                                coloredCtx.globalCompositeOperation = "source-in";
+                                coloredCtx.fillRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
+                                coloredCtx.globalCompositeOperation = "source-over";
+                            }
+                    }
+
+                }
+                //2e. For each drawing: if loaded and cleaner loaded - create drawings[i].minusedCtx canvas
+                for (var i = 0; i < drawings.length; i++) {
+                    if (typeof drawings[i].ctx != 'undefined' && typeof cleaner != 'undefined') {
                         drawings[i].minusedCtx = document.createElement('canvas').getContext('2d');
                         var minusedCtx = drawings[i].minusedCtx;
                         minusedCtx.canvas.width = canvasWidth;
@@ -369,7 +392,7 @@ function viewer(model, options, labels) {
                 }
                 for (var i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha < 0) {
-                        if (drawings[i].minusedCtx) {
+                        if (typeof drawings[i].minusedCtx != 'undefined' ) {
                             ctx.globalAlpha = -drawings[i].alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
                         }
@@ -377,8 +400,10 @@ function viewer(model, options, labels) {
                 }
                 for (var i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha > 0) {
-                        ctx.globalAlpha = drawings[i].alpha;
-                        ctx.drawImage(drawings[i].coloredCtx.canvas, 0, 0);
+                        if (typeof drawings[i].coloredCtx != 'undefined' ) {
+                            ctx.globalAlpha = drawings[i].alpha;
+                            ctx.drawImage(drawings[i].coloredCtx.canvas, 0, 0);
+                        }
                     }
                 }
                 if (texture) texture.needsUpdate = true;

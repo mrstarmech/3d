@@ -37,7 +37,11 @@ function start() {
                             document.getElementById('picker-indicator'),
                             mouseSlide, mousePicker
                         );
-                        t.switchEnv('background', hex);
+                        if (currentDrawingId == null) t.switchEnv('background', hex);
+                        else {
+                            drawings[currentDrawingId].color = hex;
+                            t.redrawTexture();
+                        }
                     });
             }
             OBJECTS.children('.' + classNameContainer).attr('data-state', 'dynamic');
@@ -57,7 +61,9 @@ function supermenu() {
     if (Array.isArray(object.setting.drawing)) {
         var inputAlpha = '<div id="rt_popover">';
         for (var i = 0; i < object.setting.drawing.length; i++)
-            inputAlpha += i + ' : <input type=\'range\' id=\'' + i + '\'class=\'alpha-value\' step=\'0.05\' min=\'-1\' max=\'1\' value=\'1\'><br>';
+            inputAlpha += i + ' : <input type=\'range\' id=\'' + i + '\' class=\'alpha-value\' step=\'0.05\' min=\'-1\' max=\'1\' value=\'1\'>'
+                + '<button value="'+i+'" class="btn menu-object" data-menu="layer_pallete" data-html="true" data-container="#rt_popover"'
+                + 'data-toggle="popover" data-placement="bottom"><i class="fas fa-palette"></i></button>' + '<br>';
         inputAlpha += '</div>'
 
         rt_popover = $(inputAlpha);
@@ -138,7 +144,7 @@ function modalDialogShare() {
 }
 
 function paletteColor() {
-    return $('<div id="color" style="display: none">\n' +
+    return $('<div id="color" class="container-pallete" style="display: none">\n' +
         '    <div id="color-picker" class="cp-default">\n' +
         '        <div class="picker-wrapper">\n' +
         '            <div id="picker" class="picker"></div>\n' +
@@ -242,6 +248,7 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         case 'background':
             object.option.background = !object.option.background;
             buttonActive($(this), object.option.background);
+            currentDrawingId = null;
             $('#color').toggle();
             break;
         case 'light':
@@ -268,19 +275,25 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.zoom);
             break;
         case 'reconstruction-tools':
-            object.option.rt = !object.option.rt;
-            if (object.option.rt) {
-                $(this).popover({
-                    content: function(){
-                        return '<div id="rt_popover">' + rt_popover.html() + '</div>';
-                    }
-                });
-                $(this).popover('show');
-            } else {
-                rt_popover.html($('#rt_popover').html());
-                $(this).popover('destroy');
-            }
-            buttonActive($(this), object.option.rt);
+        object.option.rt = !object.option.rt;
+        if (object.option.rt) {
+            $(this).popover({
+                content: function(){
+                    return '<div id="rt_popover">' + rt_popover.html() + '</div>';
+                }
+            });
+            $(this).popover('show');
+        } else {
+            rt_popover.html($('#rt_popover').html());
+            $(this).popover('destroy');
+        }
+        buttonActive($(this), object.option.rt);
+        break;
+        case 'layer_pallete':
+            object.option.layer_pallete = !object.option.layer_pallete;
+            buttonActive($(this), object.option.layer_pallete);
+            currentDrawingId = $(this).val();
+            $('#color').toggle();
             break;
         case 'texture-change': 
             object.option.textureChange = !object.option.textureChange;
@@ -315,10 +328,10 @@ $('.' + classNameContainer)
         t.camera.updateProjectionMatrix();
     })
     .on('input change', '.alpha-value', function () {
-        $(this).attr('value', $(this).val());
-        drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
-        t.redrawTexture();
-    })
+    $(this).attr('value', $(this).val());
+    drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
+    t.redrawTexture();
+})
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';

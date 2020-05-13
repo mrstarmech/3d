@@ -46,6 +46,11 @@
     right: 0; }
     .container-object .container-supermenu-object .submenu {
       display: none; }
+  .container-object .container-pallete {
+    position: absolute;
+    z-index: 999;
+    top: 0;
+    left: 0; }
   .container-object .modal .modal-dialog {
     width: 90% !important;
     margin: auto !important;
