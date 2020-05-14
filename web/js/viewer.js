@@ -736,7 +736,7 @@ function viewer(model, options, labels) {
 
             var pointsE = [];
             pointsE.push( new THREE.Vector3( 0, 0, 0 ) );
-            pointsE.push( new THREE.Vector3( 50, 0, 0 ) );
+            pointsE.push( new THREE.Vector3( -50, 0, 0 ) );
             var geometryE = new THREE.BufferGeometry().setFromPoints( pointsE );
             var lineE = new THREE.Line( geometryE, materialE );
             group.add( lineE );
@@ -766,7 +766,7 @@ function viewer(model, options, labels) {
 
             var textEGeo = new THREE.TextGeometry('E', params);
             var  textE = new THREE.Mesh(textEGeo , materialE);
-            textE.position.x = 60;
+            textE.position.x = -60;
             textE.position.y = 0;
             textE.position.z = 0;
             //textN.rotation = camera.rotation;
@@ -1327,7 +1327,7 @@ function viewer(model, options, labels) {
             group.translateY(s  * 6/10);
             group.translateX(s * camera.aspect * 6/10);
             group.rotation.x -=  camera.rotation.x - model.compass.up * Math.PI / 180;
-            group.rotation.y -=  model.compass.n * Math.PI / 180 + camera.rotation.y;
+            group.rotation.y -=  camera.rotation.y - model.compass.n * Math.PI / 180;
             group.rotation.z -=  camera.rotation.z;
             group.updateMatrix();
         }
