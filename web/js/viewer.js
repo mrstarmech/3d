@@ -358,28 +358,29 @@ function viewer(model, options, labels) {
                             coloredCtx.globalCompositeOperation = "source-in";
                             coloredCtx.fillRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
                             coloredCtx.globalCompositeOperation = "source-over";
+                            drawings[i].currentColor = drawings[i].color;
                         }
                     }
                 }
                 //2d. For each drawing: if color changed - redraw drawings[i].coloredCtx
                 for (var i = 0; i < drawings.length; i++) {
                     if (drawings[i].ctx && typeof drawings[i].color === 'string' &&
-                        (typeof drawings[i].currentColor == undefined || drawings[i].currentColor != drawings[i].color)) {
+                        (typeof drawings[i].currentColor == "undefined" || drawings[i].currentColor != drawings[i].color)) {
                             var coloredCtx = drawings[i].coloredCtx;
                             coloredCtx.clearRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
                             coloredCtx.drawImage(drawings[i].ctx.canvas, 0, 0);
-                            if (typeof drawings[i].color === 'string') {
-                                coloredCtx.fillStyle = drawings[i].color;
-                                coloredCtx.globalCompositeOperation = "source-in";
-                                coloredCtx.fillRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
-                                coloredCtx.globalCompositeOperation = "source-over";
-                            }
+                            coloredCtx.fillStyle = drawings[i].color;
+                            coloredCtx.globalCompositeOperation = "source-in";
+                            coloredCtx.fillRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
+                            coloredCtx.globalCompositeOperation = "source-over";
+                            drawings[i].currentColor = drawings[i].color;
                     }
 
                 }
                 //2e. For each drawing: if loaded and cleaner loaded - create drawings[i].minusedCtx canvas
                 for (var i = 0; i < drawings.length; i++) {
-                    if (typeof drawings[i].ctx != 'undefined' && typeof cleaner != 'undefined') {
+                    if (typeof drawings[i].ctx != 'undefined' && typeof cleaner != 'undefined'
+                    && typeof drawings[i].minusedCtx === 'undefined') {
                         drawings[i].minusedCtx = document.createElement('canvas').getContext('2d');
                         var minusedCtx = drawings[i].minusedCtx;
                         minusedCtx.canvas.width = canvasWidth;
@@ -475,8 +476,15 @@ function viewer(model, options, labels) {
             if (modelDrawings) {
                 for (var i = 0; i < modelDrawings.length; i++) {
                     drawing = new Image();
-                    drawings.push({"image": drawing, "alpha": 1/*, "color": "#00ff00"*/});
                     drawing.src = modelDrawings[i];
+                    var alpha = 1;
+                    var color = null;
+                    if (Array.isArray(model.layersParams)){
+                        if (typeof model.layersParams[i].alpha != 'undefined') alpha = model.layersParams[i].alpha;
+                        if (typeof model.layersParams[i].color != 'undefined') color = model.layersParams[i].color;
+                    }
+
+                    drawings.push({"image": drawing, "alpha": alpha, "color": color});
                     drawing.onload = () => {
                         redrawTexture();
                     }

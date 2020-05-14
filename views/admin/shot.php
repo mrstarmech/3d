@@ -27,7 +27,7 @@ object = {
 };
 host = '$host';
 object.option.preserveDrawingBuffer = true;
-object.option.menuDisable = true;
+object.option.menuDisable = false;
 object.option.autorotate = false;
 
 start();
@@ -40,6 +40,7 @@ $('#saveLink').click(function() {
         var imgData, imgNode;
 
         try {
+            disableMenu();
             var strMime = "image/jpeg";
             imgData = t.renderer.domElement.toDataURL(strMime);
             // saveFile(imgData.replace(strMime, strDownloadMime), "$object->name.jpg");
@@ -47,7 +48,15 @@ $('#saveLink').click(function() {
             $('input[name=coordinateX]').val(t.camera.position.x);
             $('input[name=coordinateY]').val(t.camera.position.y);
             $('input[name=coordinateZ]').val(t.camera.position.z);
-
+            
+            var layers = [];
+            if (Array.isArray(drawings)){
+                for (var i = 0; i < drawings.length; i++){
+                    layers.push({alpha : drawings[i].alpha, color : drawings[i].color})
+                }
+                $('input[name=layers]').val(JSON.stringify(layers));
+            }
+            enableMenu();
         } catch (e) {
             console.log(e);
             return;
@@ -96,6 +105,7 @@ echo $this->render('_header_object', ['object' => $object]);
 <input type="hidden" name="coordinateX">
 <input type="hidden" name="coordinateY">
 <input type="hidden" name="coordinateZ">
+<input type="hidden" name="layers">
 <div class="form-group">
     <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary']) ?>
 </div>

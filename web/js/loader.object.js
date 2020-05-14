@@ -37,7 +37,10 @@ function start() {
                             document.getElementById('picker-indicator'),
                             mouseSlide, mousePicker
                         );
-                        if (currentDrawingId == null) t.switchEnv('background', hex);
+                        if (currentDrawingId == null){
+                            backgroundColor = hex;
+                            t.switchEnv('background', hex);
+                        }
                         else {
                             drawings[currentDrawingId].color = hex;
                             t.redrawTexture();
@@ -53,6 +56,17 @@ function start() {
     }
 };
 
+function disableMenu()
+{
+    $('.container-supermenu-object').hide();
+    $('.container-menu-object').hide();
+}
+function enableMenu()
+{
+    $('.container-supermenu-object').show();
+    $('.container-menu-object').show();
+}
+
 function supermenu() {
     var supermenu = $('<div class="container-supermenu-object" role="toolbar" style="width:200px"></div>');
     if (Array.isArray(object.setting.texture) && object.setting.texture.length > 1)
@@ -60,10 +74,15 @@ function supermenu() {
 
     if (Array.isArray(object.setting.drawing)) {
         var inputAlpha = '<div id="rt_popover">';
-        for (var i = 0; i < object.setting.drawing.length; i++)
-            inputAlpha += i + ' : <input type=\'range\' id=\'' + i + '\' class=\'alpha-value\' step=\'0.05\' min=\'-1\' max=\'1\' value=\'1\'>'
-                + '<button value="'+i+'" class="btn menu-object" data-menu="layer_pallete" data-html="true" data-container="#rt_popover"'
+        for (var i = 0; i < object.setting.drawing.length; i++) {
+            if (Array.isArray(object.setting.layersParams) && typeof object.setting.layersParams[i].alpha != 'undefined')
+                alphaValue = object.setting.layersParams[i].alpha;
+            else alphaValue = 1;
+            inputAlpha += (i+1)
+                + ' : <input type=\'range\' id=\'' + i + '\' class=\'alpha-value\' step=\'0.05\' min=\'-1\' max=\'1\' value=\'' + alphaValue + '\'>'
+                + '<button value="' + i + '" class="btn menu-object cp-button" data-menu="layer_pallete" data-html="true" data-container="#rt_popover"'
                 + 'data-toggle="popover" data-placement="bottom"><i class="fas fa-palette"></i></button>' + '<br>';
+        }
         inputAlpha += '</div>'
 
         rt_popover = $(inputAlpha);
@@ -92,12 +111,12 @@ function menu() {
         submenu.append('<button class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
     }
 
-    if (object.labels.length != 0) {
+    if (Array.isArray(object.labels) && object.labels.length != 0) {
         submenu.append('<button class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
         object.option.label = true;
     }
 
-    submenu.append('<button class="btn menu-object" data-menu="background"><i class="fas fa-palette"></i></button>');
+    submenu.append('<button class="btn menu-object cp-button" data-menu="background"><i class="fas fa-palette"></i></button>');
 
     if (object.option.autorotate) {
         submenu.append('<button class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
@@ -246,10 +265,16 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.label);
             break;
         case 'background':
-            object.option.background = !object.option.background;
-            buttonActive($(this), object.option.background);
-            currentDrawingId = null;
-            $('#color').toggle();
+            var active_state = !$(this).hasClass('active');
+            $(".cp-button").removeClass('active');
+            if (active_state) {
+                $(this).addClass('active');
+                currentDrawingId = null;
+                $('#color').show();
+                if (typeof backgroundColor != 'undefined')
+                    cp.setHex(backgroundColor);
+            }
+            else $('#color').hide();
             break;
         case 'light':
             object.option.lights = (object.option.lights == 'Cameralight' ? 'AmbientLight' : 'Cameralight');
@@ -290,10 +315,16 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         buttonActive($(this), object.option.rt);
         break;
         case 'layer_pallete':
-            object.option.layer_pallete = !object.option.layer_pallete;
-            buttonActive($(this), object.option.layer_pallete);
-            currentDrawingId = $(this).val();
-            $('#color').toggle();
+            var active_state = !$(this).hasClass('active');
+            $(".cp-button").removeClass('active');
+            if (active_state) {
+                $(this).addClass('active');
+                currentDrawingId = $(this).val();
+                $('#color').show();
+                if (typeof drawings[currentDrawingId].color != 'undefined' && drawings[currentDrawingId].color !== null)
+                    cp.setHex(drawings[currentDrawingId].color);
+            }
+            else $('#color').hide();
             break;
         case 'texture-change': 
             object.option.textureChange = !object.option.textureChange;

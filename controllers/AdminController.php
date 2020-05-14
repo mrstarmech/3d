@@ -382,6 +382,8 @@ class AdminController extends AdminDefaultController
 
                 $object->setOption('camera', 'manual');
 
+                $object->setSetting('layersParams', json_decode(Yii::$app->request->post('layers')));
+
                 if ($object->save()) {
 //                    return json_encode(['success']);
                     Yii::$app->session->setFlash('success', "Модель сохранена");
