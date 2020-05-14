@@ -30,9 +30,9 @@ class Iframe3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?20200513',
+        'js/viewer.js?20200514',
         'js/label.js',
-        'js/loader.object.iframe.js?20200513',
+        'js/loader.object.iframe.js?20200514',
     ];
     public $depends = [
         'yii\web\YiiAsset',

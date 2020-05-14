@@ -297,6 +297,7 @@ function viewer(model, options, labels) {
 
 
                 addLabels();
+                addCompass();
                 animate();
                 externalCallback();
             }
@@ -709,6 +710,79 @@ function viewer(model, options, labels) {
                 label.push(sprite);
             });
         }
+    }
+
+    function addCompass()
+    {
+        if (typeof model.compass == 'undefined') return;
+        var loader = new THREE.FontLoader();
+        loader.load( '/../js/three/helvetiker_regular.typeface.json', function ( font ) {
+            group = new THREE.Group();
+            var materialN = new THREE.LineBasicMaterial({
+                color: 0xff0000
+            });
+            var materialE = new THREE.LineBasicMaterial({
+                color: 0x00ff00
+            });
+            var materialUp = new THREE.LineBasicMaterial({
+                color: 0x0000ff
+            });
+            var pointsN = [];
+            pointsN.push( new THREE.Vector3( 0, 0, 0 ) );
+            pointsN.push( new THREE.Vector3( 0, 0, 50 ) );
+            var geometryN = new THREE.BufferGeometry().setFromPoints( pointsN );
+            var lineN = new THREE.Line( geometryN, materialN );
+            group.add( lineN );
+
+            var pointsE = [];
+            pointsE.push( new THREE.Vector3( 0, 0, 0 ) );
+            pointsE.push( new THREE.Vector3( 50, 0, 0 ) );
+            var geometryE = new THREE.BufferGeometry().setFromPoints( pointsE );
+            var lineE = new THREE.Line( geometryE, materialE );
+            group.add( lineE );
+
+            var pointsUp = [];
+            pointsUp.push( new THREE.Vector3( 0, 0, 0 ) );
+            pointsUp.push( new THREE.Vector3( 0, 50, 0 ) );
+            var geometryUp = new THREE.BufferGeometry().setFromPoints( pointsUp );
+            var lineUp = new THREE.Line( geometryUp, materialUp );
+            group.add( lineUp );
+
+            var params = {
+                size: 5,
+                height: 2,
+                curveSegments: 6,
+                font: font,
+                style: "normal"
+            }
+
+            var textNGeo = new THREE.TextGeometry('N', params);
+            var  textN = new THREE.Mesh(textNGeo , materialN);
+            textN.position.x = 0;
+            textN.position.y = 0;
+            textN.position.z = 60;
+            //textN.rotation = camera.rotation;
+            group.add(textN);
+
+            var textEGeo = new THREE.TextGeometry('E', params);
+            var  textE = new THREE.Mesh(textEGeo , materialE);
+            textE.position.x = 60;
+            textE.position.y = 0;
+            textE.position.z = 0;
+            //textN.rotation = camera.rotation;
+            group.add(textE);
+
+            var textUpGeo = new THREE.TextGeometry('Up', params);
+            var  textUp = new THREE.Mesh(textUpGeo , materialUp);
+            textUp.position.x = 0;
+            textUp.position.y = 60;
+            textUp.position.z = 0;
+            //textN.rotation = camera.rotation;
+            group.add(textUp);
+
+            scene.add( group );
+        } );
+
     }
 
     function webglDetect() {
@@ -1244,7 +1318,19 @@ function viewer(model, options, labels) {
             var elem = scene.getObjectByName('sceneCameraLight', true);
             elem.position.copy(camera.position);
         }
-        ;
+        if (typeof group != 'undefined' && typeof model.compass != 'undefined') {
+            group.rotation.copy( camera.rotation );
+            group.position.copy (camera.position);
+            var s = Math.tan( camera.fov * Math.PI / 180 / 2 ) * options.cameraCoords.z ;
+            group.scale.set(s/200,s/200,s/200)
+            group.translateZ(- options.cameraCoords.z);
+            group.translateY(s  * 6/10);
+            group.translateX(s * camera.aspect * 6/10);
+            group.rotation.x -=  camera.rotation.x - model.compass.up * Math.PI / 180;
+            group.rotation.y -=  model.compass.n * Math.PI / 180 + camera.rotation.y;
+            group.rotation.z -=  camera.rotation.z;
+            group.updateMatrix();
+        }
         renderer.render(scene, camera);
     };
 
