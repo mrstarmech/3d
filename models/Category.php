@@ -92,6 +92,7 @@ class Category extends ActiveRecord
         return $this->hasMany(ObjectCategory::className(), ['category_id' => 'id'])
             ->joinWith('object')
             ->where(['visible' => 1])
-            ->andWhere(['category_id' => $this->id]);
+            ->andWhere(['category_id' => $this->id])
+            ->orderBy([new \yii\db\Expression('display_order IS NULL ASC, display_order ASC, id DESC')]);
     }
 }

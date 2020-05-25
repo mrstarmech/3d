@@ -91,7 +91,7 @@ class CategoryController extends Controller
         $objects = $query
             ->offset($pages->offset)
             ->limit($pages->limit)
-            ->orderBy(['id' => SORT_DESC])
+            ->orderBy([new \yii\db\Expression('display_order IS NULL ASC, display_order ASC, id DESC')])
             ->all();
 
         return $this->render('view', [
