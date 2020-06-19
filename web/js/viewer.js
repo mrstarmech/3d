@@ -38,7 +38,9 @@ function viewer(model, options, labels) {
 
     labels = typeof labels !== 'undefined' ? labels : null;
 
-    var selfObj = this,
+    var firstPass,
+        orthographer = false,
+        selfObj = this,
         scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
         renderer = new THREE.WebGLRenderer({
@@ -146,7 +148,7 @@ function viewer(model, options, labels) {
     };
 
     var externalCallback = function () {};
-
+    
     function appendTo(object, callback) {
         if (typeof callback === "function") {
             externalCallback = callback;
@@ -824,6 +826,22 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
+            case 'reset-dots':
+                resetDots();
+                break;
+            case 'shot':
+                orthoShot(value);
+                break;
+            case 'toggle-ortho':
+                orthographer = value;
+                toggleOrthographer(value);
+                break;
+            case 'align':
+                alignCam();
+                break;
+            case 'reset':
+                resetCam();
+                break;
             case 'ruler':
                 controllers.ruler = value;
                 if (!value) {
@@ -1301,6 +1319,8 @@ function viewer(model, options, labels) {
         ;
     };
 
+    
+
     function onContainerMouseOut(event) {
         renderer.domElement.removeEventListener('mousemove', onContainerMouseMove, false);
         renderer.domElement.removeEventListener('mouseup', onContainerMouseUp, false);
@@ -1320,7 +1340,8 @@ function viewer(model, options, labels) {
     };
 
     function render() {
-        camera.lookAt(scene.position);
+        //camera.lookAt(scene.position);
+        updateOrthoCam();
         control.update();
         if (scene.getObjectByName('sceneCameraLight', true)) {
             var elem = scene.getObjectByName('sceneCameraLight', true);
@@ -1339,8 +1360,235 @@ function viewer(model, options, labels) {
             group.rotation.z -=  camera.rotation.z;
             group.updateMatrix();
         }
+        if(firstPass === undefined)
+        {
+            firstPass = true;
+            control.saveState();
+            control.screenSpacePanning = true;
+            scene.add(p1);
+            scene.add(p2);
+            scene.add(p3);
+            p1.position.set(0,10000,0);
+            p2.position.set(0,10000,0);
+            p3.position.set(0,10000,0);
+        }
         renderer.render(scene, camera);
     };
+
+    //orthoshotext----------------------------------------------------------------------------------------------------------------------------
+    const GLOBAL_UP = new THREE.Vector3(0,1,0);
+    var cameraTarget = new THREE.Vector3();
+    var co = new THREE.OrthographicCamera(-1,1,1,-1,1,1000);
+    var sphG = new THREE.SphereGeometry(1,16,16);
+    var sphM = new THREE.MeshBasicMaterial({color: 0xFF0000});
+    var p1 = new THREE.Mesh(sphG,sphM),
+        p2 = new THREE.Mesh(sphG,sphM),
+        p3 = new THREE.Mesh(sphG,sphM);
+    
+
+    var tri;
+
+
+    function updateOrthoCam(square) {
+        let halfSizeX,
+            halfSizeY;
+        let fov = camera.fov * Math.PI / 180;
+        let dist = camera.position.length();
+        halfSizeY = Math.tan(fov / 2) * dist;
+        halfSizeX = square? halfSizeY : halfSizeY * camera.aspect;
+        co.left = -halfSizeX;
+        co.right = halfSizeX;
+        co.top = halfSizeY;
+        co.bottom = -halfSizeY;
+        co.position.copy(camera.position);
+        co.rotation.copy(camera.rotation);
+        co.updateProjectionMatrix();
+    }
+
+    function orthoShot(resolution)
+    {
+        p1.visible = false;
+        p2.visible = false;
+        p3.visible = false;
+        let ps = new THREE.Vector2();
+        renderer.getSize(ps);
+        renderer.setSize(resolution,resolution);
+        updateOrthoCam(true);
+        renderer.render(scene, co);
+        downloadImage(renderer.domElement.toDataURL("image/jpeg", 0.9));
+        renderer.setSize(ps.x,ps.y);
+        p1.visible = true;
+        p2.visible = true;
+        p3.visible = true;
+    }
+
+    function downloadImage(url)
+    {
+        let a = document.createElement('a');
+        document.body.appendChild(a);
+        a.href = url;
+        a.download = "image.jpg";
+        a.click()
+        document.body.removeChild(a);
+    }
+
+    function alignCam() {
+        if(tri !== undefined && tri.isReady())
+        {
+            
+            let norm = new THREE.Vector3();
+            tri.getNormal(norm);
+            
+            let cen = new THREE.Vector3();
+            tri.getCenter(cen);
+
+            
+            let d = camera.position.distanceTo(cen);
+            
+            control.target.copy(cen);
+            console.log(camera.position);
+            camera.position.copy(cen.add(norm.multiplyScalar(-d)));
+            control.update();
+            camera.updateProjectionMatrix();
+            updateOrthoCam();
+            console.log(camera.position);
+        }
+    }
+
+    function toggleOrthographer(value)
+    {
+        console.log('toggled ' + value);
+        if(value)
+        {
+            renderer.domElement.addEventListener('click',orthoClickHandler);
+            tri = new triangle();
+        }
+        else
+        {
+            tri.clear();
+            tri = undefined;
+            renderer.domElement.removeEventListener('click',orthoClickHandler);
+        }
+    }
+
+    function orthoClickHandler(event)
+    {
+        if(mouseMoveTrigger === 0)
+        {
+            console.log('click');
+            //mouse = new THREE.Vector2(((event.clientX - renderer.domElement.offsetLeft) / renderer.domElement.clientWidth) * 2 - 1, 
+            //                        -(((event.clientY - renderer.domElement.offsetTop) / renderer.domElement.clientHeight) * 2 - 1));
+            var mouse = {};
+            mouse.x = event.offsetX == undefined ? event.layerX : event.offsetX;
+            mouse.y = event.offsetY == undefined ? event.layerY : event.offsetY;
+
+            var mousePosition = {};
+            mousePosition.x = (mouse.x / viewerContainer.clientWidth) * 2 - 1;
+            mousePosition.y = -(mouse.y / viewerContainer.clientHeight) * 2 + 1;
+
+            console.log(mouse);
+            raycaster.setFromCamera(new THREE.Vector2().set(mousePosition.x,mousePosition.y), camera);
+            var intrscts = raycaster.intersectObject( sceneObjectsMesh[0] );
+            if(intrscts.length > 0)
+            {
+                console.log('intersects');
+                tri.add(intrscts[0].point);
+            }
+        }
+    }
+
+    function resetDots(){
+        tri.clear();
+    }
+
+    function resetCam(){
+        control.reset();
+    }
+
+    function triangle() {
+        var v1,
+            v2,
+            v3,
+            center,
+            normal,
+            ready = false;
+
+        function calcCenter(c)
+        {
+            center = new THREE.Vector3();
+            center.add(v1).add(v2).add(v3);
+            center.divideScalar(3);
+            console.log(center);
+            c.copy(center);
+        }
+
+        function calcNormal(n)
+        {
+            let v12 = new THREE.Vector3();
+            let v13 = new THREE.Vector3();
+            v12.subVectors(v2,v1);
+            v13.subVectors(v3,v1);
+            v12.cross(v13);
+            normal = v12.normalize();
+            console.log(normal);
+            n.copy(normal);
+        }
+
+        function addVertex(v)
+        {
+            if(v1 === undefined)
+            {
+                v1 = new THREE.Vector3().copy(v);
+                p1.position.copy(v1);
+            }
+            else if(v2 === undefined)
+            {
+                v2 = new THREE.Vector3().copy(v);
+                p2.position.copy(v2);
+            }
+            else if(v3 === undefined)
+            {
+                v3 = new THREE.Vector3().copy(v);
+                p3.position.copy(v3);
+                ready = true;
+            }
+        }
+
+        function isReady()
+        {
+            return ready;
+        }
+
+        function getNormal(n)
+        {
+            return calcNormal(n);
+        }
+
+        function getCenter(c)
+        {
+            return calcCenter(c);
+        }
+
+        function clear()
+        {
+            v1=v2=v3=normal=center=undefined;
+            p1.position.set(0,10000,0);
+            p2.position.set(0,10000,0);
+            p3.position.set(0,10000,0);
+            ready=false;
+        }
+
+        return {
+            add: addVertex,
+            isReady: isReady,
+            getNormal: getNormal,
+            getCenter:getCenter,
+            clear: clear,
+            center: center,
+            normal: normal,
+        }
+    }
+    //----------------------------------------------------------------------------------------------------------------------------------------
 
     return {
         appendTo: appendTo,
@@ -1352,5 +1600,6 @@ function viewer(model, options, labels) {
         addLabels: addLabels,
         camera: camera,
         renderer: renderer,
+        orthographer: orthographer,
     };
 };

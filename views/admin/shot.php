@@ -76,6 +76,11 @@ $('#saveLink').click(function() {
             location.replace(uri);
         }
     }
+
+$('#orthoLink').click(function() {
+    //console.log($('select[name=res]').val());
+    window.t.switchEnv('shot', $('select[name=res]').val());
+});
 JS;
 
 View3dAsset::register($this);
@@ -111,3 +116,20 @@ echo $this->render('_header_object', ['object' => $object]);
 </div>
 
 <?php ActiveForm::end(); ?>
+
+<?php $form2 = ActiveForm::begin(); ?>
+
+<select id="resolution" name="res">
+    <option value="1024">1024</option>
+    <option value="2048">2048</option>
+    <option value="4096">4096</option>
+    <option value="8192">8192</option>
+</select>
+
+<?php ActiveForm::end(); ?>
+
+<div class="form-group">
+    <button id="orthoLink" class="btn btn-primary">
+        Ортофото
+    </button>
+</div>

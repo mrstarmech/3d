@@ -29,6 +29,8 @@ function start() {
                     hljs.highlightBlock(block);
                 });
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
+                $('.cam-align-btn').hide();
+                $('.dots-reset-btn').hide();
                 cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
                     function (hex, hsv, rgb, mousePicker, mouseSlide) {
                         currentColor = hex;
@@ -83,16 +85,17 @@ function supermenu() {
                 + '<button value="' + i + '" class="btn menu-object cp-button" data-menu="layer_pallete" data-html="true" data-container="#rt_popover"'
                 + 'data-toggle="popover" data-placement="bottom"><i class="fas fa-palette"></i></button>' + '<br>';
         }
-        inputAlpha += '</div>'
+        inputAlpha += '</div>';
 
         rt_popover = $(inputAlpha);
 
-        var rt = $('<button id="rt" class="btn menu-object" data-menu="reconstruction-tools" data-html="true" data-container=".container-supermenu-object"'
-            + 'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:green"></i></button>');
+        var rt = $('<button id="rt" class="btn menu-object" data-menu="reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
+                   'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:green"></i></button>');
         supermenu.append(rt);
-
     }
-
+    
+    supermenu.append('<button class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
+    supermenu.append('<button class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
     return supermenu;
 }
 
@@ -104,6 +107,7 @@ function menu() {
 
     topmenu.append('<button class="btn menu-object" data-menu="submenu"><i class="fas fa-cog"></i></button>');
     topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
+    topmenu.append('<button class="btn menu-object cam-reset-btn" data-menu="reset-camera"><i class="fas fa-redo"></i></button>');
 
     if (object.option.wireframe) {
         submenu.append('<button class="btn menu-object active" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
@@ -137,6 +141,7 @@ function menu() {
     var inputZoom = '<input type=\'range\' class=\'zoom-value\' step=\'0.1\' min=\'1\' max=\'20\' value=\'1\'>';
     submenu.append('<button class="btn menu-object" data-menu="zoom" data-html="true" data-container=".submenu" data-toggle="popover" data-placement="top" data-content="' + inputZoom + '"><i class="fas fa-search-plus"></i></button>');
     submenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
+    submenu.append('<button class="btn menu-object" data-menu="toggle-orthographer"><i class="fas fa-camera"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -233,6 +238,32 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                     i.msRequestFullscreen();
                 }
                 ;
+            }
+            break;
+        case 'reset-dots':
+            t.switchEnv('reset-dots', false);
+            break;
+        case 'shot-camera':
+            t.switchEnv('shot', false);
+            break;
+        case 'align-camera':
+            t.switchEnv('align', false);
+            break;
+        case 'reset-camera':
+            t.switchEnv('reset', false);
+            break;
+        case 'toggle-orthographer':
+            t.switchEnv('toggle-ortho', t.orthographer = !t.orthographer);
+            
+            if(t.orthographer == true)
+            {
+                $('.cam-align-btn').show();
+                $('.dots-reset-btn').show();
+            }
+            else
+            {
+                $('.cam-align-btn').hide();
+                $('.dots-reset-btn').hide();
             }
             break;
         case 'submenu':
