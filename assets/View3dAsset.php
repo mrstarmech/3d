@@ -29,9 +29,9 @@ class View3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js',
+        'js/viewer.js?20200622',
         'js/label.js',
-        'js/loader.object.js',
+        'js/loader.object.js?20200622',
     ];
     public $depends = [
         'yii\web\YiiAsset',

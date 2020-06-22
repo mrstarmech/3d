@@ -1438,7 +1438,14 @@ function viewer(model, options, labels) {
             
             let norm = new THREE.Vector3();
             tri.getNormal(norm);
-            
+            let camDir = new THREE.Vector3();
+            camera.getWorldDirection(camDir);
+            console.log(norm);
+            if(camDir.dot(norm) >= 0)
+            {
+                norm = norm.multiplyScalar(-1);
+            }
+            console.log(norm);
             let cen = new THREE.Vector3();
             tri.getCenter(cen);
 
@@ -1446,12 +1453,10 @@ function viewer(model, options, labels) {
             let d = camera.position.distanceTo(cen);
             
             control.target.copy(cen);
-            console.log(camera.position);
-            camera.position.copy(cen.add(norm.multiplyScalar(-d)));
+            camera.position.copy(cen.add(norm.multiplyScalar(d)));
             control.update();
             camera.updateProjectionMatrix();
             updateOrthoCam();
-            console.log(camera.position);
         }
     }
 
@@ -1518,7 +1523,6 @@ function viewer(model, options, labels) {
             center = new THREE.Vector3();
             center.add(v1).add(v2).add(v3);
             center.divideScalar(3);
-            console.log(center);
             c.copy(center);
         }
 
@@ -1530,7 +1534,6 @@ function viewer(model, options, labels) {
             v13.subVectors(v3,v1);
             v12.cross(v13);
             normal = v12.normalize();
-            console.log(normal);
             n.copy(normal);
         }
 
