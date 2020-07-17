@@ -40,9 +40,10 @@ function viewer(model, options, labels) {
 
     var firstPass,
         orthographer = false,
+        orthocam = false,
         selfObj = this,
         scene = new THREE.Scene(),
-        camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000),
+        camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000000),
         renderer = new THREE.WebGLRenderer({
             antialias: true,
             alpha: true,
@@ -237,9 +238,8 @@ function viewer(model, options, labels) {
             if (value) {
 
                 if (options.camera == 'auto') {
-                    var modelSize = getBoundingSphereRadius();
-                    modelSize = modelSize * 2;
-                    camera.position.set(modelSize * options.cameraDistanceMultiplier, 0, 0);
+                    camera.position.set(1,0,0);
+                    cameraModelFit();
                     camera.updateProjectionMatrix();
                 } else if (options.camera == 'manual') {
                     camera.position.set(options.cameraCoords.x, options.cameraCoords.y, options.cameraCoords.z);
@@ -836,6 +836,9 @@ function viewer(model, options, labels) {
                 orthographer = value;
                 toggleOrthographer(value);
                 break;
+            case 'swCam':
+                toggleOrthoCam();
+                break;
             case 'align':
                 alignCam();
                 break;
@@ -1368,17 +1371,18 @@ function viewer(model, options, labels) {
             scene.add(p1);
             scene.add(p2);
             scene.add(p3);
-            p1.position.set(0,10000,0);
-            p2.position.set(0,10000,0);
-            p3.position.set(0,10000,0);
         }
-        renderer.render(scene, camera);
+        updateDotScale(p1);
+        updateDotScale(p2);
+        updateDotScale(p3);
+        
+        renderer.render(scene, orthocam ? co : camera);
     };
 
     //orthoshotext----------------------------------------------------------------------------------------------------------------------------
     const GLOBAL_UP = new THREE.Vector3(0,1,0);
     var cameraTarget = new THREE.Vector3();
-    var co = new THREE.OrthographicCamera(-1,1,1,-1,1,1000);
+    var co = new THREE.OrthographicCamera(-1,1,1,-1,1,5000000);
     var sphG = new THREE.SphereGeometry(1,16,16);
     var sphM = new THREE.MeshBasicMaterial({color: 0xFF0000});
     var p1 = new THREE.Mesh(sphG,sphM),
@@ -1388,14 +1392,45 @@ function viewer(model, options, labels) {
 
     var tri;
 
+    p1.visible = false;
+    p2.visible = false;
+    p3.visible = false;
+
+    function updateDotScale(dot)
+    {
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        //console.log(d);
+        let s = d * (1/camera.zoom) / 60;
+        dot.scale.set(s,s,s);
+    }
+
+    function cameraModelFit()
+    {
+        let opos = new THREE.Vector3();
+        let hFov = (camera.fov * Math.PI / 180)/2;
+        let r = getBoundingSphereRadius();
+        let d;
+        d = r / Math.tan(hFov);
+        opos.copy(camera.position);
+        opos.normalize();
+        camera.position.copy(opos.multiplyScalar(d));
+        updateDotScale(p1);
+        updateDotScale(p2);
+        updateDotScale(p3);
+    }
 
     function updateOrthoCam(square) {
         let halfSizeX,
             halfSizeY;
-        let fov = camera.fov * Math.PI / 180;
-        let dist = camera.position.length();
+        let fov = (camera.fov * Math.PI / 180)/camera.zoom;
+        let cp = new THREE.Vector3();
+        cp.copy(camera.position);
+        cp.sub(control.target)
+        let dist = cp.length();
         halfSizeY = Math.tan(fov / 2) * dist;
-        halfSizeX = square? halfSizeY : halfSizeY * camera.aspect;
+        halfSizeX = halfSizeY * camera.aspect;
         co.left = -halfSizeX;
         co.right = halfSizeX;
         co.top = halfSizeY;
@@ -1407,19 +1442,14 @@ function viewer(model, options, labels) {
 
     function orthoShot(resolution)
     {
-        p1.visible = false;
-        p2.visible = false;
-        p3.visible = false;
+        tri.clear();
         let ps = new THREE.Vector2();
         renderer.getSize(ps);
         renderer.setSize(resolution,resolution);
         updateOrthoCam(true);
         renderer.render(scene, co);
-        downloadImage(renderer.domElement.toDataURL("image/jpeg", 0.9));
+        downloadImage(renderer.domElement.toDataURL("image/jpeg", 1));
         renderer.setSize(ps.x,ps.y);
-        p1.visible = true;
-        p2.visible = true;
-        p3.visible = true;
     }
 
     function downloadImage(url)
@@ -1440,24 +1470,29 @@ function viewer(model, options, labels) {
             tri.getNormal(norm);
             let camDir = new THREE.Vector3();
             camera.getWorldDirection(camDir);
-            console.log(norm);
+
             if(camDir.dot(norm) >= 0)
             {
                 norm = norm.multiplyScalar(-1);
             }
-            console.log(norm);
-            let cen = new THREE.Vector3();
-            tri.getCenter(cen);
 
+            let cen = new THREE.Vector3();
+            //tri.getCenter(cen);
+            cen.copy(control.target)
             
             let d = camera.position.distanceTo(cen);
             
-            control.target.copy(cen);
+            //control.target.copy(cen);
             camera.position.copy(cen.add(norm.multiplyScalar(d)));
             control.update();
             camera.updateProjectionMatrix();
             updateOrthoCam();
         }
+    }
+
+    function toggleOrthoCam()
+    {
+        orthocam = !orthocam;
     }
 
     function toggleOrthographer(value)
@@ -1491,12 +1526,10 @@ function viewer(model, options, labels) {
             mousePosition.x = (mouse.x / viewerContainer.clientWidth) * 2 - 1;
             mousePosition.y = -(mouse.y / viewerContainer.clientHeight) * 2 + 1;
 
-            console.log(mouse);
-            raycaster.setFromCamera(new THREE.Vector2().set(mousePosition.x,mousePosition.y), camera);
+            raycaster.setFromCamera(new THREE.Vector2().set(mousePosition.x,mousePosition.y), orthocam ? co : camera);
             var intrscts = raycaster.intersectObject( sceneObjectsMesh[0] );
             if(intrscts.length > 0)
             {
-                console.log('intersects');
                 tri.add(intrscts[0].point);
             }
         }
@@ -1543,16 +1576,19 @@ function viewer(model, options, labels) {
             {
                 v1 = new THREE.Vector3().copy(v);
                 p1.position.copy(v1);
+                p1.visible = true;
             }
             else if(v2 === undefined)
             {
                 v2 = new THREE.Vector3().copy(v);
                 p2.position.copy(v2);
+                p2.visible = true;
             }
             else if(v3 === undefined)
             {
                 v3 = new THREE.Vector3().copy(v);
                 p3.position.copy(v3);
+                p3.visible = true;
                 ready = true;
             }
         }
@@ -1575,9 +1611,9 @@ function viewer(model, options, labels) {
         function clear()
         {
             v1=v2=v3=normal=center=undefined;
-            p1.position.set(0,10000,0);
-            p2.position.set(0,10000,0);
-            p3.position.set(0,10000,0);
+            p1.visible = false;
+            p2.visible = false;
+            p3.visible = false;
             ready=false;
         }
 

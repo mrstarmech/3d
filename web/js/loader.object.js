@@ -31,6 +31,7 @@ function start() {
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
                 $('.cam-align-btn').hide();
                 $('.dots-reset-btn').hide();
+                $('.cam-switch-btn').hide();
                 cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
                     function (hex, hsv, rgb, mousePicker, mouseSlide) {
                         currentColor = hex;
@@ -70,7 +71,7 @@ function enableMenu()
 }
 
 function supermenu() {
-    var supermenu = $('<div class="container-supermenu-object" role="toolbar" style="width:200px"></div>');
+    var supermenu = $('<div class="btn-group btn-group-sm container-supermenu-object" role="toolbar"></div>');
     if (Array.isArray(object.setting.texture) && object.setting.texture.length > 1)
         supermenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book fa-2x" style="color:blue"></i></button>');
 
@@ -94,8 +95,10 @@ function supermenu() {
         supermenu.append(rt);
     }
     
-    supermenu.append('<button class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
+    supermenu.append('<button class="btn menu-object cam-switch-btn" data-menu="switch-camera"><i class="fas fa-eye"></i></button>');
     supermenu.append('<button class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
+    supermenu.append('<button class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
+    
     return supermenu;
 }
 
@@ -259,12 +262,17 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             {
                 $('.cam-align-btn').show();
                 $('.dots-reset-btn').show();
+                $('.cam-switch-btn').show();
             }
             else
             {
                 $('.cam-align-btn').hide();
                 $('.dots-reset-btn').hide();
+                $('.cam-switch-btn').hide();
             }
+            break;
+        case 'switch-camera':
+            t.switchEnv('swCam');
             break;
         case 'submenu':
             $('.' + classNameContainer + " .submenu").toggle();

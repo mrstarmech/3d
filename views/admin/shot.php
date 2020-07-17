@@ -123,7 +123,6 @@ echo $this->render('_header_object', ['object' => $object]);
     <option value="1024">1024</option>
     <option value="2048">2048</option>
     <option value="4096">4096</option>
-    <option value="8192">8192</option>
 </select>
 
 <?php ActiveForm::end(); ?>
