@@ -1184,10 +1184,9 @@ function viewer(model, options, labels) {
             pinLine.geometry.vertices.push(n);
             pinLine.geometry.verticesNeedUpdate = true;
 
-            var sphereRadius = getBoundingSphereRadius();
-            sphereRadius = (sphereRadius * 5) / 100;
+            
 
-            var pinSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius, 32, 32), new THREE.MeshBasicMaterial({color: 0x349938}));
+            var pinSphere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({color: 0x349938}));
             pinSphere.position.copy(pinLine.geometry.vertices[1]);
 
             onePin.add(pinLine);
@@ -1372,10 +1371,17 @@ function viewer(model, options, labels) {
             scene.add(p2);
             scene.add(p3);
         }
+        scene.traverse((child) => {
+            if (child instanceof THREE.Mesh
+                && child.geometry.type === 'SphereGeometry') {
+                updateDotScale(child)
+            }
+        });
+        /*
         updateDotScale(p1);
         updateDotScale(p2);
         updateDotScale(p3);
-        
+        */
         renderer.render(scene, orthocam ? co : camera);
     };
 
