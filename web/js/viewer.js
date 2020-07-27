@@ -1158,7 +1158,7 @@ function viewer(model, options, labels) {
 
         if (typeof intersects == 'object' && pinsGroup.children.length < 2) {
             var onePin = new THREE.Group();
-
+            onePin.name = 'pin';
             var p = intersects.point;
 
             pinPoints['intersections'].push(p);
@@ -1167,27 +1167,30 @@ function viewer(model, options, labels) {
             intersection.point.copy(p);
 
             var n = intersects.face.normal.clone();
-            var rulerDrawPoint = n.clone().multiplyScalar(0.7);
+            var rulerDrawPoint = n.clone();
             rulerDrawPoint.add(intersects.point);
-            n.multiplyScalar(5);
-            n.add(intersects.point);
+            //n.multiplyScalar(5);
+            //n.add(intersects.point);
             pinPoints['rulerPoints'].push(rulerDrawPoint);
 
             intersection.normal.copy(intersects.face.normal);
             helpers.mouseHelper.lookAt(n);
 
             var pinLine = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({
-                color: 0x000033,
+                color: 0x0000FF,
                 linewidth: 4
             }));
-            pinLine.geometry.vertices.push(intersection.point);
+            pinLine.name = 'pinline';
+            pinLine.geometry.vertices.push(new THREE.Vector3());
             pinLine.geometry.vertices.push(n);
             pinLine.geometry.verticesNeedUpdate = true;
+            pinLine.position.copy(p);
 
             
 
             var pinSphere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({color: 0x349938}));
             pinSphere.position.copy(pinLine.geometry.vertices[1]);
+            pinSphere.name = 'sphere';
 
             onePin.add(pinLine);
             onePin.add(pinSphere);
@@ -1220,6 +1223,39 @@ function viewer(model, options, labels) {
         }
         ;
     };
+
+    function updateRulerScale()
+    {
+        if(pinsGroup === undefined || pinsGroup.length < 1) return;
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let dist = new THREE.Vector3().subVectors(cp,tp).length();
+
+        pinsGroup.children.forEach((child, index) => {
+            if(child.name === "pin")
+            {
+                let p = new THREE.Vector3(0,0,0);
+                let d = new THREE.Vector3(0,0,0);
+                child.traverse((ch) => {    
+                    if(ch.name === 'pinline')
+                    {
+                        p.copy(ch.position);
+                        d.copy(ch.geometry.vertices[1]);
+                        d.normalize();
+                        d.multiplyScalar(dist * (1/camera.zoom) / 10);
+                        ch.geometry.vertices[1].copy(d);
+                        ch.geometry.verticesNeedUpdate = true;
+                    }
+                });
+                child.traverse((ch1) => {    
+                    if(ch1.name === 'sphere')
+                    {
+                        ch1.position.copy(d.add(p));
+                    }
+                });
+            }
+        });
+    }
 
     function saveOptions() {
         var savedOptions = {};
@@ -1377,6 +1413,7 @@ function viewer(model, options, labels) {
                 updateDotScale(child)
             }
         });
+        updateRulerScale();
         /*
         updateDotScale(p1);
         updateDotScale(p2);

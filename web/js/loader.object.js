@@ -25,6 +25,8 @@ function start() {
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(supermenu());
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
+                window.modalDialogLayers = modalDialogShareLayersParams('');
+                OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogLayers.modal);
                 $('pre code').each(function (i, block) {
                     hljs.highlightBlock(block);
                 });
@@ -73,7 +75,7 @@ function enableMenu()
 function supermenu() {
     var supermenu = $('<div class="btn-group btn-group-sm container-supermenu-object" role="toolbar"></div>');
     if (Array.isArray(object.setting.texture) && object.setting.texture.length > 1)
-        supermenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book fa-2x" style="color:blue"></i></button>');
+        supermenu.append('<button title="Change Texture" class="btn menu-object" data-menu="texture-change"><i class="fas fa-book fa-2x" style="color:blue"></i></button>');
 
     if (Array.isArray(object.setting.drawing)) {
         var inputAlpha = '<div id="rt_popover">';
@@ -90,14 +92,14 @@ function supermenu() {
 
         rt_popover = $(inputAlpha);
 
-        var rt = $('<button id="rt" class="btn menu-object" data-menu="reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
+        var rt = $('<button id="rt" title="Overlays" class="btn menu-object" data-menu="reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
                    'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:green"></i></button>');
         supermenu.append(rt);
     }
     
-    supermenu.append('<button class="btn menu-object cam-switch-btn" data-menu="switch-camera"><i class="fas fa-eye"></i></button>');
-    supermenu.append('<button class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
-    supermenu.append('<button class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
+    supermenu.append('<button title="Switch Camera" class="btn menu-object cam-switch-btn" data-menu="switch-camera"><i class="fas fa-eye"></i></button>');
+    supermenu.append('<button title="Align camera" class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
+    supermenu.append('<button title="Reset dots" class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
     
     return supermenu;
 }
@@ -108,43 +110,43 @@ function menu() {
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>'),
         submenu = $('<div class="btn-group btn-group-sm submenu" role="group"></div>');
 
-    topmenu.append('<button class="btn menu-object" data-menu="submenu"><i class="fas fa-cog"></i></button>');
-    topmenu.append('<button class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
-    topmenu.append('<button class="btn menu-object cam-reset-btn" data-menu="reset-camera"><i class="fas fa-redo"></i></button>');
+    topmenu.append('<button title="Options" class="btn menu-object" data-menu="submenu"><i class="fas fa-cog"></i></button>');
+    topmenu.append('<button title="Fullscreen" class="btn menu-object" data-menu="full-screen"><i class="fas fa-expand"></i></button>');
+    topmenu.append('<button title="Reset camera" class="btn menu-object cam-reset-btn" data-menu="reset-camera"><i class="fas fa-redo"></i></button>');
 
     if (object.option.wireframe) {
-        submenu.append('<button class="btn menu-object active" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+        submenu.append('<button title="Wireframe" class="btn menu-object active" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
     } else {
-        submenu.append('<button class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
+        submenu.append('<button title="Wireframe" class="btn menu-object" data-menu="wire-frame"><i class="fas fa-globe"></i></button>');
     }
 
     if (Array.isArray(object.labels) && object.labels.length != 0) {
-        submenu.append('<button class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
+        submenu.append('<button title="Label" class="btn menu-object active" data-menu="label"><i class="fas fa-tags"></i></button>');
         object.option.label = true;
     }
 
-    submenu.append('<button class="btn menu-object cp-button" data-menu="background"><i class="fas fa-palette"></i></button>');
+    submenu.append('<button title="Background" class="btn menu-object cp-button" data-menu="background"><i class="fas fa-palette"></i></button>');
 
     if (object.option.autorotate) {
-        submenu.append('<button class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
+        submenu.append('<button title="Autorotation off" class="btn menu-object active" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
     } else {
-        submenu.append('<button class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
+        submenu.append('<button title="Autorotation on" class="btn menu-object" data-menu="rotate"><i class="fas fa-sync-alt"></i></button>');
     }
-    submenu.append('<button class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
+    submenu.append('<button title="Share" class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
+    submenu.append('<button title="Ruler" class="btn menu-object" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
+    submenu.append('<button title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
+    submenu.append('<button title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
 
     if (object.option.grid) {
-        submenu.append('<button class="btn menu-object active" data-menu="grid"><i class="fas fa-th-large"></i></button>');
+        submenu.append('<button title="Grid off" class="btn menu-object active" data-menu="grid"><i class="fas fa-th-large"></i></button>');
     } else {
-        submenu.append('<button class="btn menu-object" data-menu="grid"><i class="fas fa-th-large"></i></button>');
+        submenu.append('<button title="Grid on" class="btn menu-object" data-menu="grid"><i class="fas fa-th-large"></i></button>');
     }
 
     var inputZoom = '<input type=\'range\' class=\'zoom-value\' step=\'0.1\' min=\'1\' max=\'20\' value=\'1\'>';
-    submenu.append('<button class="btn menu-object" data-menu="zoom" data-html="true" data-container=".submenu" data-toggle="popover" data-placement="top" data-content="' + inputZoom + '"><i class="fas fa-search-plus"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
-    submenu.append('<button class="btn menu-object" data-menu="toggle-orthographer"><i class="fas fa-camera"></i></button>');
+    submenu.append('<button title="Zoom" class="btn menu-object" data-menu="zoom" data-html="true" data-container=".submenu" data-toggle="popover" data-placement="top" data-content="' + inputZoom + '"><i class="fas fa-search-plus"></i></button>');
+    submenu.append('<button title="Change Texture" class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
+    submenu.append('<button title="Orthographer" class="btn menu-object" data-menu="toggle-orthographer"><i class="fas fa-camera"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -168,6 +170,37 @@ function modalDialogShare() {
     modal.append(dialog);
 
     return modal;
+}
+
+function layersParamsToggle(txt)
+{
+    modalDialogLayers.setText(txt);
+    modalDialogLayers.modal.modal();
+    $('.modal-backdrop').appendTo($('.' + classNameContainer).parent());
+    $('body').removeClass();
+}
+
+function modalDialogShareLayersParams() {
+    var modal = $('<div class="modal fade" id="share-object-layers" tabindex="-1" role="dialog" aria-labelledby="dialog_confirm_mapLabel" aria-hidden="true"></div>'),
+        dialog = $('<div class="modal-dialog"></div>'),
+        content = $('<div class="modal-content"></div>'),
+        body = $('<div class="modal-body"></div>'),
+        pre = $('<pre></pre>'),
+        code = $('<code id="' + object.sef + '" onclick="copy()"></code>');
+    code.text('');
+
+    pre.append(code);
+    body.append(pre);
+    content.append(body);
+    dialog.append(content);
+    modal.append(dialog);
+
+    function setText(txt)
+    {
+        code.text(txt);
+    }
+
+    return {modal, setText: setText};
 }
 
 function paletteColor() {
@@ -343,7 +376,7 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         if (object.option.rt) {
             $(this).popover({
                 content: function(){
-                    return '<div id="rt_popover">' + rt_popover.html() + '</div>';
+                    return '<div id="rt_popover" style="width: 200px">' + rt_popover.html() + '</div>';
                 }
             });
             $(this).popover('show');

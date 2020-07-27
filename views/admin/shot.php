@@ -78,8 +78,20 @@ $('#saveLink').click(function() {
     }
 
 $('#orthoLink').click(function() {
-    //console.log($('select[name=res]').val());
-    window.t.switchEnv('shot', $('select[name=res]').val());
+    window.t.switchEnv('shot', $('select[name=res]').val())});
+
+$('#drawingLink').click(function() {
+    var layers = [];
+    if (Array.isArray(drawings) && drawings.length > 0){
+        for (var i = 0; i < drawings.length; i++){
+            layers.push({alpha : drawings[i].alpha, color : drawings[i].color})
+        }
+        layersParamsToggle(`<a href="javascript:layers=` + JSON.stringify(layers) + `for (var i = 0; i < drawings.length; i++){drawings[i].alpha = layers[i].alpha;drawings[i].color = layers[i].color;}t.redrawTexture();">Параметры слоев</a>`);
+    }
+    else
+    {
+        layersParamsToggle("Слои отсутствуют!");
+    }
 });
 JS;
 
@@ -130,5 +142,10 @@ echo $this->render('_header_object', ['object' => $object]);
 <div class="form-group">
     <button id="orthoLink" class="btn btn-primary">
         Ортофото
+    </button>
+</div>
+<div class="form-group">
+    <button id="drawingLink" class="btn btn-primary">
+        Копировать параметры слоев
     </button>
 </div>
