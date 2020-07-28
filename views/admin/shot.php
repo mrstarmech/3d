@@ -86,7 +86,7 @@ $('#drawingLink').click(function() {
         for (var i = 0; i < drawings.length; i++){
             layers.push({alpha : drawings[i].alpha, color : drawings[i].color})
         }
-        layersParamsToggle(`<a href='javascript:layers=` + JSON.stringify(layers) + `for (var i = 0; i < drawings.length; i++){drawings[i].alpha = layers[i].alpha;drawings[i].color = layers[i].color;}t.redrawTexture();'>Параметры слоев</a>`);
+        layersParamsToggle(`<a href='javascript:layers=` + JSON.stringify(layers) + `;for (var i = 0; i < drawings.length; i++){drawings[i].alpha = layers[i].alpha;drawings[i].color = layers[i].color;}t.redrawTexture();'>Параметры слоев</a>`);
     }
     else
     {

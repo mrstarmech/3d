@@ -1,3 +1,5 @@
+R2hotfix2
+	; в параметрах drawings
 R2hotfix1
 	одинарные кавычки в параметрах drawings
 R2
