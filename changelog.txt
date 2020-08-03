@@ -1,3 +1,6 @@
+R3
+	масштабная линейка
+
 R2hotfix2
 	; в параметрах drawings
 R2hotfix1

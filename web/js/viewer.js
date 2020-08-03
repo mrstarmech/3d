@@ -1403,9 +1403,12 @@ function viewer(model, options, labels) {
             firstPass = true;
             control.saveState();
             control.screenSpacePanning = true;
+            scene.add(co);
             scene.add(p1);
             scene.add(p2);
             scene.add(p3);
+            createScaleObject();
+            createScaleLabel();
         }
         scene.traverse((child) => {
             if (child instanceof THREE.Mesh
@@ -1414,6 +1417,8 @@ function viewer(model, options, labels) {
             }
         });
         updateRulerScale();
+        updateScaleObject();
+        testRulerSizeX();
         /*
         updateDotScale(p1);
         updateDotScale(p2);
@@ -1468,11 +1473,10 @@ function viewer(model, options, labels) {
         let halfSizeX,
             halfSizeY;
         let fov = (camera.fov * Math.PI / 180)/camera.zoom;
-        let cp = new THREE.Vector3();
-        cp.copy(camera.position);
-        cp.sub(control.target)
-        let dist = cp.length();
-        halfSizeY = Math.tan(fov / 2) * dist;
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        halfSizeY = Math.tan(fov / 2) * d;
         halfSizeX = halfSizeY * camera.aspect;
         co.left = -halfSizeX;
         co.right = halfSizeX;
@@ -1660,6 +1664,11 @@ function viewer(model, options, labels) {
             ready=false;
         }
 
+        
+        
+
+        
+
         return {
             add: addVertex,
             isReady: isReady,
@@ -1669,6 +1678,258 @@ function viewer(model, options, labels) {
             center: center,
             normal: normal,
         }
+    }
+
+    
+    const scaleHeight = 2; //percents
+    const scaleMaxWidth = 10; //percents
+    const scaleMinWidth = 1; //percents
+    const scalePosHeight = -90; //percents
+    const scalePosWidth = -70; //percents
+    var scaleObj;
+    var scaleText;
+    function createScaleObject()
+    {
+        let vSize = co.top - co.bottom;
+        let hSize = co.right - co.left;
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        let scaleGeom = new THREE.PlaneGeometry(1,1);
+        let uvs = scaleGeom.faceVertexUvs[ 0 ];
+        uvs[ 0 ][ 0 ].set( 0, 1 );
+        uvs[ 0 ][ 1 ].set( 0, 0 );
+        uvs[ 0 ][ 2 ].set( 1, 1 );
+        uvs[ 1 ][ 0 ].set( 0, 0 );
+        uvs[ 1 ][ 1 ].set( 1, 0 );
+        uvs[ 1 ][ 2 ].set( 1, 1 );
+        let scaleMat = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, depthTest: false, transparent: true});
+        scaleObj = new THREE.Mesh(scaleGeom, scaleMat);
+        scaleObj.name = 'scaleRuler';
+        co.add(scaleObj);
+        scaleObj.renderOrder = 999;
+        scaleObj.position.copy(new THREE.Vector3(scalePosWidth/2)/100,vSize*(scalePosHeight/2)/100);
+        new THREE.TextureLoader().load( '/img/m_ruler_no_digits.png?123', (rulerTexture)=>{
+            scaleObj.material.map = rulerTexture;
+            scaleObj.material.needsUpdate = true;
+        } );
+        //scaleText = new SpriteText2D("SPRITE", { align: textAlign.center,  font: '40px Arial', fillStyle: '#000000' , antialias: false });
+        //scene.add(scaleText);
+    }
+
+    const LABEL_OFFSET_MULT = 0.5;
+    const TEXT_SIZE = 100;
+
+    var mult = 0;
+    function updateScaleObject()
+    {
+        
+        let vSize = co.top - co.bottom;
+        let hSize = co.right - co.left;
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        console.log(vSize);
+        let nmult = 1;
+
+        if(hSize < 5)
+        {
+            nmult = 0.25;
+        }
+        else if(hSize < 10)
+        {
+            nmult = 1;
+        }
+        else if(hSize < 25)
+        {
+            nmult = 2.5;
+        }
+        else if(hSize < 50)
+        {
+            nmult = 5;
+        }
+        else if(hSize < 100)
+        {
+            nmult = 10;
+        }
+        else if(hSize < 250)
+        {
+            nmult = 25;
+        }
+        else if(hSize < 500)
+        {
+            nmult = 50;
+        }
+        else if(hSize < 750)
+        {
+            nmult = 75;
+        }
+        else if(hSize < 1000)
+        {
+            nmult = 100;
+        }
+        else if(hSize < 2500)
+        {
+            nmult = 250
+        }
+        else if(hSize < 5000)
+        {
+            nmult = 500;
+        }
+        else if(hSize < 7500)
+        {
+            nmult = 750;
+        }
+        else if(hSize < 10000)
+        {
+            nmult = 1000;
+        }
+        else if(hSize < 25000)
+        {
+            nmult = 2500;
+        }
+        else if(hSize < 50000)
+        {
+            nmult = 5000;
+        }
+        else if(hSize < 75000)
+        {
+            nmult = 7500;
+        }
+        else if(hSize < 100000)
+        {
+            nmult = 10000;
+        }
+        else if(hSize < 250000)
+        {
+            nmult = 25000;
+        }
+        else if(hSize < 500000)
+        {
+            nmult = 50000;
+        }
+        else if(hSize < 750000)
+        {
+            nmult = 75000;
+        }
+        else if(hSize < 1000000)
+        {
+            nmult = 100000;
+        }
+        else if(hSize < 2500000)
+        {
+            nmult = 250000;
+        }
+        else
+        {
+            nmult = 500000;
+        }
+
+        if(mult != nmult)
+        {
+            mult = nmult;
+            updateLabel(logScale(nmult),TEXT_SIZE);
+        }
+        
+        scaleObj.scale.set(nmult, nmult/8,1);
+        scaleText.scale.set(nmult * 2/3, nmult * 2/3,1);
+        scaleObj.position.copy(new THREE.Vector3(hSize*(scalePosWidth/2)/100,vSize*(scalePosHeight/2)/100,-d));
+        scaleText.position.set(scaleObj.position.x + scaleObj.scale.x*LABEL_OFFSET_MULT + scaleText.scale.x * LABEL_OFFSET_MULT ,scaleObj.position.y,-d);
+    }
+
+    function testRulerSizeX()
+    {
+        let v1 = scaleObj.geometry.vertices[0].clone();
+        v1.add(scaleObj.position);
+        let v2 = scaleObj.geometry.vertices[1].clone();
+        v2.add(scaleObj.position);
+        let d = v1.sub(v2).length();
+    }
+
+    function logScale(mult)
+    {
+        let m = ''
+        let val = 0;
+        if(mult < 10)
+        {
+            val = mult;
+            m = 'mm';
+        }
+        else if(mult < 100)
+        {
+            val = mult/10;
+            m = 'cm';
+        }
+        else if(mult < 1000)
+        {
+            val = mult/100;
+            m = 'dm';
+        }
+        else if(mult < 1000000)
+        {
+            val = mult/1000;
+            m = 'm';
+        }
+        else
+        {
+            val = mult/1000000;
+            m = 'km';
+        }
+        return val + m;
+    }
+
+    function createScaleLabel()
+    {
+        let vSize = co.top - co.bottom;
+        let hSize = co.right - co.left;
+        let cp = new THREE.Vector3().copy(camera.position);
+        let tp = new THREE.Vector3().copy(control.target);
+        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        let scaleGeom = new THREE.PlaneGeometry(1,1);
+        let uvs = scaleGeom.faceVertexUvs[ 0 ];
+        uvs[ 0 ][ 0 ].set( 0, 1 );
+        uvs[ 0 ][ 1 ].set( 0, 0 );
+        uvs[ 0 ][ 2 ].set( 1, 1 );
+        uvs[ 1 ][ 0 ].set( 0, 0 );
+        uvs[ 1 ][ 1 ].set( 1, 0 );
+        uvs[ 1 ][ 2 ].set( 1, 1 );
+        let scaleMat = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, transparent: true});
+        scaleText = new THREE.Mesh(scaleGeom, scaleMat);
+        scaleText.name = 'scaleLabel';
+        co.add(scaleText);
+        scaleText.renderOrder = 999;
+        scaleText.position.set(0,0,-d);
+    }
+
+    function updateLabel(text, size) {
+        let lcanvas = document.createElement("canvas");
+        lcanvas.width = 512;
+        lcanvas.height = 512;
+        let lcontext = lcanvas.getContext("2d");
+
+        lcontext.font = size + "pt Arial";
+
+        let lmargin = 10;
+        let ltextWidth = lcontext.measureText(text).width;
+
+        //lcontext.strokeStyle = "black";
+        //lcontext.strokeRect(0, 0, lcanvas.width, lcanvas.height);
+
+        //lcontext.strokeStyle = "red";
+        //lcontext.strokeRect(lcanvas.width / 2 - ltextWidth / 2 - lmargin / 2, lcanvas.height / 2 - size / 2 - +lmargin / 2, ltextWidth + lmargin, size + lmargin);
+
+        lcontext.textAlign = "center";
+        lcontext.textBaseline = "middle";
+        lcontext.fillStyle = "black";
+        lcontext.fillText(text, lcanvas.width/2, lcanvas.height/2);
+
+        var ltexture = new THREE.Texture(lcanvas);
+        ltexture.needsUpdate = true;
+
+        scaleText.material.map = ltexture;
+        scaleText.material.needsUpdate = true;
+
+        
     }
     //----------------------------------------------------------------------------------------------------------------------------------------
 

@@ -29,7 +29,7 @@ class View3dAsset extends AssetBundle
         'js/three/TrackballControls.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?123',
+        'js/viewer.js?1231',
         'js/label.js',
         'js/loader.object.js?123',
     ];
