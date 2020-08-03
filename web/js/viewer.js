@@ -226,6 +226,8 @@ function viewer(model, options, labels) {
         control.rotateSpeed = 1.2;
         control.zoomSpeed = 1.2;
 
+        
+
         helpers.mouseHelper = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 10), new THREE.MeshNormalMaterial());
         helpers.mouseHelper.visible = false;
 
@@ -948,6 +950,14 @@ function viewer(model, options, labels) {
                     light = lights[value]();
                     scene.add(light);
                     controllers.currentLight = light;
+                    if(light.name == 'CameraLight')
+                    {
+                        lightEnabled = true;
+                    }
+                    else
+                    {
+                        lightEnabled = false;
+                    }
 
                     if (sceneObjectsMesh.length > 0) {
                         sceneObjectsMesh[0].material.needsUpdate = true
@@ -1012,14 +1022,17 @@ function viewer(model, options, labels) {
                                     color: 0xdddddd,
                                     shading: THREE.SmoothShading
                                 });
+                                texEnabled = false;
 
                             } else if (controllers.originMaterial[i] !== undefined) {
                                 item.material = controllers.originMaterial[i];
+                                texEnabled = true;
                             }
 
                         }
                     });
                 }
+                console.log(texEnabled);
                 switchEnv('wireframe', options.wireframe);
                 break;
             case 'scale':
@@ -1055,6 +1068,7 @@ function viewer(model, options, labels) {
                         }
                     });
                 }
+                
                 switchEnv('wireframe', options.wireframe);
                 break;
         }
@@ -1370,6 +1384,7 @@ function viewer(model, options, labels) {
         camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+        effectComposer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
     };
 
     function animate() {
@@ -1409,6 +1424,7 @@ function viewer(model, options, labels) {
             scene.add(p3);
             createScaleObject();
             createScaleLabel();
+            SetupComposer();
         }
         scene.traverse((child) => {
             if (child instanceof THREE.Mesh
@@ -1419,12 +1435,34 @@ function viewer(model, options, labels) {
         updateRulerScale();
         updateScaleObject();
         testRulerSizeX();
+        checkOutline();
         /*
         updateDotScale(p1);
         updateDotScale(p2);
         updateDotScale(p3);
         */
-        renderer.render(scene, orthocam ? co : camera);
+        //renderer.render(scene, orthocam ? co : camera);
+        if(orthocam)
+        {
+            effectComposer.passes[0].enabled = false;
+            effectComposer.passes[1].enabled = true;
+            if(enableOutline)
+            {
+                effectComposer.passes[2].enabled = false;
+                effectComposer.passes[3].enabled = true;
+            }
+        }
+        else
+        {
+            effectComposer.passes[0].enabled = true;
+            effectComposer.passes[1].enabled = false;
+            if(enableOutline)
+            {
+                effectComposer.passes[2].enabled = true;
+                effectComposer.passes[3].enabled = false;
+            }
+        }
+        effectComposer.render();
     };
 
     //orthoshotext----------------------------------------------------------------------------------------------------------------------------
@@ -1729,7 +1767,6 @@ function viewer(model, options, labels) {
         let cp = new THREE.Vector3().copy(camera.position);
         let tp = new THREE.Vector3().copy(control.target);
         let d = new THREE.Vector3().subVectors(cp,tp).length();
-        console.log(vSize);
         let nmult = 1;
 
         if(hSize < 5)
@@ -1931,6 +1968,57 @@ function viewer(model, options, labels) {
 
         
     }
+
+    var effectComposer = new THREE.EffectComposer(renderer);
+    var renderPass;
+    var orthoPass;
+    var outlinePass;
+    var outlineOrthoPass;
+    var enableOutline = false;
+    var texEnabled = true;
+    function checkOutline()
+    {
+        if(!texEnabled)
+        {
+            enableOutline = true;
+        }
+        else
+        {
+            enableOutline = false;
+            effectComposer.passes[2].enabled = false;
+            effectComposer.passes[3].enabled = false;
+        }
+    }
+
+    function SetupComposer()
+    {
+        renderPass = new THREE.RenderPass(scene,camera);
+        effectComposer.addPass(renderPass);
+        orthoPass = new THREE.RenderPass(scene, co);
+        orthoPass.enabled = false;
+        effectComposer.addPass(orthoPass);
+
+        outlinePass = new THREE.OutlinePass(new THREE.Vector2(1024,1024), scene,camera);
+        outlinePass.enabled = false;
+        outlinePass.visibleEdgeColor.set('black');
+        outlinePass.edgeStrength = 2;
+        outlinePass.edgeGlow = 0;
+        outlinePass.edgeThickness = 0.1;
+        effectComposer.addPass(outlinePass);
+
+        outlineOrthoPass = new THREE.OutlinePass(new THREE.Vector2(1024,1024), scene,co);
+        outlineOrthoPass.enabled = false;
+        outlineOrthoPass.visibleEdgeColor.set('black');
+        outlineOrthoPass.edgeStrength = 2;
+        outlineOrthoPass.edgeGlow = 0;
+        outlineOrthoPass.edgeThickness = 0.1;
+        effectComposer.addPass(outlineOrthoPass);
+        outlinePass.selectedObjects = sceneObjectsMesh;
+        outlineOrthoPass.selectedObjects = sceneObjectsMesh;
+
+        effectComposer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+    }
+
     //----------------------------------------------------------------------------------------------------------------------------------------
 
     return {
