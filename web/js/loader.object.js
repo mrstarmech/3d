@@ -305,6 +305,16 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             }
             break;
         case 'switch-camera':
+            $('.cam-switch-btn').toggleClass('active');
+            if($('.cam-switch-btn').hasClass('active')){
+                $('.cam-switch-btn').css('background','padding-box red');
+                $('.cam-switch-btn').attr('title','Orthographic Camera Active');
+            }
+            else{
+                $('.cam-switch-btn').css('background', 'padding-box rgba(0,0,0,0)');
+                $('.cam-switch-btn').attr('title','Switch camera');
+            }
+
             t.switchEnv('swCam');
             break;
         case 'submenu':

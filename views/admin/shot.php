@@ -129,21 +129,19 @@ echo $this->render('_header_object', ['object' => $object]);
 
 <?php ActiveForm::end(); ?>
 
-<?php $form2 = ActiveForm::begin(); ?>
-
-<select id="resolution" name="res">
-    <option value="1024">1024</option>
-    <option value="2048">2048</option>
-    <option value="4096">4096</option>
-</select>
-
-<?php ActiveForm::end(); ?>
-
 <div class="form-group">
     <button id="orthoLink" class="btn btn-primary">
         Ортофото
     </button>
+    <select id="resolution" name="res">
+        <option value="1024">1024</option>
+        <option value="2048">2048</option>
+        <option value="4096">4096</option>
+    </select>
 </div>
+
+
+
 <div class="form-group">
     <button id="drawingLink" class="btn btn-primary">
         Копировать параметры слоев

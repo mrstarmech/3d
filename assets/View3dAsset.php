@@ -13,7 +13,7 @@ class View3dAsset extends AssetBundle
     public $basePath = '@webroot';
     public $baseUrl = '@web';
     public $css = [
-        'css/loader.object.css?20200430',
+        'css/loader.object.css?2020043',
         'css/jquery.fancybox.min.css',
         'css/colorpicker.css',
     ];
@@ -36,7 +36,7 @@ class View3dAsset extends AssetBundle
         'js/colorpicker.min.js',
         'js/viewer.js?1231',
         'js/label.js',
-        'js/loader.object.js?123',
+        'js/loader.object.js?1234545',
     ];
     public $depends = [
         'yii\web\YiiAsset',
