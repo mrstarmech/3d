@@ -6,6 +6,7 @@ use yii\web\AssetBundle;
 
 /**
  * Class View3dAsset
+ * 
  * @package app\assets
  */
 class View3dAsset extends AssetBundle
@@ -34,7 +35,7 @@ class View3dAsset extends AssetBundle
         'js/three/postprocessing/OutlinePass.js?123',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?1231',
+        'js/viewer.js?12',
         'js/label.js',
         'js/loader.object.js?1234545',
     ];

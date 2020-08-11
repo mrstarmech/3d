@@ -50,8 +50,6 @@ function viewer(model, options, labels) {
             preserveDrawingBuffer: options.preserveDrawingBuffer
         }),
         raycaster = new THREE.Raycaster(),
-        //sphere = new THREE.Mesh(new THREE.SphereGeometry( 1, 32, 32 ), new THREE.MeshBasicMaterial( {color:0x349938})),
-        line = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({color: 0x000033, linewidth: 4})),
         lights = {
             AmbientLight: function () {
                 var elem = new THREE.AmbientLight();
@@ -82,17 +80,11 @@ function viewer(model, options, labels) {
                 for (var i = 0; i < count; i++) {
                     var position = new THREE.Vector3();
                     position.fromArray(coords[i]);
-                    //var lightSphere = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 8), new THREE.MeshBasicMaterial({color: Math.random() * 0xffffff}));
                     var lightPoint = new THREE.DirectionalLight(0xffffff, 0.7);
                     lightPoint.name = 'light_' + i;
-                    //lightPoint.add(lightSphere);
                     lightPoint.position.copy(position);
-                    //lightSphere.position.copy(position);
-
                     drivenLightsGroup.add(lightPoint);
                 }
-                ;
-
                 return drivenLightsGroup;
             }
         },
@@ -209,11 +201,9 @@ function viewer(model, options, labels) {
 
             viewerContainer.appendChild(loadingBar);
 
-            // setTimeout(init, 1500);
             init();
-        }
-        ;
-    };
+        }   
+    }
 
     function init() {
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -247,13 +237,13 @@ function viewer(model, options, labels) {
                     camera.position.set(options.cameraCoords.x, options.cameraCoords.y, options.cameraCoords.z);
                     camera.updateProjectionMatrix();
                 }
-                ;
+                
 
                 scene.traverse(function (node) {
                     if (node.type == 'Mesh') {
                         node.material.needsUpdate = true;
                     }
-                    ;
+                    
                 });
 
                 viewerContainer.removeChild(loadingBar);
@@ -262,39 +252,35 @@ function viewer(model, options, labels) {
                 if (options.backgroundColor) {
                     switchEnv('background', options.backgroundColor);
                 }
-                ;
+                
 
                 if (options.ruler) {
                     switchEnv('ruler', true);
                 }
-                ;
+                
                 if (options.grid) {
                     switchEnv('grid', true);
                 }
-                ;
+                
                 if (options.wireframe) {
                     switchEnv('wireframe', true);
                 }
-                ;
+                
                 if (options.autorotate) {
                     switchEnv('autoRotate', true);
                 }
-                ;
+                
                 if (options.focalLenght) {
                     switchEnv('focalLenght', options.focalLenght);
                 }
-                ;
+                
                 if (options.cameraFov) {
                     switchEnv('cameraFov', options.cameraFov);
                 }
-                ;
+                
                 if (options.scale) {
                     switchEnv('scale', options.scale);
                 }
-                ;
-
-                // projector = new THREE.Projector();
-                // document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 
                 renderer.domElement.addEventListener('mousedown', onContainerMouseDown, false);
                 window.addEventListener('resize', onWindowResize, false);
@@ -304,16 +290,15 @@ function viewer(model, options, labels) {
                 addCompass();
                 animate();
                 externalCallback();
-            }
-            ;
+            }  
         });
-    };
+    }
 
     function redrawTexture(){
         //1. For each background: if loaded - create backgrounds[i].ctx canvas with background image
-        for (var i = 0; i < backgrounds.length; i++) {
-            if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0
-                && typeof backgrounds[i].ctx === 'undefined') {
+        for (let i = 0; i < backgrounds.length; i++) {
+            if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0 && typeof backgrounds[i].ctx === 'undefined') 
+            {
                 backgrounds[i].ctx = document.createElement('canvas').getContext('2d');
                 backgrounds[i].ctx.canvas.width = backgrounds[i].image.width;
                 backgrounds[i].ctx.canvas.height = backgrounds[i].image.height;
@@ -322,7 +307,7 @@ function viewer(model, options, labels) {
         }
 
         //2. Draw
-        for (var i = 0; i < backgrounds.length; i++) {
+        for (let i = 0; i < backgrounds.length; i++) {
             if (backgrounds[i].path == controllers.currentTexture[0]) {
                 //2a. draw current background in main ctx
                 if (typeof backgrounds[i].ctx == 'undefined') return;
@@ -343,9 +328,9 @@ function viewer(model, options, labels) {
                 }
                 //2c. For each drawing: if loaded - create drawings[i].ctx canvas with drawing image
                 // and drawings[i].coloredCtx with colored drawing image
-                for (var i = 0; i < drawings.length; i++) {
-                    if (drawings[i].image.complete && drawings[i].image.naturalHeight !== 0
-                        && typeof drawings[i].ctx === 'undefined') {
+                for (let i = 0; i < drawings.length; i++) {
+                    if (drawings[i].image.complete && drawings[i].image.naturalHeight !== 0 && typeof drawings[i].ctx === 'undefined') 
+                    {
                         drawings[i].ctx = document.createElement('canvas').getContext('2d');
                         drawings[i].ctx.canvas.width = canvasWidth;
                         drawings[i].ctx.canvas.height = canvasHeight;
@@ -367,10 +352,11 @@ function viewer(model, options, labels) {
                     }
                 }
                 //2d. For each drawing: if color changed - redraw drawings[i].coloredCtx
-                for (var i = 0; i < drawings.length; i++) {
+                for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].ctx && typeof drawings[i].color === 'string' &&
-                        (typeof drawings[i].currentColor == "undefined" || drawings[i].currentColor != drawings[i].color)) {
-                            var coloredCtx = drawings[i].coloredCtx;
+                        (typeof drawings[i].currentColor == "undefined" || drawings[i].currentColor != drawings[i].color)) 
+                    {
+                            let coloredCtx = drawings[i].coloredCtx;
                             coloredCtx.clearRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
                             coloredCtx.drawImage(drawings[i].ctx.canvas, 0, 0);
                             coloredCtx.fillStyle = drawings[i].color;
@@ -382,9 +368,9 @@ function viewer(model, options, labels) {
 
                 }
                 //2e. For each drawing: if loaded and cleaner loaded - create drawings[i].minusedCtx canvas
-                for (var i = 0; i < drawings.length; i++) {
-                    if (typeof drawings[i].ctx != 'undefined' && typeof cleaner != 'undefined'
-                    && typeof drawings[i].minusedCtx === 'undefined') {
+                for (let i = 0; i < drawings.length; i++) {
+                    if (typeof drawings[i].ctx != 'undefined' && typeof cleaner != 'undefined' && typeof drawings[i].minusedCtx === 'undefined') 
+                    {
                         drawings[i].minusedCtx = document.createElement('canvas').getContext('2d');
                         var minusedCtx = drawings[i].minusedCtx;
                         minusedCtx.canvas.width = canvasWidth;
@@ -396,7 +382,7 @@ function viewer(model, options, labels) {
                         minusedCtx.globalCompositeOperation = "source-over";
                     }
                 }
-                for (var i = 0; i < drawings.length; i++) {
+                for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha < 0) {
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
                             ctx.globalAlpha = -drawings[i].alpha;
@@ -404,7 +390,7 @@ function viewer(model, options, labels) {
                         }
                     }
                 }
-                for (var i = 0; i < drawings.length; i++) {
+                for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha > 0) {
                         if (typeof drawings[i].coloredCtx != 'undefined' ) {
                             ctx.globalAlpha = drawings[i].alpha;
@@ -1392,6 +1378,8 @@ function viewer(model, options, labels) {
         render();
     };
 
+    let boxHelper;
+
     function render() {
         //camera.lookAt(scene.position);
         updateOrthoCam();
@@ -1425,6 +1413,8 @@ function viewer(model, options, labels) {
             createScaleObject();
             createScaleLabel();
             SetupComposer();
+            boxHelper = new THREE.BoxHelper(sceneObjectsMesh[0]);
+            scene.add(boxHelper);
         }
         scene.traverse((child) => {
             if (child instanceof THREE.Mesh
@@ -1507,7 +1497,8 @@ function viewer(model, options, labels) {
         updateDotScale(p3);
     }
 
-    function updateOrthoCam(square) {
+    function updateOrthoCam(clip) 
+    {
         let halfSizeX,
             halfSizeY;
         let fov = (camera.fov * Math.PI / 180)/camera.zoom;
@@ -1520,6 +1511,14 @@ function viewer(model, options, labels) {
         co.right = halfSizeX;
         co.top = halfSizeY;
         co.bottom = -halfSizeY;
+        let r = getBoundingSphereRadius() * .75;
+        if(clip)
+        {
+            co.left = -r;
+            co.right = r;
+            co.top = r;
+            co.bottom = -r;
+        }
         co.position.copy(camera.position);
         co.rotation.copy(camera.rotation);
         co.updateProjectionMatrix();
@@ -1527,14 +1526,21 @@ function viewer(model, options, labels) {
 
     function orthoShot(resolution)
     {
-        tri.clear();
+        if(tri!==undefined)tri.clear();
         let ps = new THREE.Vector2();
+        let asp = camera.aspect;
         renderer.getSize(ps);
         renderer.setSize(resolution,resolution);
+        effectComposer.setSize(resolution, resolution);
+        camera.aspect = 1;
+        camera.updateProjectionMatrix();
         updateOrthoCam(true);
-        renderer.render(scene, co);
+        effectComposer.render();
         downloadImage(renderer.domElement.toDataURL("image/jpeg", 1));
         renderer.setSize(ps.x,ps.y);
+        effectComposer.setSize(ps.x,ps.y);
+        camera.aspect = asp;
+        camera.updateProjectionMatrix();
     }
 
     function downloadImage(url)
@@ -1590,7 +1596,7 @@ function viewer(model, options, labels) {
         }
         else
         {
-            tri.clear();
+            if(tri!==undefined)tri.clear();
             tri = undefined;
             renderer.domElement.removeEventListener('click',orthoClickHandler);
         }
@@ -1621,7 +1627,7 @@ function viewer(model, options, labels) {
     }
 
     function resetDots(){
-        tri.clear();
+        if(tri!==undefined)tri.clear();
     }
 
     function resetCam(){
