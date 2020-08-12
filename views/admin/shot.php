@@ -80,6 +80,11 @@ $('#saveLink').click(function() {
 $('#orthoLink').click(function() {
     window.t.switchEnv('shot', $('select[name=res]').val())});
 
+$('#wback').change(function () {
+    
+    window.t.switchEnv('white-back', $("input[type=checkbox][name=wback]").is(":checked"))
+});
+
 $('#drawingLink').click(function() {
     var layers = [];
     if (Array.isArray(drawings) && drawings.length > 0){
@@ -138,6 +143,8 @@ echo $this->render('_header_object', ['object' => $object]);
         <option value="2048">2048</option>
         <option value="4096">4096</option>
     </select>
+    <input type="checkbox" id="wback" name="wback">
+    <label for="wback">Белый фон</label>
 </div>
 
 

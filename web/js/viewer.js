@@ -294,7 +294,8 @@ function viewer(model, options, labels) {
         });
     }
 
-    function redrawTexture(){
+    function redrawTexture(clean){
+        clean = !texEnabled;
         //1. For each background: if loaded - create backgrounds[i].ctx canvas with background image
         for (let i = 0; i < backgrounds.length; i++) {
             if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0 && typeof backgrounds[i].ctx === 'undefined') 
@@ -316,9 +317,18 @@ function viewer(model, options, labels) {
                 ctx.canvas.width = canvasWidth;
                 ctx.canvas.height = canvasHeight;
                 ctx.globalAlpha = 1;
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.drawImage(backgrounds[i].ctx.canvas, 0, 0);
-
+                if(!clean)
+                {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.drawImage(backgrounds[i].ctx.canvas, 0, 0);
+                }
+                else
+                {
+                    ctx.beginPath();
+                    ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.fillStyle = "white";
+                    ctx.fill();
+                }
                 //2b. if loaded - create cleaner.ctx canvas with cleaner image
                 if (typeof cleaner !== 'undefined' && typeof cleaner.ctx === 'undefined') {
                     cleaner.ctx = document.createElement('canvas').getContext('2d');
@@ -541,7 +551,7 @@ function viewer(model, options, labels) {
                             object.position.y = objectDefaultCoords.y;
                             object.position.z = objectDefaultCoords.z;
                         }
-                        ;
+                        
                         object.traverse(function (node) {
                             if (node.type == 'Mesh') {
                                 node.geometry.computeVertexNormals();
@@ -552,7 +562,7 @@ function viewer(model, options, labels) {
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
-                            ;
+                            
                         });
                         scene.add(object);
 
@@ -629,7 +639,7 @@ function viewer(model, options, labels) {
                             object.position.y = objectDefaultCoords.y;
                             object.position.z = objectDefaultCoords.z;
                         }
-                        ;
+                        
                         object.scene.traverse(function (node) {
                             if (node.type == 'Mesh') {
                                 node.geometry.computeVertexNormals();
@@ -814,6 +824,10 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
+            case 'white-back':
+                whiteBack(value);
+                
+                break;
             case 'reset-dots':
                 resetDots();
                 break;
@@ -1000,19 +1014,25 @@ function viewer(model, options, labels) {
                                 controllers.originMaterial = [];
                             }
                             if (controllers.originMaterial[i] === undefined) {
-                                controllers.originMaterial[i] = item.material;
+                                controllers.originMaterial[i] = item.material.map;
                             }
 
                             if (value) {
-                                item.material = new THREE.MeshLambertMaterial({
-                                    color: 0xdddddd,
-                                    shading: THREE.SmoothShading
-                                });
+                                // item.material.map = "";/*new THREE.MeshLambertMaterial({
+                                //     color: 0xdddddd,
+                                //     shading: THREE.SmoothShading
+                                // });*/
+                                //item.material.needsUpdate = true;
                                 texEnabled = false;
+                                redrawTexture(true);
 
-                            } else if (controllers.originMaterial[i] !== undefined) {
-                                item.material = controllers.originMaterial[i];
+                            } 
+                            else //(controllers.originMaterial[i] !== undefined) 
+                            {
+                                //item.material.map = controllers.originMaterial[i];
+                                //item.material.needsUpdate = true;
                                 texEnabled = true;
+                                redrawTexture(false);
                             }
 
                         }
@@ -1058,8 +1078,8 @@ function viewer(model, options, labels) {
                 switchEnv('wireframe', options.wireframe);
                 break;
         }
-        ;
-    };
+        
+    }
 
     function getBoundingSphereRadius() {
         var radius = 0;
@@ -1068,10 +1088,10 @@ function viewer(model, options, labels) {
             if (bbox.geometry.boundingSphere.radius >= radius) {
                 radius = bbox.geometry.boundingSphere.radius;
             }
-            ;
+            
         });
         return radius;
-    };
+    }
 
     function getObjectFromGroup(objectsGroup, elemMouseCoords) {
         var intersects;
@@ -1980,8 +2000,10 @@ function viewer(model, options, labels) {
     var orthoPass;
     var outlinePass;
     var outlineOrthoPass;
+    const BACK_COLOR = 0xf0f0f0;
     var enableOutline = false;
     var texEnabled = true;
+
     function checkOutline()
     {
         if(!texEnabled)
@@ -1993,6 +2015,18 @@ function viewer(model, options, labels) {
             enableOutline = false;
             effectComposer.passes[2].enabled = false;
             effectComposer.passes[3].enabled = false;
+        }
+    }
+
+    function whiteBack(enable)
+    {
+        if(enable)
+        {
+            renderer.setClearColor('white');
+        }
+        else
+        {
+            renderer.setClearColor(BACK_COLOR);
         }
     }
 
