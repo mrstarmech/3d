@@ -1400,8 +1400,6 @@ function viewer(model, options, labels) {
         render();
     };
 
-    let boxHelper;
-
     function render() {
         //camera.lookAt(scene.position);
         updateOrthoCam();
@@ -1435,8 +1433,6 @@ function viewer(model, options, labels) {
             
             addScaleRuler();
             SetupComposer();
-            boxHelper = new THREE.BoxHelper(sceneObjectsMesh[0]);
-            scene.add(boxHelper);
         }
         scene.traverse((child) => {
             if (child instanceof THREE.Mesh
@@ -1547,20 +1543,50 @@ function viewer(model, options, labels) {
     {
         if(tri!==undefined)tri.clear();
         let ps = new THREE.Vector2();
+        let mvs = cameraSpaceBoundingBox();
         let asp = camera.aspect;
+        let ofov = camera.fov;
+        let opos = camera.position.clone();
         renderer.getSize(ps);
-        renderer.setSize(resolution,resolution);
-        effectComposer.setSize(resolution, resolution);
-        camera.aspect = 1;
+        if(orthocam)
+        {
+            camera.position.copy(mvs.center);
+            camera.aspect = mvs.visibleSize.x/mvs.visibleSize.y;
+            let wd = new THREE.Vector3();
+            let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
+            let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
+            if(mvs.visibleSize.x > mvs.visibleSize.y) {
+                renderer.setSize(resolution,resolution/camera.aspect);
+                effectComposer.setSize(resolution,resolution/camera.aspect);
+            }
+            else {
+                renderer.setSize(resolution*camera.aspect,resolution);
+                effectComposer.setSize(resolution*camera.aspect,resolution);
+            }
+            camera.fov = 2*(Math.atan((mvs.visibleSize.y/2)/planarDistance) * (180/Math.PI));
+        }
+        else
+        {
+            if(camera.aspect > 1) {
+                renderer.setSize(resolution, resolution/camera.aspect);
+                effectComposer.setSize(resolution, resolution/camera.aspect);
+            }else{
+                renderer.setSize(resolution/camera.aspect, resolution);
+                effectComposer.setSize(resolution/camera.aspect, resolution);
+            }
+        }
+
         camera.updateProjectionMatrix();
         updateOrthoCam(true);
-        updateScaleRuler();
+        updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         effectComposer.render();
         downloadImage(renderer.domElement.toDataURL("image/jpeg", 1));
         renderer.setSize(ps.x,ps.y);
         effectComposer.setSize(ps.x,ps.y);
         camera.aspect = asp;
+        camera.fov = ofov;
+        camera.position.copy(opos);
         camera.updateProjectionMatrix();
     }
 
@@ -2098,7 +2124,7 @@ function viewer(model, options, labels) {
         });
     }
 
-    function updateScaleRuler()
+    function updateScaleRuler(ensure)
     {
         let wd = new THREE.Vector3();
         let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
@@ -2107,6 +2133,7 @@ function viewer(model, options, labels) {
         scrSpCan.update(planarDistance);
         let main = scrSpCan.get('main');
         if(main !== undefined) main.opt.width = scrSpCan.stage;
+        if(ensure)scrSpCan.update(planarDistance);
     }
 
     function mouseWheelHandler(event)
@@ -2123,6 +2150,39 @@ function viewer(model, options, labels) {
 
     var stages = [1,2,3,4,5,10,20,30,40,50,100,200,300,400,500,1000,2000,3000,4000,5000,10000,20000,30000,40000,50000,100000,200000,300000,400000,500000,1000000,2000000,3000000,4000000,5000000];
     var units  = ['mm','cm','dm','m','m','m','km']
+    //------------------------------------------------------------------------------------
+    //GPUcalculations---------------------------------------------------------------------
+    var calcObj;
+    function cameraSpaceBoundingBox()
+    {
+        if(calcObj === undefined)
+        {
+            calcObj = {
+                obj2calc: sceneObjectsMesh[0],
+                cam2calc: camera,
+                bVx: sceneObjectsMesh[0].geometry.getAttribute('position').array,
+            }
+        }
+
+        let minx = Infinity, miny = Infinity;
+        let maxx = -Infinity, maxy = -Infinity;
+
+        for (let bvxI = 0; bvxI < calcObj.bVx.length; bvxI+=3) {
+            const vx = new THREE.Vector3().set(calcObj.bVx[bvxI],calcObj.bVx[bvxI+1],calcObj.bVx[bvxI+2]);
+            const cvx = calcObj.cam2calc.worldToLocal(calcObj.obj2calc.localToWorld(vx));
+            if(cvx.x < minx) minx = cvx.x;
+            if(cvx.y < miny) miny = cvx.y;
+            if(cvx.x > maxx) maxx = cvx.x;
+            if(cvx.y > maxy) maxy = cvx.y;
+        }
+        let low = new THREE.Vector2(minx,miny);
+        let high = new THREE.Vector2(maxx,maxy);
+        let visibleSize = new THREE.Vector2().subVectors(high,low);
+        let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(.5);
+        center = calcObj.cam2calc.localToWorld(new THREE.Vector3().set(center.x,center.y,0));
+
+        return {visibleSize, center};
+    }
     //------------------------------------------------------------------------------------
 
     return {
