@@ -209,12 +209,14 @@ function viewer(model, options, labels) {
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(0xf0f0f0);
         renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+        renderer.domElement.addEventListener( 'wheel', mouseWheelHandler, false );
         camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
         camera.updateProjectionMatrix();
 
         control = controls[options.controls]();
         control.rotateSpeed = 1.2;
-        control.zoomSpeed = 1.2;
+        control.enableZoom = false;
+        
 
         
 
@@ -1430,8 +1432,8 @@ function viewer(model, options, labels) {
             scene.add(p1);
             scene.add(p2);
             scene.add(p3);
-            createScaleObject();
-            createScaleLabel();
+            
+            addScaleRuler();
             SetupComposer();
             boxHelper = new THREE.BoxHelper(sceneObjectsMesh[0]);
             scene.add(boxHelper);
@@ -1442,16 +1444,12 @@ function viewer(model, options, labels) {
                 updateDotScale(child)
             }
         });
-        updateRulerScale();
-        updateScaleObject();
-        testRulerSizeX();
+        
         checkOutline();
-        /*
-        updateDotScale(p1);
-        updateDotScale(p2);
-        updateDotScale(p3);
-        */
-        //renderer.render(scene, orthocam ? co : camera);
+        updateScaleRuler();
+        updateRulerScale();
+        updateScaleLabel(scrSpCan.label, TEXT_SIZE);
+
         if(orthocam)
         {
             effectComposer.passes[0].enabled = false;
@@ -1494,11 +1492,12 @@ function viewer(model, options, labels) {
 
     function updateDotScale(dot)
     {
-        let cp = new THREE.Vector3().copy(camera.position);
-        let tp = new THREE.Vector3().copy(control.target);
-        let d = new THREE.Vector3().subVectors(cp,tp).length();
+        let wd = new THREE.Vector3();
+        let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
+        let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
+        
         //console.log(d);
-        let s = d * (1/camera.zoom) / 60;
+        let s = camera.fov * planarDistance/2000;
         dot.scale.set(s,s,s);
     }
 
@@ -1521,24 +1520,24 @@ function viewer(model, options, labels) {
     {
         let halfSizeX,
             halfSizeY;
-        let fov = (camera.fov * Math.PI / 180)/camera.zoom;
+        let fov = (camera.fov * Math.PI / 180);
         let cp = new THREE.Vector3().copy(camera.position);
         let tp = new THREE.Vector3().copy(control.target);
         let d = new THREE.Vector3().subVectors(cp,tp).length();
+
+        let wd = new THREE.Vector3();
+        let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
+        let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
+        d = planarDistance;
+
         halfSizeY = Math.tan(fov / 2) * d;
         halfSizeX = halfSizeY * camera.aspect;
         co.left = -halfSizeX;
         co.right = halfSizeX;
         co.top = halfSizeY;
         co.bottom = -halfSizeY;
-        let r = getBoundingSphereRadius() * .75;
-        if(clip)
-        {
-            co.left = -r;
-            co.right = r;
-            co.top = r;
-            co.bottom = -r;
-        }
+        
+        
         co.position.copy(camera.position);
         co.rotation.copy(camera.rotation);
         co.updateProjectionMatrix();
@@ -1555,6 +1554,8 @@ function viewer(model, options, labels) {
         camera.aspect = 1;
         camera.updateProjectionMatrix();
         updateOrthoCam(true);
+        updateScaleRuler();
+        updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         effectComposer.render();
         downloadImage(renderer.domElement.toDataURL("image/jpeg", 1));
         renderer.setSize(ps.x,ps.y);
@@ -1590,11 +1591,15 @@ function viewer(model, options, labels) {
             let cen = new THREE.Vector3();
             //tri.getCenter(cen);
             cen.copy(control.target)
+            let wd = new THREE.Vector3();
+            let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
+            let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
+        
             
             let d = camera.position.distanceTo(cen);
             
             //control.target.copy(cen);
-            camera.position.copy(cen.add(norm.multiplyScalar(d)));
+            camera.position.copy(cen.add(norm.multiplyScalar(planarDistance)));
             control.update();
             camera.updateProjectionMatrix();
             updateOrthoCam();
@@ -1728,11 +1733,6 @@ function viewer(model, options, labels) {
             ready=false;
         }
 
-        
-        
-
-        
-
         return {
             add: addVertex,
             isReady: isReady,
@@ -1742,257 +1742,6 @@ function viewer(model, options, labels) {
             center: center,
             normal: normal,
         }
-    }
-
-    
-    const scaleHeight = 2; //percents
-    const scaleMaxWidth = 10; //percents
-    const scaleMinWidth = 1; //percents
-    const scalePosHeight = -90; //percents
-    const scalePosWidth = -70; //percents
-    var scaleObj;
-    var scaleText;
-    function createScaleObject()
-    {
-        let vSize = co.top - co.bottom;
-        let hSize = co.right - co.left;
-        let cp = new THREE.Vector3().copy(camera.position);
-        let tp = new THREE.Vector3().copy(control.target);
-        let d = new THREE.Vector3().subVectors(cp,tp).length();
-        let scaleGeom = new THREE.PlaneGeometry(1,1);
-        let uvs = scaleGeom.faceVertexUvs[ 0 ];
-        uvs[ 0 ][ 0 ].set( 0, 1 );
-        uvs[ 0 ][ 1 ].set( 0, 0 );
-        uvs[ 0 ][ 2 ].set( 1, 1 );
-        uvs[ 1 ][ 0 ].set( 0, 0 );
-        uvs[ 1 ][ 1 ].set( 1, 0 );
-        uvs[ 1 ][ 2 ].set( 1, 1 );
-        let scaleMat = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, depthTest: false, transparent: true});
-        scaleObj = new THREE.Mesh(scaleGeom, scaleMat);
-        scaleObj.name = 'scaleRuler';
-        co.add(scaleObj);
-        scaleObj.renderOrder = 999;
-        scaleObj.position.copy(new THREE.Vector3(scalePosWidth/2)/100,vSize*(scalePosHeight/2)/100);
-        new THREE.TextureLoader().load( '/img/m_ruler_no_digits.png?123', (rulerTexture)=>{
-            scaleObj.material.map = rulerTexture;
-            scaleObj.material.needsUpdate = true;
-        } );
-        //scaleText = new SpriteText2D("SPRITE", { align: textAlign.center,  font: '40px Arial', fillStyle: '#000000' , antialias: false });
-        //scene.add(scaleText);
-    }
-
-    const LABEL_OFFSET_MULT = 0.5;
-    const TEXT_SIZE = 100;
-
-    var mult = 0;
-    function updateScaleObject()
-    {
-        
-        let vSize = co.top - co.bottom;
-        let hSize = co.right - co.left;
-        let cp = new THREE.Vector3().copy(camera.position);
-        let tp = new THREE.Vector3().copy(control.target);
-        let d = new THREE.Vector3().subVectors(cp,tp).length();
-        let nmult = 1;
-
-        if(hSize < 5)
-        {
-            nmult = 0.25;
-        }
-        else if(hSize < 10)
-        {
-            nmult = 1;
-        }
-        else if(hSize < 25)
-        {
-            nmult = 2.5;
-        }
-        else if(hSize < 50)
-        {
-            nmult = 5;
-        }
-        else if(hSize < 100)
-        {
-            nmult = 10;
-        }
-        else if(hSize < 250)
-        {
-            nmult = 25;
-        }
-        else if(hSize < 500)
-        {
-            nmult = 50;
-        }
-        else if(hSize < 750)
-        {
-            nmult = 75;
-        }
-        else if(hSize < 1000)
-        {
-            nmult = 100;
-        }
-        else if(hSize < 2500)
-        {
-            nmult = 250
-        }
-        else if(hSize < 5000)
-        {
-            nmult = 500;
-        }
-        else if(hSize < 7500)
-        {
-            nmult = 750;
-        }
-        else if(hSize < 10000)
-        {
-            nmult = 1000;
-        }
-        else if(hSize < 25000)
-        {
-            nmult = 2500;
-        }
-        else if(hSize < 50000)
-        {
-            nmult = 5000;
-        }
-        else if(hSize < 75000)
-        {
-            nmult = 7500;
-        }
-        else if(hSize < 100000)
-        {
-            nmult = 10000;
-        }
-        else if(hSize < 250000)
-        {
-            nmult = 25000;
-        }
-        else if(hSize < 500000)
-        {
-            nmult = 50000;
-        }
-        else if(hSize < 750000)
-        {
-            nmult = 75000;
-        }
-        else if(hSize < 1000000)
-        {
-            nmult = 100000;
-        }
-        else if(hSize < 2500000)
-        {
-            nmult = 250000;
-        }
-        else
-        {
-            nmult = 500000;
-        }
-
-        if(mult != nmult)
-        {
-            mult = nmult;
-            updateLabel(logScale(nmult),TEXT_SIZE);
-        }
-        
-        scaleObj.scale.set(nmult, nmult/8,1);
-        scaleText.scale.set(nmult * 2/3, nmult * 2/3,1);
-        scaleObj.position.copy(new THREE.Vector3(hSize*(scalePosWidth/2)/100,vSize*(scalePosHeight/2)/100,-d));
-        scaleText.position.set(scaleObj.position.x + scaleObj.scale.x*LABEL_OFFSET_MULT + scaleText.scale.x * LABEL_OFFSET_MULT ,scaleObj.position.y,-d);
-    }
-
-    function testRulerSizeX()
-    {
-        let v1 = scaleObj.geometry.vertices[0].clone();
-        v1.add(scaleObj.position);
-        let v2 = scaleObj.geometry.vertices[1].clone();
-        v2.add(scaleObj.position);
-        let d = v1.sub(v2).length();
-    }
-
-    function logScale(mult)
-    {
-        let m = ''
-        let val = 0;
-        if(mult < 10)
-        {
-            val = mult;
-            m = 'mm';
-        }
-        else if(mult < 100)
-        {
-            val = mult/10;
-            m = 'cm';
-        }
-        else if(mult < 1000)
-        {
-            val = mult/100;
-            m = 'dm';
-        }
-        else if(mult < 1000000)
-        {
-            val = mult/1000;
-            m = 'm';
-        }
-        else
-        {
-            val = mult/1000000;
-            m = 'km';
-        }
-        return val + m;
-    }
-
-    function createScaleLabel()
-    {
-        let vSize = co.top - co.bottom;
-        let hSize = co.right - co.left;
-        let cp = new THREE.Vector3().copy(camera.position);
-        let tp = new THREE.Vector3().copy(control.target);
-        let d = new THREE.Vector3().subVectors(cp,tp).length();
-        let scaleGeom = new THREE.PlaneGeometry(1,1);
-        let uvs = scaleGeom.faceVertexUvs[ 0 ];
-        uvs[ 0 ][ 0 ].set( 0, 1 );
-        uvs[ 0 ][ 1 ].set( 0, 0 );
-        uvs[ 0 ][ 2 ].set( 1, 1 );
-        uvs[ 1 ][ 0 ].set( 0, 0 );
-        uvs[ 1 ][ 1 ].set( 1, 0 );
-        uvs[ 1 ][ 2 ].set( 1, 1 );
-        let scaleMat = new THREE.MeshBasicMaterial({color: 0xff0000, side: THREE.DoubleSide, depthTest: false, transparent: true});
-        scaleText = new THREE.Mesh(scaleGeom, scaleMat);
-        scaleText.name = 'scaleLabel';
-        co.add(scaleText);
-        scaleText.renderOrder = 999;
-        scaleText.position.set(0,0,-d);
-    }
-
-    function updateLabel(text, size) {
-        let lcanvas = document.createElement("canvas");
-        lcanvas.width = 512;
-        lcanvas.height = 512;
-        let lcontext = lcanvas.getContext("2d");
-
-        lcontext.font = size + "pt Arial";
-
-        let lmargin = 10;
-        let ltextWidth = lcontext.measureText(text).width;
-
-        //lcontext.strokeStyle = "black";
-        //lcontext.strokeRect(0, 0, lcanvas.width, lcanvas.height);
-
-        //lcontext.strokeStyle = "red";
-        //lcontext.strokeRect(lcanvas.width / 2 - ltextWidth / 2 - lmargin / 2, lcanvas.height / 2 - size / 2 - +lmargin / 2, ltextWidth + lmargin, size + lmargin);
-
-        lcontext.textAlign = "center";
-        lcontext.textBaseline = "middle";
-        lcontext.fillStyle = "black";
-        lcontext.fillText(text, lcanvas.width/2, lcanvas.height/2);
-
-        var ltexture = new THREE.Texture(lcanvas);
-        ltexture.needsUpdate = true;
-
-        scaleText.material.map = ltexture;
-        scaleText.material.needsUpdate = true;
-
-        
     }
 
     var effectComposer = new THREE.EffectComposer(renderer);
@@ -2059,7 +1808,322 @@ function viewer(model, options, labels) {
         effectComposer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
     }
 
-    //----------------------------------------------------------------------------------------------------------------------------------------
+    //ScreenSpace-------------------------------------------------------------------------
+    const C_FOV_MAX = 85;
+    const C_FOV_MIN = 1;
+    
+    
+    function screenSpaceCanvas(cam0)
+    {
+        ssc = {
+            add: addToSSC,
+            update: update,
+            get: get
+        };
+
+        ssc.camera = cam0;
+        ssc.height = 1;
+        ssc.aspect = 1;
+        ssc.width = 1;
+        ssc.scale = 1;
+        ssc.planeDist = cam0.near * 2;
+        ssc.UI = new THREE.Group();
+        scene.add(ssc.UI);
+
+        ssc.UI.position.set(0,0,cam0.near + 1);
+        
+        ssc.objects = [];
+        ssc.label = '';
+        ssc.stage = 0;
+
+        function addToSSC(obj0, id0, options0)
+        {
+            let opt0 = options0 !== undefined ? options0 : {
+                parent: undefined,
+                hPaddingType : 'left',
+                vPaddingType : 'top',
+                hPos : .5,//percent
+                vPos : .5,//percent
+                width: 16,//mm
+                height: 8,//mm
+                hConst: true,
+                wConst: false
+            }
+
+            let obj1 = {
+                id : id0,
+                obj : obj0,
+                opt : opt0
+            }
+
+            ssc.objects.push(obj1);
+            ssc.UI.add(obj0);
+
+            adjustPosScale(obj1);
+        }
+
+        function adjustPosScale(sscObj)
+        {
+            let w;
+            let h; 
+            
+            let X;
+            let Y;
+            
+            w = sscObj.opt.width * ssc.scale;
+            h = sscObj.opt.height * ssc.scale;
+            if(sscObj.opt.hConst) h = sscObj.opt.height * ssc.height / 100;
+            if(sscObj.opt.wConst) w = sscObj.opt.width * ssc.width / (100 * ssc.aspect);
+
+            if(sscObj.opt.parent !== undefined)
+            {
+                let pw = sscObj.opt.parent.obj.scale.x;
+                let ph = sscObj.opt.parent.obj.scale.y;
+
+                if(sscObj.opt.hPaddingType === 'left') X = sscObj.opt.parent.obj.position.x - pw/2 + w/2 + pw * sscObj.opt.hPos;
+                else X = sscObj.opt.parent.obj.position.x + pw/2 - w/2 - pw * sscObj.opt.hPos;
+                if(sscObj.opt.vPaddingType === 'bottom') Y = sscObj.opt.parent.obj.position.y - ph/2 + h/2 + ph * sscObj.opt.vPos;
+                else Y = sscObj.opt.parent.obj.position.y + ph/2 - h/2 - ph * sscObj.opt.vPos;
+            }
+            else
+            {
+                if(sscObj.opt.hPaddingType === 'left') X = -ssc.width + w/2 + ssc.width * sscObj.opt.hPos;
+                else X = - w/2 + ssc.width * sscObj.opt.hPos;
+                if(sscObj.opt.vPaddingType === 'bottom') Y = -ssc.height + h/2 + ssc.height * sscObj.opt.vPos;
+                else Y = - h/2 + ssc.height * sscObj.opt.vPos;
+            }
+            
+            sscObj.obj.scale.set(w, h, 1);
+            sscObj.obj.position.set(X, Y, 0);
+        }
+
+        function update(cameraDist)
+        {
+            let p = new THREE.Vector3();
+            let d = new THREE.Vector3();
+            let q = new THREE.Quaternion();
+            let aHeight;
+            let aWidth;
+            let fovTan;
+            if(orthocam)
+            {
+                ssc.aspect = ssc.camera.aspect;
+                ssc.height = co.top;
+                aHeight = co.top * 2;
+                aWidth = aHeight * ssc.aspect
+                ssc.width = ssc.height * ssc.aspect;
+                ssc.scale = 1;
+                ssc.planeDist = co.near + 1;
+                co.getWorldPosition(p);
+                co.getWorldDirection(d);
+                p.addVectors(p, d.multiplyScalar(ssc.planeDist));
+                ssc.UI.position.copy(p);
+                co.getWorldQuaternion(q);
+                ssc.UI.quaternion.copy(q);
+            }
+            else
+            {
+                ssc.planeDist = ssc.camera.near + 1;
+                ssc.camera.getWorldPosition(p);
+                ssc.camera.getWorldDirection(d);
+                p.addVectors(p, d.multiplyScalar(ssc.planeDist));
+                ssc.UI.position.copy(p);
+                ssc.camera.getWorldQuaternion(q);
+                ssc.UI.quaternion.copy(q);
+                ssc.aspect = ssc.camera.aspect;
+                fovTan = Math.tan(ssc.camera.fov * 0.5 * Math.PI/180);
+                aHeight = cameraDist * fovTan;
+                aWidth = aHeight * ssc.aspect;
+                ssc.height = ssc.planeDist * fovTan;
+                ssc.width = ssc.height * ssc.aspect;
+                ssc.scale = ssc.height / aHeight;
+            }
+            let stage = 10000000;
+            let stageIndex = 1000;
+            
+            for (let distIndex = 0; distIndex < stages.length; distIndex++) {
+                const dist = stages[distIndex];
+                if(aWidth < dist*3)
+                {
+                    stage = stages[distIndex];
+                    stageIndex = distIndex;
+                    break;
+                }
+            }
+            let unitIndex = Math.min(Math.trunc(stageIndex/5),units.length);
+            let unit = units[unitIndex];
+            let div = unitIndex;
+            
+            if(stageIndex > 19) div = unitIndex-1;
+            if(stageIndex > 24) div = unitIndex-2;
+            if(stageIndex > 29) div = unitIndex;
+            
+            ssc.label = stage / (10**div) + unit;
+            ssc.stage = stage;
+            
+            ssc.objects.forEach(o => {
+                adjustPosScale(o);
+            });
+        }
+
+        function get(id)
+        {
+            return ssc.objects.find((elem)=>{ return elem.id === id});
+        }
+
+        return ssc;
+    }
+
+    scrSpCan = screenSpaceCanvas(camera);
+    const TEXT_SIZE = 30;
+
+    function createScaleLabel()
+    {
+        let scaleGeom = new THREE.PlaneGeometry(1,1);
+        let uvs = scaleGeom.faceVertexUvs[ 0 ];
+        uvs[ 0 ][ 0 ].set( 0, 1 );
+        uvs[ 0 ][ 1 ].set( 0, 0 );
+        uvs[ 0 ][ 2 ].set( 1, 1 );
+        uvs[ 1 ][ 0 ].set( 0, 0 );
+        uvs[ 1 ][ 1 ].set( 1, 0 );
+        uvs[ 1 ][ 2 ].set( 1, 1 );
+        let scaleMat = new THREE.MeshBasicMaterial({side: THREE.DoubleSide, depthTest: false, transparent: true});
+        let scaleText = new THREE.Mesh(scaleGeom, scaleMat);
+        scaleText.name = 'scaleLabel';
+        scrSpCan.add(scaleText, 'scaleLabel',{
+            parent: undefined,
+            hPaddingType : 'right',
+            vPaddingType : 'bottom',
+            hPos : 1,//percent
+            vPos : .05,//percent
+            width: 32,//mm
+            height: 32,//mm
+            hConst: true,
+            wConst: true
+        });
+        scaleText.renderOrder = 999;
+    }
+
+    function updateScaleLabel(text, size) {
+        let lcanvas = document.createElement("canvas");
+        lcanvas.width = 128;
+        lcanvas.height = 128;
+        let lcontext = lcanvas.getContext("2d");
+
+        lcontext.font = size + "px serif";
+
+        lcontext.textAlign = "center";
+        lcontext.textBaseline = "middle";
+        lcontext.fillStyle = "black";
+        lcontext.fillText(text, lcanvas.width/2, lcanvas.height/2);
+
+        var ltexture = new THREE.Texture(lcanvas);
+        ltexture.needsUpdate = true;
+
+        let l = scrSpCan.get('scaleLabel');
+
+        l.obj.material.map = ltexture;
+        l.obj.material.needsUpdate = true;
+    }
+
+    function addScaleRuler()
+    {
+        createScaleLabel();
+        createRulerObjects();
+    }
+
+    function createRulerObjects(texture)
+    {
+        let rsections = [];
+        let rulerGeom = new THREE.PlaneGeometry(1,1);
+        let rmat = new THREE.MeshBasicMaterial({color:'black', side: THREE.DoubleSide, depthTest: false, transparent: true});
+        let uvs = rulerGeom.faceVertexUvs[ 0 ];
+        uvs[ 0 ][ 0 ].set( 0, 1 );
+        uvs[ 0 ][ 1 ].set( 0, 0 );
+        uvs[ 0 ][ 2 ].set( 1, 1 );
+        uvs[ 1 ][ 0 ].set( 0, 0 );
+        uvs[ 1 ][ 1 ].set( 1, 0 );
+        uvs[ 1 ][ 2 ].set( 1, 1 );
+        for (let rulerI = 0; rulerI < 4; rulerI++) 
+        {
+            let robj = new THREE.Mesh(rulerGeom, rmat);
+            robj.renderOrder = 999;
+            robj.name = 'rulerSection'+rulerI;
+            rsections.push(robj);
+        }
+
+        scrSpCan.add(rsections[0], 'main',{
+            parent: scrSpCan.get('scaleLabel'),
+            hPaddingType : 'right',
+            vPaddingType : 'bottom',
+            hPos : .95,//percent
+            vPos : .40,//percent
+            width: 10,//mm
+            height: 1,//mm
+            hConst: true,
+            wConst: false
+        });
+        scrSpCan.add(rsections[1], 'pin1',{
+            parent: scrSpCan.get('main'),
+            hPaddingType : 'right',
+            vPaddingType : 'bottom',
+            hPos : 0,//percent
+            vPos : 0,//percent
+            width: 1,//mm
+            height: 8,//mm
+            hConst: true,
+            wConst: true
+        });
+        scrSpCan.add(rsections[2], 'pin2',{
+            parent: scrSpCan.get('main'),
+            hPaddingType : 'right',
+            vPaddingType : 'bottom',
+            hPos : 0.5,//percent
+            vPos : 0,//percent
+            width: 1,//mm
+            height: 5,//mm
+            hConst: true,
+            wConst: true
+        });
+        scrSpCan.add(rsections[3], 'pin3',{
+            parent: scrSpCan.get('main'),
+            hPaddingType : 'right',
+            vPaddingType : 'bottom',
+            hPos : 1,//percent
+            vPos : 0,//percent
+            width: 1,//mm
+            height: 8,//mm
+            hConst: true,
+            wConst: true
+        });
+    }
+
+    function updateScaleRuler()
+    {
+        let wd = new THREE.Vector3();
+        let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
+        let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
+        
+        scrSpCan.update(planarDistance);
+        let main = scrSpCan.get('main');
+        if(main !== undefined) main.opt.width = scrSpCan.stage;
+    }
+
+    function mouseWheelHandler(event)
+    {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        let f = camera.fov;
+        let delta = event.deltaY;
+        f = Math.max(C_FOV_MIN, Math.min(C_FOV_MAX, f + delta/100));
+        camera.fov = f;
+        camera.updateProjectionMatrix();
+    }
+
+    var stages = [1,2,3,4,5,10,20,30,40,50,100,200,300,400,500,1000,2000,3000,4000,5000,10000,20000,30000,40000,50000,100000,200000,300000,400000,500000,1000000,2000000,3000000,4000000,5000000];
+    var units  = ['mm','cm','dm','m','m','m','km']
+    //------------------------------------------------------------------------------------
 
     return {
         appendTo: appendTo,

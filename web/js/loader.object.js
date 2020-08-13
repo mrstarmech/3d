@@ -33,7 +33,6 @@ function start() {
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(paletteColor());
                 $('.cam-align-btn').hide();
                 $('.dots-reset-btn').hide();
-                $('.cam-switch-btn').hide();
                 cp = ColorPicker(document.getElementById('slide'), document.getElementById('picker'),
                     function (hex, hsv, rgb, mousePicker, mouseSlide) {
                         currentColor = hex;
@@ -97,7 +96,7 @@ function supermenu() {
         supermenu.append(rt);
     }
     
-    supermenu.append('<button title="Switch Camera" class="btn menu-object cam-switch-btn" data-menu="switch-camera"><i class="fas fa-eye"></i></button>');
+    
     supermenu.append('<button title="Align camera" class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
     supermenu.append('<button title="Reset dots" class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
     
@@ -148,6 +147,7 @@ function menu() {
     if (Array.isArray(object.setting.texture) && object.setting.texture.length > 1)
         submenu.append('<button title="Change Texture" class="btn menu-object" data-menu="texture-change"><i class="fas fa-book"></i></button>');
     submenu.append('<button title="Orthographer" class="btn menu-object orthographer" data-menu="toggle-orthographer"><i class="fas fa-camera"></i></button>');
+    submenu.append('<button title="Switch Camera" class="btn menu-object cam-switch-btn" data-menu="switch-camera"><i class="fas fa-eye"></i></button>');
 
     menu.append(submenu);
     menu.append(topmenu);
@@ -296,13 +296,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             {
                 $('.cam-align-btn').show();
                 $('.dots-reset-btn').show();
-                $('.cam-switch-btn').show();
             }
             else
             {
                 $('.cam-align-btn').hide();
                 $('.dots-reset-btn').hide();
-                $('.cam-switch-btn').hide();
             }
             if(object.option.ruler)
             {
@@ -315,11 +313,11 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         case 'switch-camera':
             $('.cam-switch-btn').toggleClass('active');
             if($('.cam-switch-btn').hasClass('active')){
-                $('.cam-switch-btn').css('background','padding-box red');
+                $('.cam-switch-btn').css('border',' 1px solid red');
                 $('.cam-switch-btn').attr('title','Orthographic Camera Active');
             }
             else{
-                $('.cam-switch-btn').css('background', 'padding-box rgba(0,0,0,0)');
+                $('.cam-switch-btn').css('border', 'none');
                 $('.cam-switch-btn').attr('title','Switch camera');
             }
 
@@ -349,11 +347,9 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             t.switchEnv('ruler', object.option.ruler);
             if(object.option.ruler && t.orthographer)
             {
-                //t.orthographer = false;
                 t.switchEnv('toggle-ortho',t.orthographer = !t.orthographer);
                 $('.cam-align-btn').hide();
                 $('.dots-reset-btn').hide();
-                $('.cam-switch-btn').hide();
                 buttonActive($('.orthographer'), t.orthographer);
             }
             buttonActive($(this), object.option.ruler);
