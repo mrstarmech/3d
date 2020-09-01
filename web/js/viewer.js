@@ -37,6 +37,8 @@ function viewer(model, options, labels) {
     };
 
     labels = typeof labels !== 'undefined' ? labels : null;
+    backgrounds = [];
+    drawings = [];
 
     var firstPass,
         orthographer = false,
@@ -300,6 +302,7 @@ function viewer(model, options, labels) {
         clean = !texEnabled;
         //1. For each background: if loaded - create backgrounds[i].ctx canvas with background image
         for (let i = 0; i < backgrounds.length; i++) {
+            
             if (backgrounds[i].image.complete && backgrounds[i].image.naturalHeight !== 0 && typeof backgrounds[i].ctx === 'undefined') 
             {
                 backgrounds[i].ctx = document.createElement('canvas').getContext('2d');
@@ -307,11 +310,21 @@ function viewer(model, options, labels) {
                 backgrounds[i].ctx.canvas.height = backgrounds[i].image.height;
                 backgrounds[i].ctx.drawImage(backgrounds[i].image, 0, 0);
             }
+            else if(backgrounds[i].image == "")
+            {
+                backgrounds[i].ctx = document.createElement('canvas').getContext('2d');
+                backgrounds[i].ctx.canvas.width = 1;
+                backgrounds[i].ctx.canvas.height = 1;
+                backgrounds[i].ctx.beginPath();
+                backgrounds[i].ctx.rect(0, 0, 1, 1);
+                backgrounds[i].ctx.fillStyle = model.color;
+                backgrounds[i].ctx.fill();
+            }
         }
 
         //2. Draw
         for (let i = 0; i < backgrounds.length; i++) {
-            if (backgrounds[i].path == controllers.currentTexture[0]) {
+            if (backgrounds[i].path === controllers.currentTexture[0]) {
                 //2a. draw current background in main ctx
                 if (typeof backgrounds[i].ctx == 'undefined') return;
                 canvasWidth = backgrounds[i].ctx.canvas.width;
@@ -349,7 +362,7 @@ function viewer(model, options, labels) {
                         drawings[i].ctx.drawImage(drawings[i].image, 0, 0);
 
                         drawings[i].coloredCtx = document.createElement('canvas').getContext('2d');
-                        var coloredCtx = drawings[i].coloredCtx;
+                        let coloredCtx = drawings[i].coloredCtx;
                         coloredCtx.canvas.width = canvasWidth;
                         coloredCtx.canvas.height = canvasHeight;
                         coloredCtx.clearRect(0, 0, coloredCtx.canvas.width, coloredCtx.canvas.height);
@@ -418,7 +431,8 @@ function viewer(model, options, labels) {
     }
 
     function loadModel(model, callback) {
-        var parametersMaterial = {
+        let forceUpdate = false;
+        let parametersMaterial = {
             specular: 0xffffff,
             shininess: 50,
             shading: THREE.SmoothShading
@@ -464,23 +478,33 @@ function viewer(model, options, labels) {
         ctx = document.createElement('canvas').getContext('2d');
 
         backgrounds = [];
+        drawings = [];
         if (controllers.textures[0].length >0)
         {
             for (var i = 0; i < controllers.textures[0].length; i++) {
-                bgItem = new Image();
-                backgrounds.push({"image": bgItem, "path": controllers.textures[0][i]});
-                bgItem.src = controllers.textures[0][i];
-                bgItem.onload = () => {
-                    redrawTexture();
+                if(controllers.textures[0] != "")
+                {
+                    bgItem = new Image();
+                    backgrounds.push({"image": bgItem, "path": controllers.textures[0][i]});
+                    bgItem.src = controllers.textures[0][i];
+                    bgItem.onload = () => {
+                        redrawTexture();
+                    };
+                }
+                else
+                {
+                    backgrounds.push({"image": '', "path": ''});
+                    forceUpdate = true;
+                    
                 }
             }
-            drawings = [];
+            
             if (modelDrawings) {
-                for (var i = 0; i < modelDrawings.length; i++) {
+                for (let i = 0; i < modelDrawings.length; i++) {
                     drawing = new Image();
                     drawing.src = modelDrawings[i];
-                    var alpha = 1;
-                    var color = null;
+                    let alpha = 1;
+                    let color = null;
                     if (Array.isArray(model.layersParams)){
                         if (typeof model.layersParams[i].alpha != 'undefined') alpha = model.layersParams[i].alpha;
                         if (typeof model.layersParams[i].color != 'undefined') color = model.layersParams[i].color;
@@ -489,7 +513,7 @@ function viewer(model, options, labels) {
                     drawings.push({"image": drawing, "alpha": alpha, "color": color});
                     drawing.onload = () => {
                         redrawTexture();
-                    }
+                    };
                 }
             }
             if (modelCleaner) {
@@ -498,7 +522,7 @@ function viewer(model, options, labels) {
                 img_cleaner.onload = () => {
                     cleaner = img_cleaner;
                     redrawTexture();
-                }
+                };
             }
             texture = new THREE.CanvasTexture(ctx.canvas);
             parametersMaterial.map = texture;
@@ -555,7 +579,7 @@ function viewer(model, options, labels) {
                         }
                         
                         object.traverse(function (node) {
-                            if (node.type == 'Mesh') {
+                            if (node.type === 'Mesh') {
                                 node.geometry.computeVertexNormals();
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
@@ -587,7 +611,7 @@ function viewer(model, options, labels) {
                             object.position.y = objectDefaultCoords.y;
                             object.position.z = objectDefaultCoords.z;
                         }
-                        ;
+                        
                         sceneObjectsMesh.push(object);
 
                         callback(true);
@@ -606,9 +630,9 @@ function viewer(model, options, labels) {
                             object.position.y = objectDefaultCoords.y;
                             object.position.z = objectDefaultCoords.z;
                         }
-                        ;
+                        
                         object.traverse(function (node) {
-                            if (node.type == 'Mesh') {
+                            if (node.type === 'Mesh') {
                                 node.geometry.computeVertexNormals();
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
@@ -619,7 +643,6 @@ function viewer(model, options, labels) {
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
-                            ;
                         });
 
                         scene.add(object);
@@ -643,7 +666,7 @@ function viewer(model, options, labels) {
                         }
                         
                         object.scene.traverse(function (node) {
-                            if (node.type == 'Mesh') {
+                            if (node.type === 'Mesh') {
                                 node.geometry.computeVertexNormals();
                                 node.geometry.normalizeNormals();
                                 node.geometry.computeBoundingBox();
@@ -651,7 +674,6 @@ function viewer(model, options, labels) {
                                 node.material.needsUpdate = true;
                                 sceneObjectsMesh.push(node);
                             }
-                            ;
                         });
                         scene.add(object.scene);
 
@@ -680,7 +702,7 @@ function viewer(model, options, labels) {
                         mesh.position.y = objectDefaultCoords.y;
                         mesh.position.z = objectDefaultCoords.z;
                     }
-                    ;
+                    
 
                     scene.add(mesh);
 
@@ -694,9 +716,9 @@ function viewer(model, options, labels) {
                 }, onProgress, onError);
                 break;
         }
-        ;
-
-    };
+        
+        if(forceUpdate) redrawTexture();
+    }
 
     function addLabels() {
         if (labels) {
@@ -808,20 +830,20 @@ function viewer(model, options, labels) {
                         //enabled
                         return 0;
                     }
-                    ;
+                    
                 } catch (e) {
                 }
-                ;
+                
             }
-            ;
+            
             //supported, but disabled
             return 1;
         } else {
             //not supported
             return 2;
         }
-        ;
-    };
+        
+    }
 
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
@@ -856,17 +878,14 @@ function viewer(model, options, labels) {
                         if (node.visible) {
                             node.visible = false;
                         }
-                        ;
                     });
                 } else {
                     pinsGroup.traverse(function (node) {
                         if (!node.visible) {
                             node.visible = true;
                         }
-                        ;
                     });
                 }
-                ;
                 break;
             case 'createLabel':
                 if (value && typeof (value) == 'boolean') {
@@ -896,7 +915,7 @@ function viewer(model, options, labels) {
                         elem.material.transparent = false;
                     });
                 }
-                ;
+
 
                 break;
             case 'grid':
@@ -914,14 +933,14 @@ function viewer(model, options, labels) {
                 } else {
                     scene.remove(gridGroup);
                 }
-                ;
+
                 break;
             case 'lights':
                 if (typeof (value) == 'object') {
                     if (controllers.currentLight.name == 'sceneAmbientLight' || controllers.currentLight.name == 'sceneCameraLight') {
                         scene.remove(controllers.currentLight);
                     }
-                    ;
+
 
                     switch (value.state) {
                         case'init':
@@ -936,7 +955,7 @@ function viewer(model, options, labels) {
                             el.children[0].position.copy(vec);
                             break;
                     }
-                    ;
+
 
                     controllers.currentLight = drivenLightsGroup;
                 } else if (typeof (value) == 'string') {
@@ -962,17 +981,17 @@ function viewer(model, options, labels) {
                     }
 
                     if (sceneObjectsMesh.length > 0) {
-                        sceneObjectsMesh[0].material.needsUpdate = true
+                        sceneObjectsMesh[0].material.needsUpdate = true;
                     }
 
                 }
-                ;
+
                 break;
             case 'background':
                 if (value) {
                     renderer.setClearColor(value);
                 }
-                ;
+
                 break;
             case 'autoRotate':
                 if (value && typeof (value) == 'boolean') {
@@ -983,21 +1002,21 @@ function viewer(model, options, labels) {
                     control.autoRotate = false;
                     controllers.autorotate = false;
                 }
-                ;
+
                 break;
             case 'cameraFov':
                 if (value && typeof (value) == 'number') {
                     camera.fov = value;
                     camera.updateProjectionMatrix();
                 }
-                ;
+
                 break;
             case 'focalLenght':
                 if (value && typeof (value) == 'number') {
                     //console.log(camera);
                     camera.setLens(value);
                 }
-                ;
+
                 break;
             case 'bbox':
                 break;
@@ -1010,7 +1029,7 @@ function viewer(model, options, labels) {
                 break;
             case 'textureDisable':
                 if (sceneObjectsMesh.length > 0) {
-                    $.each(sceneObjectsMesh, function (i, item) {
+                    sceneObjectsMesh.forEach((item,i) => {
                         if (item.type === 'Mesh') {
                             if (!controllers.originMaterial) {
                                 controllers.originMaterial = [];
@@ -1040,8 +1059,6 @@ function viewer(model, options, labels) {
                         }
                     });
                 }
-                console.log(texEnabled);
-                switchEnv('wireframe', options.wireframe);
                 break;
             case 'scale':
                 if (sceneObjectsMesh.length > 0 && value && value * 1 === value) {
@@ -1084,9 +1101,9 @@ function viewer(model, options, labels) {
     }
 
     function getBoundingSphereRadius() {
-        var radius = 0;
+        let radius = 0;
         sceneObjectsMesh.forEach(function (elem) {
-            var bbox = new THREE.BoxHelper(elem);
+            let bbox = new THREE.BoxHelper(elem);
             if (bbox.geometry.boundingSphere.radius >= radius) {
                 radius = bbox.geometry.boundingSphere.radius;
             }
@@ -1096,8 +1113,8 @@ function viewer(model, options, labels) {
     }
 
     function getObjectFromGroup(objectsGroup, elemMouseCoords) {
-        var intersects;
-        var mousePosition = {};
+        let intersects;
+        let mousePosition = {};
 
         mousePosition.x = (elemMouseCoords.x / viewerContainer.clientWidth) * 2 - 1;
         mousePosition.y = -(elemMouseCoords.y / viewerContainer.clientHeight) * 2 + 1;
@@ -1111,12 +1128,12 @@ function viewer(model, options, labels) {
         } else {
             return false;
         }
-        ;
-    };
+
+    }
 
     function getObjectSplite(objectsGroup, elemMouseCoords) {
-        var intersects;
-        var mousePosition = {};
+        let intersects;
+        let mousePosition = {};
 
         mousePosition.x = (elemMouseCoords.x / viewerContainer.clientWidth) * 2 - 1;
         mousePosition.y = -(elemMouseCoords.y / viewerContainer.clientHeight) * 2 + 1;
@@ -1130,18 +1147,18 @@ function viewer(model, options, labels) {
         } else {
             return false;
         }
-        ;
-    };
+
+    }
 
     function CreateSplite(intersects) {
         if (intersects && !newlabel) {
-            var r = getBoundingSphereRadius(),
+            let r = getBoundingSphereRadius(),
                 p = r / 30,
                 w = r / 60;
-            var n = intersects.face.normal.clone().multiplyScalar(w).add(intersects.point);
-            var spriteMap = new THREE.ImageUtils.loadTexture('/img/labels/label.png');
-            var material = new THREE.SpriteMaterial({map: spriteMap});
-            var sprite = new THREE.Sprite(material);
+            let n = intersects.face.normal.clone().multiplyScalar(w).add(intersects.point);
+            let spriteMap = new THREE.ImageUtils.loadTexture('/img/labels/label.png');
+            let material = new THREE.SpriteMaterial({map: spriteMap});
+            let sprite = new THREE.Sprite(material);
             scene.add(sprite);
             sprite.position.copy(n);
             sprite.scale.set(p, p, p);
@@ -1149,70 +1166,68 @@ function viewer(model, options, labels) {
             newlabel = sprite;
             scene.add(sprite);
         } else if (intersects && newlabel) {
-            var n = intersects.face.normal.clone().multiplyScalar(0.3).add(intersects.point);
+            let n = intersects.face.normal.clone().multiplyScalar(0.3).add(intersects.point);
             newlabel.position.copy(n);
         }
-    };
+    }
 
     function getDistance() {
-        if (pinPoints['intersections'].length == 2 && controllers.ruler == true) {
-            var x = pinPoints['intersections'][1].x - pinPoints['intersections'][0].x;
-            var y = pinPoints['intersections'][1].y - pinPoints['intersections'][0].y;
-            var z = pinPoints['intersections'][1].z - pinPoints['intersections'][0].z;
+        if (pinPoints.intersections.length === 2 && controllers.ruler == true) {
+            let x = pinPoints.intersections[1].x - pinPoints.intersections[0].x;
+            let y = pinPoints.intersections[1].y - pinPoints.intersections[0].y;
+            let z = pinPoints.intersections[1].z - pinPoints.intersections[0].z;
 
-            var distance = Math.sqrt(x * x + y * y + z * z);
+            let distance = Math.sqrt(x * x + y * y + z * z);
             distance = distance.toFixed(2);
             return distance;
-        } else if (pinPoints['intersections'].length !== 2 && controllers.ruler == true) {
+        } else if (pinPoints.intersections.length !== 2 && controllers.ruler == true) {
             return 0;
         } else if (controllers.ruler == false) {
             return null;
         }
-        ;
-    };
+
+    }
 
     function getNewLabel() {
         return newlabel;
-    };
+    }
+
+    var rLineMat = new THREE.LineBasicMaterial({color: 0x0000FF, linewidth: 4});
+    var pSphereMat = new THREE.MeshBasicMaterial({color: 0x349938});
 
     function rulerBuild(intersects) {
         if (!sceneObjectsMesh[0]) return;
 
         if (typeof intersects == 'object' && pinsGroup.children.length < 2) {
-            var onePin = new THREE.Group();
+            let onePin = new THREE.Group();
             onePin.name = 'pin';
-            var p = intersects.point;
+            let p = intersects.point;
 
-            pinPoints['intersections'].push(p);
+            pinPoints.intersections.push(p);
 
             helpers.mouseHelper.position.copy(p);
             intersection.point.copy(p);
 
-            var n = intersects.face.normal.clone();
-            var rulerDrawPoint = n.clone();
+            let n = intersects.face.normal.clone();
+            let rulerDrawPoint = n.clone();
             rulerDrawPoint.add(intersects.point);
             //n.multiplyScalar(5);
             //n.add(intersects.point);
-            pinPoints['rulerPoints'].push(rulerDrawPoint);
+            pinPoints.rulerPoints.push(rulerDrawPoint);
 
             intersection.normal.copy(intersects.face.normal);
             helpers.mouseHelper.lookAt(n);
 
-            var pinLine = new THREE.Line(new THREE.Geometry(), new THREE.LineBasicMaterial({
-                color: 0x0000FF,
-                linewidth: 4
-            }));
+            let pinLine = new THREE.Line(new THREE.Geometry(), rLineMat);
             pinLine.name = 'pinline';
             pinLine.geometry.vertices.push(new THREE.Vector3());
             pinLine.geometry.vertices.push(n);
             pinLine.geometry.verticesNeedUpdate = true;
             pinLine.position.copy(p);
 
-            
-
-            var pinSphere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshBasicMaterial({color: 0x349938}));
+            let pinSphere = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), pSphereMat);
             pinSphere.position.copy(pinLine.geometry.vertices[1]);
-            pinSphere.name = 'sphere';
+            pinSphere.name = 'pinsphere';
 
             onePin.add(pinLine);
             onePin.add(pinSphere);
@@ -1223,28 +1238,27 @@ function viewer(model, options, labels) {
 
             if (pinsGroup.children.length == 2) {
 
-                var material = new THREE.LineBasicMaterial({color: 0x000033, linewidth: 30});
-                var lineGeometry = new THREE.Geometry();
-                lineGeometry.vertices.push(pinPoints['rulerPoints'][0]);
-                lineGeometry.vertices.push(pinPoints['rulerPoints'][1]);
-                var line = new THREE.Line(lineGeometry, material);
+                let material = new THREE.LineBasicMaterial({color: 0x000033, linewidth: 30});
+                let lineGeometry = new THREE.Geometry();
+                lineGeometry.vertices.push(pinPoints.rulerPoints[0]);
+                lineGeometry.vertices.push(pinPoints.rulerPoints[1]);
+                let line = new THREE.Line(lineGeometry, material);
                 scene.add(line);
                 pinsGroup.children.push(line);
             }
-            ;
         } else if (typeof intersects == 'object' && pinsGroup.children.length == 3) {
             pinsGroup.children.forEach(function (element, index) {
                 scene.remove(element);
             });
             scene.remove(pinsGroup);
-            pinPoints['intersections'] = Array();
-            pinPoints['rulerPoints'] = Array();
+            pinPoints.intersections = Array();
+            pinPoints.rulerPoints = Array();
             pinsGroup = new THREE.Group();
             scene.add(pinsGroup);
             rulerBuild(intersects);
         }
-        ;
-    };
+
+    }
 
     function updateRulerScale()
     {
@@ -1270,7 +1284,7 @@ function viewer(model, options, labels) {
                     }
                 });
                 child.traverse((ch1) => {    
-                    if(ch1.name === 'sphere')
+                    if(ch1.name === 'pinsphere')
                     {
                         ch1.position.copy(d.add(p));
                     }
@@ -1280,7 +1294,7 @@ function viewer(model, options, labels) {
     }
 
     function saveOptions() {
-        var savedOptions = {};
+        let savedOptions = {};
 
         controllers.ruler == false ? savedOptions.ruler = true : savedOptions.ruler = false;
         controllers.wireframe == false ? savedOptions.wireframe = true : savedOptions.wireframe = false;
@@ -1293,7 +1307,7 @@ function viewer(model, options, labels) {
         savedOptions.cameraDistanceMultiplier = options.cameraDistanceMultiplier;
         savedOptions.cameraCoords = {x: camera.position.x, y: camera.position.y, z: camera.position.z};
         savedOptions.backgroundColor = (function () {
-            var color = renderer.getClearColor();
+            let color = renderer.getClearColor();
             return 'rgd(' + color.r + ',' + color.g + ',' + color.b + ')';
         })();
 
@@ -1303,9 +1317,9 @@ function viewer(model, options, labels) {
                     state: 'init',
                     count: controllers.currentLight.children.length,
                     coords: (function () {
-                        var tmpArr = Array();
+                        let tmpArr = Array();
                         controllers.currentLight.children.forEach(function (elem) {
-                            var elemCoords = [elem.position.x, elem.position.y, elem.position.z];
+                            let elemCoords = [elem.position.x, elem.position.y, elem.position.z];
                             tmpArr.push(elemCoords);
                         });
                         return tmpArr;
@@ -1319,10 +1333,10 @@ function viewer(model, options, labels) {
                 savedOptions.lights = 'AmbientLight';
                 break;
         }
-        ;
+
 
         return savedOptions;
-    };
+    }
 
     function onContainerMouseDown(event) {
         renderer.domElement.addEventListener('mousemove', onContainerMouseMove, false);
@@ -1330,7 +1344,7 @@ function viewer(model, options, labels) {
         renderer.domElement.addEventListener('mouseout', onContainerMouseOut, false);
 
         mouseMoveTrigger = 0;
-    };
+    }
 
     function onContainerMouseMove(event) {
         if (event.movementX === 0 && event.movementY === 0) {
@@ -1339,7 +1353,7 @@ function viewer(model, options, labels) {
             mouseMoveTrigger = 1;
 
         }
-    };
+    }
 
     function onContainerMouseUp(event) {
         renderer.domElement.removeEventListener('mousemove', onContainerMouseMove, false);
@@ -1353,13 +1367,11 @@ function viewer(model, options, labels) {
             mouse.y = event.offsetY == undefined ? event.layerY : event.offsetY;
 
             if (controllers.ruler == true) {
-                var intersects = getObjectFromGroup(sceneObjectsMesh, mouse);
+                let intersects = getObjectFromGroup(sceneObjectsMesh, mouse);
 
                 rulerBuild(intersects);
             }
-            ;
-
-            var intersects = getObjectSplite(label, mouse);
+            let intersects = getObjectSplite(label, mouse);
             if (intersects && intersects.object.type == 'Sprite') {
                 try {
                     $.fancybox.open({
@@ -1372,12 +1384,12 @@ function viewer(model, options, labels) {
                 } catch (e) {
                 }
             } else if (controllers.createLabel) {
-                var intersects = getObjectSplite(sceneObjectsMesh, mouse);
+                let intersects = getObjectSplite(sceneObjectsMesh, mouse);
                 CreateSplite(intersects);
             }
         }
-        ;
-    };
+
+    }
 
     
 
@@ -1385,7 +1397,7 @@ function viewer(model, options, labels) {
         renderer.domElement.removeEventListener('mousemove', onContainerMouseMove, false);
         renderer.domElement.removeEventListener('mouseup', onContainerMouseUp, false);
         renderer.domElement.removeEventListener('mouseout', onContainerMouseOut, false);
-    };
+    }
 
     function onWindowResize() {
         document.body.style.overflow = 'hidden';
@@ -1393,19 +1405,19 @@ function viewer(model, options, labels) {
         camera.updateProjectionMatrix();
         renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
         effectComposer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
-    };
+    }
 
     function animate() {
         requestAnimationFrame(animate);
         render();
-    };
+    }
 
     function render() {
         //camera.lookAt(scene.position);
         updateOrthoCam();
         control.update();
         if (scene.getObjectByName('sceneCameraLight', true)) {
-            var elem = scene.getObjectByName('sceneCameraLight', true);
+            let elem = scene.getObjectByName('sceneCameraLight', true);
             elem.position.copy(camera.position);
         }
         if (typeof group != 'undefined' && typeof model.compass != 'undefined') {
@@ -1435,9 +1447,8 @@ function viewer(model, options, labels) {
             SetupComposer();
         }
         scene.traverse((child) => {
-            if (child instanceof THREE.Mesh
-                && child.geometry.type === 'SphereGeometry') {
-                updateDotScale(child)
+            if (child instanceof THREE.Mesh && child.geometry.type === 'SphereGeometry') {
+                updateDotScale(child);
             }
         });
         
@@ -1466,8 +1477,9 @@ function viewer(model, options, labels) {
                 effectComposer.passes[3].enabled = false;
             }
         }
+        TestCorrectRulerVisibility();
         effectComposer.render();
-    };
+    }
 
     //orthoshotext----------------------------------------------------------------------------------------------------------------------------
     const GLOBAL_UP = new THREE.Vector3(0,1,0);
@@ -1767,7 +1779,7 @@ function viewer(model, options, labels) {
             clear: clear,
             center: center,
             normal: normal,
-        }
+        };
     }
 
     var effectComposer = new THREE.EffectComposer(renderer);
@@ -1852,6 +1864,7 @@ function viewer(model, options, labels) {
         ssc.aspect = 1;
         ssc.width = 1;
         ssc.scale = 1;
+        ssc.index = 1;
         ssc.planeDist = cam0.near * 2;
         ssc.UI = new THREE.Group();
         scene.add(ssc.UI);
@@ -1860,7 +1873,7 @@ function viewer(model, options, labels) {
         
         ssc.objects = [];
         ssc.label = '';
-        ssc.stage = 0;
+        ssc.stage = 10000000;
 
         function addToSSC(obj0, id0, options0)
         {
@@ -1874,13 +1887,13 @@ function viewer(model, options, labels) {
                 height: 8,//mm
                 hConst: true,
                 wConst: false
-            }
+            };
 
             let obj1 = {
                 id : id0,
                 obj : obj0,
                 opt : opt0
-            }
+            };
 
             ssc.objects.push(obj1);
             ssc.UI.add(obj0);
@@ -1933,10 +1946,10 @@ function viewer(model, options, labels) {
             let fovTan;
             if(orthocam)
             {
-                ssc.aspect = ssc.camera.aspect;
+                ssc.aspect = co.right / co.top;
                 ssc.height = co.top;
                 aHeight = co.top * 2;
-                aWidth = aHeight * ssc.aspect
+                aWidth = co.right * 2;
                 ssc.width = ssc.height * ssc.aspect;
                 ssc.scale = 1;
                 ssc.planeDist = co.near + 1;
@@ -1966,27 +1979,30 @@ function viewer(model, options, labels) {
             }
             let stage = 10000000;
             let stageIndex = 1000;
-            
-            for (let distIndex = 0; distIndex < stages.length; distIndex++) {
-                const dist = stages[distIndex];
-                if(aWidth < dist*3)
-                {
-                    stage = stages[distIndex];
-                    stageIndex = distIndex;
-                    break;
+            let halfWidth = aWidth * 0.5;
+            let tenPercent = aWidth * 0.1;
+
+            if(ssc.stage > halfWidth || ssc.stage < tenPercent) {
+                for (let si = 0; si < stages.length; si++) {
+                    const st = stages[si];
+                    if (st >= tenPercent && st <= halfWidth) {
+                        stage = st;
+                        stageIndex = si;
+                    }
                 }
+
+                let unitIndex = Math.min(Math.trunc(stageIndex / 5), units.length);
+                let unit = units[unitIndex];
+                let div = unitIndex;
+
+                if (stageIndex > 19) div = unitIndex - 1;
+                if (stageIndex > 24) div = unitIndex - 2;
+                if (stageIndex > 29) div = unitIndex;
+
+                ssc.label = stage / (10 ** div) + unit;
+                ssc.stage = stage;
+                ssc.index = stageIndex;
             }
-            let unitIndex = Math.min(Math.trunc(stageIndex/5),units.length);
-            let unit = units[unitIndex];
-            let div = unitIndex;
-            
-            if(stageIndex > 19) div = unitIndex-1;
-            if(stageIndex > 24) div = unitIndex-2;
-            if(stageIndex > 29) div = unitIndex;
-            
-            ssc.label = stage / (10**div) + unit;
-            ssc.stage = stage;
-            
             ssc.objects.forEach(o => {
                 adjustPosScale(o);
             });
@@ -2062,7 +2078,8 @@ function viewer(model, options, labels) {
     {
         let rsections = [];
         let rulerGeom = new THREE.PlaneGeometry(1,1);
-        let rmat = new THREE.MeshBasicMaterial({color:'black', side: THREE.DoubleSide, depthTest: false, transparent: true});
+        let rmat = new THREE.MeshBasicMaterial({color:'black', side: THREE.DoubleSide, depthTest: false, transparent: false});
+        let rwmat = new THREE.MeshBasicMaterial({color:'white', side: THREE.DoubleSide, depthTest: false, transparent: false});
         let uvs = rulerGeom.faceVertexUvs[ 0 ];
         uvs[ 0 ][ 0 ].set( 0, 1 );
         uvs[ 0 ][ 1 ].set( 0, 0 );
@@ -2070,9 +2087,16 @@ function viewer(model, options, labels) {
         uvs[ 1 ][ 0 ].set( 0, 0 );
         uvs[ 1 ][ 1 ].set( 1, 0 );
         uvs[ 1 ][ 2 ].set( 1, 1 );
-        for (let rulerI = 0; rulerI < 4; rulerI++) 
+        for (let rulerI = 0; rulerI < 17; rulerI++)
         {
             let robj = new THREE.Mesh(rulerGeom, rmat);
+            robj.renderOrder = 998;
+            robj.name = 'rulerSection'+rulerI;
+            rsections.push(robj);
+        }
+        for (let rulerI = 17; rulerI < 22; rulerI++)
+        {
+            let robj = new THREE.Mesh(rulerGeom, rwmat);
             robj.renderOrder = 999;
             robj.name = 'rulerSection'+rulerI;
             rsections.push(robj);
@@ -2085,43 +2109,49 @@ function viewer(model, options, labels) {
             hPos : .95,//percent
             vPos : .40,//percent
             width: 10,//mm
-            height: 1,//mm
+            height: 6,//mm
             hConst: true,
             wConst: false
         });
-        scrSpCan.add(rsections[1], 'pin1',{
-            parent: scrSpCan.get('main'),
-            hPaddingType : 'right',
-            vPaddingType : 'bottom',
-            hPos : 0,//percent
-            vPos : 0,//percent
-            width: 1,//mm
-            height: 8,//mm
-            hConst: true,
-            wConst: true
-        });
-        scrSpCan.add(rsections[2], 'pin2',{
-            parent: scrSpCan.get('main'),
-            hPaddingType : 'right',
-            vPaddingType : 'bottom',
-            hPos : 0.5,//percent
-            vPos : 0,//percent
-            width: 1,//mm
-            height: 5,//mm
-            hConst: true,
-            wConst: true
-        });
-        scrSpCan.add(rsections[3], 'pin3',{
-            parent: scrSpCan.get('main'),
-            hPaddingType : 'right',
-            vPaddingType : 'bottom',
-            hPos : 1,//percent
-            vPos : 0,//percent
-            width: 1,//mm
-            height: 8,//mm
-            hConst: true,
-            wConst: true
-        });
+        for (let i = 0; i < 11; i++) {
+            scrSpCan.add(rsections[i+1], 'pin' + i, {
+                parent: scrSpCan.get('main'),
+                hPaddingType: 'right',
+                vPaddingType: 'bottom',
+                hPos: i === 10 ? 1:(i-0.05)/10,//percent
+                vPos: 0,//percent
+                width: 1,//mm
+                height: 10,//mm
+                hConst: true,
+                wConst: true
+            });
+        }
+        for (let i = 0, k = 0; i < 10; i+=2, k++) {
+            scrSpCan.add(rsections[k + 12], 'rect' + i, {
+                parent: scrSpCan.get('pin' + i),
+                hPaddingType: 'right',
+                vPaddingType: 'bottom',
+                hPos: 0.5,//percent
+                vPos: 0.07,//percent
+                width: 1,//mm
+                height: 4,//mm
+                hConst: true,
+                wConst: false
+            });
+        }
+        for (let i = 1, k = 0; i < 10; i+=2, k++){
+            scrSpCan.add(rsections[k + 17], 'rect' + i, {
+                parent: scrSpCan.get('pin' + i),
+                hPaddingType: 'right',
+                vPaddingType: 'bottom',
+                hPos: 0.5,//percent
+                vPos: 0.07,//percent
+                width: 1,//mm
+                height: 4,//mm
+                hConst: true,
+                wConst: false
+            });
+        }
     }
 
     function updateScaleRuler(ensure)
@@ -2131,8 +2161,28 @@ function viewer(model, options, labels) {
         let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
         
         scrSpCan.update(planarDistance);
+        let secNum = parseInt(ssc.stage.toString().charAt(0));
         let main = scrSpCan.get('main');
         if(main !== undefined) main.opt.width = scrSpCan.stage;
+        for (let i = 0; i < 10; i++)
+        {
+            scrSpCan.get('rect' + i).obj.visible = false;
+            scrSpCan.get('pin' + i).obj.visible = false;
+        }
+        scrSpCan.get('pin0').obj.visible = true;
+        for (let i = 0; i < secNum; i++)
+        {
+            let rect = scrSpCan.get('rect' + i);
+            rect.opt.width = main.opt.width / secNum;
+            rect.obj.visible = true;
+            if(i>0 && i<secNum) {
+                let pin = scrSpCan.get('pin' + i);
+                pin.obj.visible = true;
+                pin.opt.hPos = i/secNum;
+                pin.opt.height = 8;
+            }
+        }
+        scrSpCan.get('pin10').obj.visible = true;
         if(ensure)scrSpCan.update(planarDistance);
     }
 
@@ -2148,10 +2198,10 @@ function viewer(model, options, labels) {
         camera.updateProjectionMatrix();
     }
 
-    var stages = [1,2,3,4,5,10,20,30,40,50,100,200,300,400,500,1000,2000,3000,4000,5000,10000,20000,30000,40000,50000,100000,200000,300000,400000,500000,1000000,2000000,3000000,4000000,5000000];
+    var stages = [1,1,1,1,5,10,10,10,10,50,100,100,100,100,500,1000,1000,1000,1000,5000,10000,10000,10000,10000,50000,100000,100000,100000,100000,500000,1000000,1000000,1000000,1000000,5000000];
     var units  = ['mm','cm','dm','m','m','m','km']
     //------------------------------------------------------------------------------------
-    //GPUcalculations---------------------------------------------------------------------
+    //BoundingBoxCalculations-------------------------------------------------------------
     var calcObj;
     function cameraSpaceBoundingBox()
     {
@@ -2185,6 +2235,21 @@ function viewer(model, options, labels) {
     }
     //------------------------------------------------------------------------------------
 
+    function TestCorrectRulerVisibility()
+    {
+        if(controllers.ruler)
+        {
+            if(pinsGroup !== 'undefined' && pinsGroup.children.length > 0)
+            {
+                pinsGroup.traverse(pin => {
+                    pin.traverse(pinElement => {
+                        pinElement.visible = true;
+                    });
+                });
+            }
+        }
+    }
+
     return {
         appendTo: appendTo,
         switchEnv: switchEnv,
@@ -2197,4 +2262,4 @@ function viewer(model, options, labels) {
         renderer: renderer,
         orthographer: orthographer,
     };
-};
+}

@@ -154,3 +154,5 @@ echo $this->render('_header_object', ['object' => $object]);
         Копировать параметры слоев
     </button>
 </div>
+
+<?= $object->description ?>
