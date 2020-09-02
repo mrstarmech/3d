@@ -381,6 +381,7 @@ class AdminController extends AdminDefaultController
                 ]);
 
                 $object->setOption('camera', 'manual');
+                $object->setOption('fov', Yii::$app->request->post('fov'));
 
                 $object->setSetting('layersParams', json_decode(Yii::$app->request->post('layers')));
 

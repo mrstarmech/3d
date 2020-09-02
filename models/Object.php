@@ -60,7 +60,8 @@ class Object extends ActiveRecord
             "x" => 0,
             "y" => 0,
             "z" => 0
-        ]
+        ],
+        "fov" => 60,
     ];
     public $defaultSetting = [
         "name" => "",

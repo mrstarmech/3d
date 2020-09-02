@@ -10,7 +10,7 @@ function viewer(model, options, labels) {
         wireframe: false,
         autorotate: false,
         backgroundColor: '#fffffd',
-        cameraFov: 55,
+        fov: 55,
         focalLenght: '',
         lights: 'Cameralight',
         loader: 'utf8Loader',
@@ -239,6 +239,7 @@ function viewer(model, options, labels) {
                     camera.updateProjectionMatrix();
                 } else if (options.camera == 'manual') {
                     camera.position.set(options.cameraCoords.x, options.cameraCoords.y, options.cameraCoords.z);
+                    camera.fov = options.fov ? parseInt(options.fov) : 60;
                     camera.updateProjectionMatrix();
                 }
                 
@@ -278,8 +279,8 @@ function viewer(model, options, labels) {
                     switchEnv('focalLenght', options.focalLenght);
                 }
                 
-                if (options.cameraFov) {
-                    switchEnv('cameraFov', options.cameraFov);
+                if (options.fov) {
+                    switchEnv('cameraFov', options.fov);
                 }
                 
                 if (options.scale) {
@@ -319,6 +320,7 @@ function viewer(model, options, labels) {
                 backgrounds[i].ctx.rect(0, 0, 1, 1);
                 backgrounds[i].ctx.fillStyle = model.color;
                 backgrounds[i].ctx.fill();
+                console.log(backgrounds[i]);
             }
         }
 
