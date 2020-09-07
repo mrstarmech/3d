@@ -25,12 +25,13 @@ object = {
     option: $object->option,
     setting: $object->setting,
 };
+
 host = '$host';
 object.option.preserveDrawingBuffer = true;
 object.option.menuDisable = false;
 object.option.autorotate = false;
 
-start();
+start(true);
 
 var strDownloadMime = "image/octet-stream";
 $('#saveLink').click(function() {
@@ -41,6 +42,8 @@ $('#saveLink').click(function() {
 
         try {
             disableMenu();
+            t.switchEnv('scale-ruler', false);
+            t.render();
             var strMime = "image/jpeg";
             imgData = t.renderer.domElement.toDataURL(strMime);
             // saveFile(imgData.replace(strMime, strDownloadMime), "$object->name.jpg");
@@ -57,6 +60,7 @@ $('#saveLink').click(function() {
                 $('input[name=layers]').val(JSON.stringify(layers));
             }
             enableMenu();
+            t.switchEnv('scale-ruler', true);
         } catch (e) {
             console.log(e);
             return;

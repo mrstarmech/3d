@@ -15,9 +15,9 @@ OBJECTS.click(function () {
     }
 });
 
-function start() {
+function start(admin) {
     try {
-        window.t = new viewer(object.setting, object.option, object.labels);
+        window.t = new viewer(object.setting, object.option, object.labels, admin);
         t.appendTo(classNameCanvas, function () {
             OBJECTS.attr('data-render', 'success');
 

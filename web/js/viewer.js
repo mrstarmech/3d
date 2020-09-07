@@ -3,7 +3,7 @@
  Viewer for THREE.js objects v 0.9.7
 
  **/
-function viewer(model, options, labels) {
+function viewer(model, options, labels, admin) {
     options = typeof options !== 'undefined' ? options : {
         grid: false,
         ruler: false,
@@ -850,9 +850,11 @@ function viewer(model, options, labels) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
+            case 'scale-ruler':
+                scrSpCan.show(value);
+                break;
             case 'white-back':
                 whiteBack(value);
-                
                 break;
             case 'reset-dots':
                 resetDots();
@@ -1121,7 +1123,7 @@ function viewer(model, options, labels) {
         mousePosition.x = (elemMouseCoords.x / viewerContainer.clientWidth) * 2 - 1;
         mousePosition.y = -(elemMouseCoords.y / viewerContainer.clientHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mousePosition, camera);
+        raycaster.setFromCamera(mousePosition, orthocam? co : camera);
 
         intersects = raycaster.intersectObjects(objectsGroup);
 
@@ -1140,7 +1142,7 @@ function viewer(model, options, labels) {
         mousePosition.x = (elemMouseCoords.x / viewerContainer.clientWidth) * 2 - 1;
         mousePosition.y = -(elemMouseCoords.y / viewerContainer.clientHeight) * 2 + 1;
 
-        raycaster.setFromCamera(mousePosition, camera);
+        raycaster.setFromCamera(mousePosition, orthocam? co : camera);
 
         intersects = raycaster.intersectObjects(objectsGroup);
 
@@ -1445,7 +1447,7 @@ function viewer(model, options, labels) {
             scene.add(p2);
             scene.add(p3);
             
-            addScaleRuler();
+            if(admin) addScaleRuler();
             SetupComposer();
         }
         scene.traverse((child) => {
@@ -1455,10 +1457,11 @@ function viewer(model, options, labels) {
         });
         
         checkOutline();
-        updateScaleRuler();
+        if(admin) {
+            updateScaleRuler();
+            updateScaleLabel(scrSpCan.label, TEXT_SIZE);
+        }
         updateRulerScale();
-        updateScaleLabel(scrSpCan.label, TEXT_SIZE);
-
         if(orthocam)
         {
             effectComposer.passes[0].enabled = false;
@@ -1557,7 +1560,7 @@ function viewer(model, options, labels) {
     {
         if(tri!==undefined)tri.clear();
         let ps = new THREE.Vector2();
-        let mvs = cameraSpaceBoundingBox();
+        let mvs = cameraSpaceBoundingBox(true);
         let asp = camera.aspect;
         let ofov = camera.fov;
         let opos = camera.position.clone();
@@ -1592,6 +1595,7 @@ function viewer(model, options, labels) {
 
         camera.updateProjectionMatrix();
         updateOrthoCam(true);
+        scrSpCan.get('scaleLabel').opt.vPos = -0.1;
         updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         effectComposer.render();
@@ -1602,6 +1606,7 @@ function viewer(model, options, labels) {
         camera.fov = ofov;
         camera.position.copy(opos);
         camera.updateProjectionMatrix();
+        scrSpCan.get('scaleLabel').opt.vPos = 0;
     }
 
     function downloadImage(url)
@@ -1858,7 +1863,8 @@ function viewer(model, options, labels) {
         ssc = {
             add: addToSSC,
             update: update,
-            get: get
+            get: get,
+            show: show,
         };
 
         ssc.camera = cam0;
@@ -1867,6 +1873,7 @@ function viewer(model, options, labels) {
         ssc.width = 1;
         ssc.scale = 1;
         ssc.index = 1;
+        ssc.aboveQuart = false;
         ssc.planeDist = cam0.near * 2;
         ssc.UI = new THREE.Group();
         scene.add(ssc.UI);
@@ -1876,6 +1883,11 @@ function viewer(model, options, labels) {
         ssc.objects = [];
         ssc.label = '';
         ssc.stage = 10000000;
+
+        function show(val)
+        {
+            ssc.UI.visible = val;
+        }
 
         function addToSSC(obj0, id0, options0)
         {
@@ -1979,31 +1991,42 @@ function viewer(model, options, labels) {
                 ssc.width = ssc.height * ssc.aspect;
                 ssc.scale = ssc.height / aHeight;
             }
-            let stage = 10000000;
-            let stageIndex = 1000;
+            let stage = 1;
+            let stageIndex = 0;
             let halfWidth = aWidth * 0.5;
             let tenPercent = aWidth * 0.1;
 
-            if(ssc.stage > halfWidth || ssc.stage < tenPercent) {
-                for (let si = 0; si < stages.length; si++) {
-                    const st = stages[si];
-                    if (st >= tenPercent && st <= halfWidth) {
-                        stage = st;
-                        stageIndex = si;
-                    }
+            for (let si = 0; si < stages.length; si++) {
+                const st = stages[si];
+                if (st >= tenPercent && st <= halfWidth) {
+                    stage = st;
+                    stageIndex = si;
                 }
+            }
 
-                let unitIndex = Math.min(Math.trunc(stageIndex / 5), units.length);
-                let unit = units[unitIndex];
-                let div = unitIndex;
+            if(isNaN(stage) && isNaN(stageIndex))
+            {
+                console.log('nan');
+                stage = 1;
+                stageIndex = 0;
+            }
 
-                if (stageIndex > 19) div = unitIndex - 1;
-                if (stageIndex > 24) div = unitIndex - 2;
-                if (stageIndex > 29) div = unitIndex;
+            let unitIndex = Math.min(Math.trunc(stageIndex / 5), units.length);
+            let unit = units[unitIndex];
+            let div = unitIndex;
 
-                ssc.label = stage / (10 ** div) + unit;
-                ssc.stage = stage;
-                ssc.index = stageIndex;
+            if (stageIndex > 19) div = unitIndex - 1;
+            if (stageIndex > 24) div = unitIndex - 2;
+            if (stageIndex > 29) div = unitIndex;
+
+            ssc.label = stage / (10 ** div) + unit;
+            ssc.stage = stage;
+            ssc.index = stageIndex;
+            ssc.aboveQuart = stage > aWidth * 0.25;
+            let secNum = parseInt(ssc.stage.toString().charAt(0));
+            if(ssc.aboveQuart && stage > 2 && stage < 10000 && secNum == 1)
+            {
+                ssc.label = stage / (10 ** div) + '0' + units[unitIndex - 1];
             }
             ssc.objects.forEach(o => {
                 adjustPosScale(o);
@@ -2012,7 +2035,7 @@ function viewer(model, options, labels) {
 
         function get(id)
         {
-            return ssc.objects.find((elem)=>{ return elem.id === id});
+            return ssc.objects.find((elem)=>{ return elem.id === id; });
         }
 
         return ssc;
@@ -2039,7 +2062,7 @@ function viewer(model, options, labels) {
             hPaddingType : 'right',
             vPaddingType : 'bottom',
             hPos : 1,//percent
-            vPos : .05,//percent
+            vPos : 0,//percent
             width: 32,//mm
             height: 32,//mm
             hConst: true,
@@ -2054,7 +2077,7 @@ function viewer(model, options, labels) {
         lcanvas.height = 128;
         let lcontext = lcanvas.getContext("2d");
 
-        lcontext.font = size + "px serif";
+        lcontext.font = size + "px arial";
 
         lcontext.textAlign = "center";
         lcontext.textBaseline = "middle";
@@ -2108,10 +2131,10 @@ function viewer(model, options, labels) {
             parent: scrSpCan.get('scaleLabel'),
             hPaddingType : 'right',
             vPaddingType : 'bottom',
-            hPos : .95,//percent
-            vPos : .40,//percent
+            hPos : 0.95,//percent
+            vPos : 0.40,//percent
             width: 10,//mm
-            height: 6,//mm
+            height: 5,//mm
             hConst: true,
             wConst: false
         });
@@ -2122,7 +2145,7 @@ function viewer(model, options, labels) {
                 vPaddingType: 'bottom',
                 hPos: i === 10 ? 1:(i-0.05)/10,//percent
                 vPos: 0,//percent
-                width: 1,//mm
+                width: 0.5,//mm
                 height: 10,//mm
                 hConst: true,
                 wConst: true
@@ -2164,6 +2187,7 @@ function viewer(model, options, labels) {
         
         scrSpCan.update(planarDistance);
         let secNum = parseInt(ssc.stage.toString().charAt(0));
+        if(secNum == 1 && ssc.stage > 2 && ssc.stage < 10000 && ssc.aboveQuart) secNum = 10;
         let main = scrSpCan.get('main');
         if(main !== undefined) main.opt.width = scrSpCan.stage;
         for (let i = 0; i < 10; i++)
@@ -2182,6 +2206,10 @@ function viewer(model, options, labels) {
                 pin.obj.visible = true;
                 pin.opt.hPos = i/secNum;
                 pin.opt.height = 8;
+                if(secNum == 10 && i == 5)
+                {
+                    pin.opt.height = 10;
+                }
             }
         }
         scrSpCan.get('pin10').obj.visible = true;
@@ -2201,11 +2229,11 @@ function viewer(model, options, labels) {
     }
 
     var stages = [1,1,1,1,5,10,10,10,10,50,100,100,100,100,500,1000,1000,1000,1000,5000,10000,10000,10000,10000,50000,100000,100000,100000,100000,500000,1000000,1000000,1000000,1000000,5000000];
-    var units  = ['mm','cm','dm','m','m','m','km']
+    var units  = ['mm','cm','dm','m','m','m','km'];
     //------------------------------------------------------------------------------------
     //BoundingBoxCalculations-------------------------------------------------------------
     var calcObj;
-    function cameraSpaceBoundingBox()
+    function cameraSpaceBoundingBox(withRuler)
     {
         if(calcObj === undefined)
         {
@@ -2213,7 +2241,7 @@ function viewer(model, options, labels) {
                 obj2calc: sceneObjectsMesh[0],
                 cam2calc: camera,
                 bVx: sceneObjectsMesh[0].geometry.getAttribute('position').array,
-            }
+            };
         }
 
         let minx = Infinity, miny = Infinity;
@@ -2230,9 +2258,15 @@ function viewer(model, options, labels) {
         let low = new THREE.Vector2(minx,miny);
         let high = new THREE.Vector2(maxx,maxy);
         let visibleSize = new THREE.Vector2().subVectors(high,low);
-        let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(.5);
+        let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(0.5);
+        if(withRuler)
+        {
+            let rulerHeight = scrSpCan.get('scaleLabel').obj.scale.y;
+            visibleSize.y = visibleSize.y + rulerHeight/2;
+            let div = new THREE.Vector3(0,rulerHeight/4);
+            center.subVectors(center,div);
+        }
         center = calcObj.cam2calc.localToWorld(new THREE.Vector3().set(center.x,center.y,0));
-
         return {visibleSize, center};
     }
     //------------------------------------------------------------------------------------
@@ -2254,6 +2288,7 @@ function viewer(model, options, labels) {
 
     return {
         appendTo: appendTo,
+        render: render,
         switchEnv: switchEnv,
         redrawTexture: redrawTexture,
         rulerDistance: getDistance,
