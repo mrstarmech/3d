@@ -2262,8 +2262,11 @@ function viewer(model, options, labels, admin) {
             if(cvx.y > maxy) maxy = cvx.y;
         }
         let low = new THREE.Vector2(minx,miny);
+        low.add(low.clone().multiplyScalar(low.length() * 0.0005));
         let high = new THREE.Vector2(maxx,maxy);
+        high.add(high.clone().multiplyScalar(high.length() * 0.0005));
         let visibleSize = new THREE.Vector2().subVectors(high,low);
+
         let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(0.5);
         if(withRuler)
         {
