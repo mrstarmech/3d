@@ -135,6 +135,7 @@ function menu() {
     submenu.append('<button title="Ruler" class="btn menu-object ruler" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
     submenu.append('<button title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
     submenu.append('<button title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
+    submenu.append('<button title="Rotate Model" class="btn menu-object" data-menu="rotate90"><i class="fas fa-sync-alt"></i></button>');
 
     if (object.option.grid) {
         submenu.append('<button title="Grid off" class="btn menu-object active" data-menu="grid"><i class="fas fa-th-large"></i></button>');
@@ -276,6 +277,9 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 }
                 ;
             }
+            break;
+        case 'rotate90':
+            t.switchEnv('rotate90');
             break;
         case 'reset-dots':
             t.switchEnv('reset-dots', false);

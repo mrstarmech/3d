@@ -850,6 +850,10 @@ function viewer(model, options, labels, admin) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
+            case 'rotate90':
+                console.log('switch rotate');
+                rotateObject();
+                break;
             case 'scale-ruler':
                 scrSpCan.show(value);
                 break;
@@ -2286,12 +2290,18 @@ function viewer(model, options, labels, admin) {
         }
     }
 
+    function rotateObject() {
+        sceneObjectsMesh[0].rotateOnWorldAxis(new THREE.Vector3(1,0,0), 90);
+        console.log('rotate called');
+    }
+
     return {
         appendTo: appendTo,
         render: render,
         switchEnv: switchEnv,
         redrawTexture: redrawTexture,
         rulerDistance: getDistance,
+        rotate: rotateObject,
         saveOptions: saveOptions,
         getNewLabel: getNewLabel,
         addLabels: addLabels,
