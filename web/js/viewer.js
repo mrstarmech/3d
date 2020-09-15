@@ -1966,8 +1966,7 @@ function viewer(model, options, labels, admin) {
             {
                 ssc.aspect = co.right / co.top;
                 ssc.height = co.top;
-                aHeight = co.top * 2;
-                aWidth = co.right * 2;
+
                 ssc.width = ssc.height * ssc.aspect;
                 ssc.scale = 1;
                 ssc.planeDist = co.near + 1;
@@ -1995,6 +1994,8 @@ function viewer(model, options, labels, admin) {
                 ssc.width = ssc.height * ssc.aspect;
                 ssc.scale = ssc.height / aHeight;
             }
+            aHeight = co.top * 2;
+            aWidth = co.right * 2;
             let stage = 1;
             let stageIndex = 0;
             let halfWidth = aWidth * 0.5;
@@ -2014,6 +2015,7 @@ function viewer(model, options, labels, admin) {
                 stage = 1;
                 stageIndex = 0;
             }
+
 
             let unitIndex = Math.min(Math.trunc(stageIndex / 5), units.length);
             let unit = units[unitIndex];
