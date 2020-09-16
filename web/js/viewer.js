@@ -62,18 +62,18 @@ function viewer(model, options, labels, admin) {
                 var elem = new THREE.DirectionalLight(0xffffff, 1);
                 elem.name = 'sceneCameraLight';
                 elem.castShadow = true;
-                elem.shadowMapWidth = 2048;
-                elem.shadowMaHeight = 2048;
+                elem.shadow.mapSize.width = 2048;
+                elem.shadow.mapSize.height = 2048;
 
                 var d = 150;
 
-                elem.shadowCameraLeft = -d * 1.2;
-                elem.shadowCameraRight = d * 1.2;
-                elem.shadowCameraTop = d;
-                elem.shadowCameraBottom = -d;
+                elem.shadow.camera.left = -d * 1.2;
+                elem.shadow.camera.right = d * 1.2;
+                elem.shadow.camera.top = d;
+                elem.shadow.camera.bottom = -d;
 
-                elem.shadowCameraNear = 200;
-                elem.shadowCameraFar = 500;
+                elem.shadow.camera.near = 200;
+                elem.shadow.camera.far = 500;
                 return elem;
             },
             ManualSetup: function (count, coords) {
@@ -234,8 +234,10 @@ function viewer(model, options, labels, admin) {
             if (value) {
 
                 if (options.camera == 'auto') {
-                    camera.position.set(1,0,0);
+                    camera.position.set(0,0,1);
                     cameraModelFit();
+                    if(options.fov)
+                        camera.fov = parseInt(options.fov);
                     camera.updateProjectionMatrix();
                 } else if (options.camera == 'manual') {
                     camera.position.set(options.cameraCoords.x, options.cameraCoords.y, options.cameraCoords.z);
@@ -320,7 +322,6 @@ function viewer(model, options, labels, admin) {
                 backgrounds[i].ctx.rect(0, 0, 1, 1);
                 backgrounds[i].ctx.fillStyle = model.color;
                 backgrounds[i].ctx.fill();
-                console.log(backgrounds[i]);
             }
         }
 
@@ -435,9 +436,11 @@ function viewer(model, options, labels, admin) {
     function loadModel(model, callback) {
         let forceUpdate = false;
         let parametersMaterial = {
+            /*
             specular: 0xffffff,
             shininess: 50,
             shading: THREE.SmoothShading
+            */
         };
 
         if (model.ambient !== undefined && model.ambient !== '') {
@@ -851,7 +854,6 @@ function viewer(model, options, labels, admin) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
             case 'rotate90':
-                console.log('switch rotate');
                 rotateObject();
                 break;
             case 'scale-ruler':
@@ -1021,7 +1023,6 @@ function viewer(model, options, labels, admin) {
                 break;
             case 'focalLenght':
                 if (value && typeof (value) == 'number') {
-                    //console.log(camera);
                     camera.setLens(value);
                 }
 
@@ -1450,7 +1451,13 @@ function viewer(model, options, labels, admin) {
             scene.add(p1);
             scene.add(p2);
             scene.add(p3);
-            
+            if(options.rotation)
+                sceneObjectsMesh[0].quaternion.copy(new THREE.Quaternion(
+                    parseFloat(options.rotation.x),
+                    parseFloat(options.rotation.y),
+                    parseFloat(options.rotation.z),
+                    parseFloat(options.rotation.w),
+                ));
             if(admin) addScaleRuler();
             SetupComposer();
         }
@@ -1513,7 +1520,6 @@ function viewer(model, options, labels, admin) {
         let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
         let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
         
-        //console.log(d);
         let s = camera.fov * planarDistance/2000;
         dot.scale.set(s,s,s);
     }
@@ -1662,7 +1668,6 @@ function viewer(model, options, labels, admin) {
 
     function toggleOrthographer(value)
     {
-        console.log('toggled ' + value);
         if(value)
         {
             renderer.domElement.addEventListener('click',orthoClickHandler);
@@ -1680,7 +1685,6 @@ function viewer(model, options, labels, admin) {
     {
         if(mouseMoveTrigger === 0)
         {
-            console.log('click');
             //mouse = new THREE.Vector2(((event.clientX - renderer.domElement.offsetLeft) / renderer.domElement.clientWidth) * 2 - 1, 
             //                        -(((event.clientY - renderer.domElement.offsetTop) / renderer.domElement.clientHeight) * 2 - 1));
             var mouse = {};
@@ -2011,7 +2015,6 @@ function viewer(model, options, labels, admin) {
 
             if(isNaN(stage) && isNaN(stageIndex))
             {
-                console.log('nan');
                 stage = 1;
                 stageIndex = 0;
             }
@@ -2296,8 +2299,12 @@ function viewer(model, options, labels, admin) {
     }
 
     function rotateObject() {
-        sceneObjectsMesh[0].rotateOnWorldAxis(new THREE.Vector3(1,0,0), 90);
-        console.log('rotate called');
+        sceneObjectsMesh[0].rotateOnWorldAxis(new THREE.Vector3(0,0,1), Math.PI/2);
+    }
+
+    function getRot()
+    {
+        return new THREE.Quaternion().copy(sceneObjectsMesh[0].quaternion);
     }
 
     return {
@@ -2306,7 +2313,7 @@ function viewer(model, options, labels, admin) {
         switchEnv: switchEnv,
         redrawTexture: redrawTexture,
         rulerDistance: getDistance,
-        rotate: rotateObject,
+        getRotation: getRot,
         saveOptions: saveOptions,
         getNewLabel: getNewLabel,
         addLabels: addLabels,

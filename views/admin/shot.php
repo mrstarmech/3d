@@ -52,6 +52,10 @@ $('#saveLink').click(function() {
             $('input[name=coordinateY]').val(t.camera.position.y);
             $('input[name=coordinateZ]').val(t.camera.position.z);
             $('input[name=fov]').val(t.camera.fov);
+            $('input[name=rotationX]').val(t.getRotation().x);
+            $('input[name=rotationY]').val(t.getRotation().y);
+            $('input[name=rotationZ]').val(t.getRotation().z);
+            $('input[name=rotationW]').val(t.getRotation().w);
             var layers = [];
             if (Array.isArray(drawings)){
                 for (var i = 0; i < drawings.length; i++){
@@ -133,6 +137,10 @@ echo $this->render('_header_object', ['object' => $object]);
     <input type="hidden" name="coordinateZ">
     <input type="hidden" name="layers">
     <input type="hidden" name="fov">
+    <input type="hidden" name="rotationX">
+    <input type="hidden" name="rotationY">
+    <input type="hidden" name="rotationZ">
+    <input type="hidden" name="rotationW">
 <div class="form-group">
     <?= Html::submitButton('Добавить', ['class' => 'btn btn-primary']) ?>
 </div>
