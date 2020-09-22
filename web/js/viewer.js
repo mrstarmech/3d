@@ -1548,11 +1548,6 @@ function viewer(model, options, labels, admin) {
         let tp = new THREE.Vector3().copy(control.target);
         let d = new THREE.Vector3().subVectors(cp,tp).length();
 
-        let wd = new THREE.Vector3();
-        let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
-        let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
-        d = planarDistance;
-
         halfSizeY = Math.tan(fov / 2) * d;
         halfSizeX = halfSizeY * camera.aspect;
         co.left = -halfSizeX;
@@ -1577,11 +1572,8 @@ function viewer(model, options, labels, admin) {
         renderer.getSize(ps);
         if(orthocam)
         {
-            camera.position.copy(mvs.center);
+            co.position.copy(mvs.center);
             camera.aspect = mvs.visibleSize.x/mvs.visibleSize.y;
-            let wd = new THREE.Vector3();
-            let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
-            let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
             if(mvs.visibleSize.x > mvs.visibleSize.y) {
                 renderer.setSize(resolution,resolution/camera.aspect);
                 effectComposer.setSize(resolution,resolution/camera.aspect);
@@ -1590,10 +1582,16 @@ function viewer(model, options, labels, admin) {
                 renderer.setSize(resolution*camera.aspect,resolution);
                 effectComposer.setSize(resolution*camera.aspect,resolution);
             }
-            camera.fov = 2*(Math.atan((mvs.visibleSize.y/2)/planarDistance) * (180/Math.PI));
+            co.left = -mvs.visibleSize.x / 2;
+            co.right = mvs.visibleSize.x / 2;
+            co.top = mvs.visibleSize.y / 2;
+            co.bottom = -mvs.visibleSize.y / 2;
+
+            co.updateProjectionMatrix();
         }
         else
         {
+            camera.position.copy(mvs.center);
             if(camera.aspect > 1) {
                 renderer.setSize(resolution, resolution/camera.aspect);
                 effectComposer.setSize(resolution, resolution/camera.aspect);
@@ -1601,10 +1599,11 @@ function viewer(model, options, labels, admin) {
                 renderer.setSize(resolution/camera.aspect, resolution);
                 effectComposer.setSize(resolution/camera.aspect, resolution);
             }
+
+            camera.updateProjectionMatrix();
         }
 
-        camera.updateProjectionMatrix();
-        updateOrthoCam(true);
+
         scrSpCan.get('scaleLabel').opt.vPos = -0.1;
         updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
@@ -2124,14 +2123,15 @@ function viewer(model, options, labels, admin) {
         for (let rulerI = 0; rulerI < 17; rulerI++)
         {
             let robj = new THREE.Mesh(rulerGeom, rmat);
-            robj.renderOrder = 998;
+            if(rulerI > 0) robj.renderOrder = 999;
+            else robj.renderOrder = 900;
             robj.name = 'rulerSection'+rulerI;
             rsections.push(robj);
         }
         for (let rulerI = 17; rulerI < 22; rulerI++)
         {
             let robj = new THREE.Mesh(rulerGeom, rwmat);
-            robj.renderOrder = 999;
+            robj.renderOrder = 995;
             robj.name = 'rulerSection'+rulerI;
             rsections.push(robj);
         }
@@ -2192,8 +2192,7 @@ function viewer(model, options, labels, admin) {
     {
         let wd = new THREE.Vector3();
         let objPlane = new THREE.Plane(camera.getWorldDirection(wd).clone());
-        let planarDistance = Math.abs(objPlane.distanceToPoint(camera.position));
-        
+        let planarDistance = new THREE.Vector3().subVectors(camera.position, control.target).length();
         scrSpCan.update(planarDistance);
         let secNum = parseInt(ssc.stage.toString().charAt(0));
         if(secNum == 1 && ssc.stage > 2 && ssc.stage < 10000 && ssc.aboveQuart) secNum = 10;
@@ -2218,6 +2217,7 @@ function viewer(model, options, labels, admin) {
                 if(secNum == 10 && i == 5)
                 {
                     pin.opt.height = 10;
+                    rect.opt.vPos = 0.05;
                 }
             }
         }
@@ -2252,7 +2252,8 @@ function viewer(model, options, labels, admin) {
                 bVx: sceneObjectsMesh[0].geometry.getAttribute('position').array,
             };
         }
-
+        if(orthocam) calcObj.cam2calc = co;
+        else calcObj.cam2calc = camera;
         let minx = Infinity, miny = Infinity;
         let maxx = -Infinity, maxy = -Infinity;
 
@@ -2265,12 +2266,16 @@ function viewer(model, options, labels, admin) {
             if(cvx.y > maxy) maxy = cvx.y;
         }
         let low = new THREE.Vector2(minx,miny);
-        low.add(low.clone().multiplyScalar(low.length() * 0.0005));
         let high = new THREE.Vector2(maxx,maxy);
-        high.add(high.clone().multiplyScalar(high.length() * 0.0005));
-        let visibleSize = new THREE.Vector2().subVectors(high,low);
-
         let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(0.5);
+
+        low.subVectors(low, center);
+        high.subVectors(high, center);
+
+        low.add(low.clone().multiplyScalar(low.length() * 0.0005));
+        high.add(high.clone().multiplyScalar(high.length() * 0.0005));
+
+        let visibleSize = new THREE.Vector2().subVectors(high,low);
         if(withRuler)
         {
             let rulerHeight = scrSpCan.get('scaleLabel').obj.scale.y;

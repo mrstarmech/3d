@@ -35,9 +35,9 @@ class View3dAsset extends AssetBundle
         'js/three/postprocessing/OutlinePass.js?123',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?1',
+        'js/viewer.js?3',
         'js/label.js',
-        'js/loader.object.js?1',
+        'js/loader.object.js?3',
     ];
     public $depends = [
         'yii\web\YiiAsset',
