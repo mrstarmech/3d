@@ -16,7 +16,6 @@ use yii\helpers\FileHelper;
  * @property int status
  * @property array lang
  * @property Object[] objects
- * @property int parent
  * @package app\models
  */
 class Category extends ActiveRecord
@@ -36,8 +35,6 @@ class Category extends ActiveRecord
             [['status'], 'number'],
             [['status'], 'in', 'range' => [self::NOT_AVAILABLE, self::AVAILABLE_MENU, self::AVAILABLE_REFERENCE]],
             [['status'], 'default', 'value' => self::NOT_AVAILABLE],
-            [['parent'], 'number'],
-            [['parent'], 'default', 'value' => 0],
         ];
     }
 

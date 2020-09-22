@@ -68,36 +68,14 @@ class CategoryController extends Controller
 
         $categories = Category::find()
             ->where(['status' => Category::AVAILABLE_MENU])
-            ->andWhere(['parent' => 0])
-            ->all();
-        $subCategories = Category::find()
-            ->where(['status' => Category::AVAILABLE_MENU])
-            ->andWhere(['!=', 'parent', 0])
             ->all();
 
         if (!empty($categories)) {
             foreach ($categories as $item) {
                 if (!empty($item->objects)) {
-                    $children = array();
-                    foreach ($subCategories as $subItem)
-                    {
-                        if($subItem->parent == $item->id)
-                            $children[] = [
-                                'label' => $subItem->name,
-                                'url' => ['category/view', 'id' => $subItem->id],
-                            ];
-                    }
-                    if(!empty($children))
-                    {
-                        $children = array_merge([[
-                            'label' => $item->name,
-                            'url'=>['category/view', 'id' => $item->id]]],
-                            $children);
-                    }
                     $catMenu[] = [
                         'label' => $item->name,
                         'url' => ['category/view', 'id' => $item->id],
-                        'items' => $children,
                     ];
                 }
             }

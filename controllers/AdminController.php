@@ -168,18 +168,6 @@ class AdminController extends AdminDefaultController
     public function actionEditCategory($id)
     {
         $category = Category::find()->multilingual()->where(['id' => $id])->one();
-        $categories = Category::find()->where(['!=', 'parent', 0])->all();
-        $hasChildren = false;
-        foreach ($categories as $item)
-        {
-            if($item->parent == $id)
-                $hasChildren = true;
-        }
-        $top = Category::find()
-            ->multilingual()
-            ->where(['parent' => 0])
-            ->andWhere(['!=', 'id', $id])
-            ->all();
 
         if (empty($category)) {
             throw new HttpException(404);
@@ -192,25 +180,8 @@ class AdminController extends AdminDefaultController
             }
         }
 
-
-        $availableParents[0] = ['id' => 0, 'name' => ''];
-
-        if(!$hasChildren) {
-            foreach ($top as $item) {
-                $availableParents[$item->id] = [
-                    'id' => $item->id,
-                    'name' => $item->name,
-                ];
-            }
-        }
-        else
-        {
-            $availableParents[0] = ['id' => 0, 'name' => 'Категория является родительской!'];
-        }
-
         return $this->render('editCategory', [
             'model' => $category,
-            'availableParents' => $availableParents,
         ]);
     }
 

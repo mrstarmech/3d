@@ -28,12 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
 <div class="clearfix"></div>
 
 <br>
-<div class="row">
-    <div class="col-xs-12 text-right">
-        <br>
-        <?= Html::a('Просмотр', ['category/view', 'id' => $model->id]) ?>
-    </div>
-</div>
+
 <?php $form = ActiveForm::begin() ?>
 <div class="row">
 
@@ -45,10 +40,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </div>
 
-    <div class="col-xs-6">
-        <?= $form->field($model, 'parent')->dropDownList(
-            \yii\helpers\ArrayHelper::map($availableParents, 'id', 'name')
-        ) ?>
+    <div class="col-xs-6 text-right">
+        <br>
+        <?= Html::a('Просмотр', ['category/view', 'id' => $model->id]) ?>
     </div>
 
     <div class="clearfix"></div>
