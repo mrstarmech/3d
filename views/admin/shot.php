@@ -43,6 +43,7 @@ $('#saveLink').click(function() {
         try {
             disableMenu();
             t.switchEnv('scale-ruler', false);
+            t.switchEnv('toggle-ortho', false);
             t.render();
             var strMime = "image/jpeg";
             imgData = t.renderer.domElement.toDataURL(strMime);
