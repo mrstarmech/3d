@@ -2268,14 +2268,8 @@ function viewer(model, options, labels, admin) {
         let low = new THREE.Vector2(minx,miny);
         let high = new THREE.Vector2(maxx,maxy);
         let center = new THREE.Vector2().addVectors(high,low).multiplyScalar(0.5);
-
-        low.subVectors(low, center);
-        high.subVectors(high, center);
-
-        low.add(low.clone().multiplyScalar(low.length() * 0.0005));
-        high.add(high.clone().multiplyScalar(high.length() * 0.0005));
-
         let visibleSize = new THREE.Vector2().subVectors(high,low);
+        visibleSize.addVectors(visibleSize,visibleSize.clone().multiplyScalar(0.03));
         if(withRuler)
         {
             let rulerHeight = scrSpCan.get('scaleLabel').obj.scale.y;
