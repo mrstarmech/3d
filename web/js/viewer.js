@@ -302,6 +302,7 @@ function viewer(model, options, labels, admin) {
     }
 
     function redrawTexture(clean){
+        if(typeof texture === 'undefined') return;
         clean = !texEnabled;
         //1. For each background: if loaded - create backgrounds[i].ctx canvas with background image
         for (let i = 0; i < backgrounds.length; i++) {
@@ -510,9 +511,15 @@ function viewer(model, options, labels, admin) {
                     drawing.src = modelDrawings[i];
                     let alpha = 1;
                     let color = null;
-                    if (Array.isArray(model.layersParams)){
+                    if (Array.isArray(model.layersParams) && model.layersParams.length === modelDrawings.length){
                         if (typeof model.layersParams[i].alpha != 'undefined') alpha = model.layersParams[i].alpha;
                         if (typeof model.layersParams[i].color != 'undefined') color = model.layersParams[i].color;
+                    }else{
+                        model.layersParams = [];
+                        for (let j = 0; j < modelDrawings.length; j++)
+                        {
+                            model.layersParams.push({alpha:1,color:null});
+                        }
                     }
 
                     drawings.push({"image": drawing, "alpha": alpha, "color": color});

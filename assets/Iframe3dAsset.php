@@ -21,8 +21,8 @@ class Iframe3dAsset extends AssetBundle
     ];
     public $js = [
         'js/three/dat.gui.min.js',
-        'js/three/three.min.js?123',
-        'js/three/OrbitControls.js?123',
+        'js/three/three.min.js?',
+        'js/three/OrbitControls.js?',
         'js/three/OBJLoader.js',
         'js/three/MTLLoader.js',
         'js/three/UTF8Loader.js',
@@ -33,12 +33,12 @@ class Iframe3dAsset extends AssetBundle
         'js/three/postprocessing/ShaderPass.js',
         'js/three/shaders/CopyShader.js',
         'js/three/postprocessing/RenderPass.js',
-        'js/three/postprocessing/OutlinePass.js?123',
+        'js/three/postprocessing/OutlinePass.js?',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?4',
+        'js/viewer.js?20201021',
         'js/label.js',
-        'js/loader.object.iframe.js?4',
+        'js/loader.object.iframe.js?20201021',
     ];
     public $depends = [
         'yii\web\YiiAsset',
