@@ -111,6 +111,15 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-xs-6">
         <?= $form->field($model, 'tech_info')->textarea() ?>
     </div>
+    <div class="col-xs-6">
+        <?= $form->field($model, 'author')->textarea() ?>
+    </div>
+    <div class="col-xs-6">
+        <?= $form->field($model, 'copyright')->textarea() ?>
+    </div>
+    <div class="col-xs-6">
+        <?= $form->field($model, 'license')->textarea() ?>
+    </div>
 
     <div class="clearfix"></div>
 

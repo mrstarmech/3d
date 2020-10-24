@@ -26,6 +26,9 @@ use yii\helpers\Url;
  * @property array labels
  * @property array labelsArray
  * @property string pathFileWR
+ * @property string author
+ * @property string copyright
+ * @property string license
  *
  * @package app\models
  */
@@ -85,7 +88,7 @@ class Object extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting', 'tech_info'], 'string'],
+            [['name', 'description', 'image', 'obj', 'mtl', 'texture', 'option', 'setting', 'tech_info', 'author', 'copyright', 'license'], 'string'],
             [['visible'], 'in', 'range' => [0, 1]],
             [['fileImage'], 'file', 'skipOnEmpty' => true, 'extensions' => 'png, jpg'],
             [['fileObj'], 'file', 'skipOnEmpty' => true, 'checkExtensionByMimeType' => false, 'extensions' => 'obj, gltf, glb, drc'],
@@ -113,7 +116,10 @@ class Object extends ActiveRecord
             'option' => 'Опции',
             'setting' => 'Настройки',
             'sef' => 'ЧПУ',
-            'tech_info' => 'Техническая информация'
+            'tech_info' => 'Техническая информация',
+            'author' => 'Авторы модели',
+            'copyright' => 'Правообладатель модели',
+            'license' => 'Номер лицензионного договора',
         ];
     }
 

@@ -17,11 +17,16 @@ if (!empty($labels)) {
 }
 
 $labelsJson = json_encode($dataLabels);
+
+$licenseInfo = ['author'=>$object->author, 'copyright'=>$object->copyright, 'license'=>$object->license];
+$licinfo = json_encode($licenseInfo);
+
 $script = <<< JS
 object = {
     option: $object->option,
     setting: $object->setting,
-    labels: $labelsJson
+    labels: $labelsJson,
+    licinfo: $licinfo
 };
 
 object.option.backgroundColor = '$bgColor';

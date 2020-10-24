@@ -57,6 +57,13 @@ $this->registerJs($script, yii\web\View::POS_READY);
     </div>
 <?php endif; ?>
 <?= $object->description ?>
+<?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
+    <div class="tech-info">
+        <p><i>Авторы модели: <?=nl2br($object->author)?></i></p>
+        <p><i>Правообладатель модели: <?=nl2br($object->copyright)?></i></p>
+        <p><i>Номер лицензионного договора: <?=nl2br($object->license)?></i></p>
+    </div>
+<?php endif; ?>
 <div class="clearfix"></div>
 
 <?php if ($categoryId): ?>
