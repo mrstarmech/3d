@@ -660,7 +660,7 @@ function viewer(model, options, labels, admin) {
                 break;
             case 'dracoLoader':
                 loader = new THREE.DRACOLoader();
-                loader.setDecoderPath('/js/three/draco/');
+                loader.setDecoderPath('/js/three/draco_r1.3.6/');
                 loader.setDecoderConfig({type: 'js'});
 
                 loader.load(model.mesh, function (geometry) {

@@ -34,7 +34,7 @@ class View3dAsset extends AssetBundle
         'js/three/postprocessing/OutlinePass.js??20200311',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?20200311',
+        'js/viewer.js?20201116',
         'js/label.js',
         'js/loader.object.js?20201021',
     ];
