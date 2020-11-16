@@ -137,7 +137,9 @@ class AdminController extends AdminDefaultController
         if (empty($object)) {
             throw new HttpException(404);
         }
+        ObjectCategory::deleteAll(['object_id'=>$id]);
         $object->delete();
+
         return $this->redirect(['admin/index']);
     }
 
@@ -192,8 +194,9 @@ class AdminController extends AdminDefaultController
         if (empty($сategory)) {
             throw new HttpException(404);
         }
-
+        ObjectCategory::deleteAll(['category_id'=>$id]);
         $сategory->delete();
+
 
         return $this->redirect(['admin/list-category']);
     }
