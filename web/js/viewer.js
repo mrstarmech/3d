@@ -549,7 +549,7 @@ function viewer(model, options, labels, admin) {
         var onError = function (e) {
             console.log('loading error: ' + e);
         };
-
+        let loader;
         switch (options.loader) {
             case 'jsonLoader':
                 loader = new THREE.JSONLoader();
@@ -630,41 +630,6 @@ function viewer(model, options, labels, admin) {
                     }, onProgress, onError
                 );
                 break;
-            case 'utf8Loader':
-                loader = new THREE.UTF8Loader();
-
-                loader.load(
-                    model.mesh,
-                    function (object) {
-                        object.name = model.name;
-                        if (options.objectCoords) {
-                            object.position.x = objectDefaultCoords.x;
-                            object.position.y = objectDefaultCoords.y;
-                            object.position.z = objectDefaultCoords.z;
-                        }
-                        
-                        object.traverse(function (node) {
-                            if (node.type === 'Mesh') {
-                                node.geometry.computeVertexNormals();
-                                node.geometry.normalizeNormals();
-                                node.geometry.computeBoundingBox();
-                                node.geometry.computeBoundingSphere();
-                                if (texture !== undefined) {
-                                    node.material.texture = texture;
-                                }
-                                node.material.needsUpdate = true;
-                                sceneObjectsMesh.push(node);
-                            }
-                        });
-
-                        scene.add(object);
-                        callback(true);
-                    },
-                    {
-                        normalizeRGB: true
-                    }
-                );
-                break;
             case 'gltfLoader':
                 loader = new THREE.GLTFLoader();
 
@@ -694,9 +659,9 @@ function viewer(model, options, labels, admin) {
                 );
                 break;
             case 'dracoLoader':
-                THREE.DRACOLoader.setDecoderPath('/js/three/draco/');
-                THREE.DRACOLoader.setDecoderConfig({type: 'js'});
-                var loader = new THREE.DRACOLoader();
+                loader = new THREE.DRACOLoader();
+                loader.setDecoderPath('/js/three/draco/');
+                loader.setDecoderConfig({type: 'js'});
 
                 loader.load(model.mesh, function (geometry) {
                     geometry.computeVertexNormals();
@@ -721,7 +686,7 @@ function viewer(model, options, labels, admin) {
                     sceneObjectsMesh.push(mesh);
 
                     // Release decoder resources.
-                    THREE.DRACOLoader.releaseDecoderModule();
+                    loader.dispose();
 
                     callback(true);
 
