@@ -60,13 +60,13 @@ $this->registerJs($script, yii\web\View::POS_READY);
 <?php if (Yii::$app->user->can(\app\models\User::ROLE_ADMINISTRATOR)): ?>
     <div class="tech-info">
         <?php if ($object->author != null and $object->author != ''): ?>
-            <p><i>Авторы модели: <?=nl2br($object->author)?></i></p>
+            <p><i><?= Yii::t('app','Authors')?>: <?=nl2br($object->author)?></i></p>
         <?php endif; ?>
         <?php if ($object->copyright != null and $object->copyright != ''): ?>
-            <p><i>Правообладатель модели: <?=nl2br($object->copyright)?></i></p>
+            <p><i><?= Yii::t('app','Copyright')?>: <?=nl2br($object->copyright)?></i></p>
         <?php endif; ?>
         <?php if ($object->license != null and $object->license != ''): ?>
-            <p><i>Номер лицензионного договора: <?=nl2br($object->license)?></i></p>
+            <p><i><?= Yii::t('app','License')?>: <?=nl2br($object->license)?></i></p>
         <?php endif; ?>
     </div>
 <?php endif; ?>

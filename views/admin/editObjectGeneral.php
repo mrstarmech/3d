@@ -111,11 +111,13 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-xs-6">
         <?= $form->field($model, 'tech_info')->textarea() ?>
     </div>
-    <div class="col-xs-6">
+    <div class="col-xs-3">
         <?= $form->field($model, 'author')->textarea() ?>
+        <?= $form->field($model, 'author_en')->textarea() ?>
     </div>
-    <div class="col-xs-6">
+    <div class="col-xs-3">
         <?= $form->field($model, 'copyright')->textarea() ?>
+        <?= $form->field($model, 'copyright_en')->textarea() ?>
     </div>
     <div class="col-xs-6">
         <?= $form->field($model, 'license')->textarea() ?>

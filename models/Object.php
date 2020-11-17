@@ -118,7 +118,9 @@ class Object extends ActiveRecord
             'sef' => 'ЧПУ',
             'tech_info' => 'Техническая информация',
             'author' => 'Авторы модели',
+            'author_en' => 'Авторы на английском',
             'copyright' => 'Правообладатель модели',
+            'copyright_en' => 'Правообладатель модели на английском',
             'license' => 'Номер лицензионного договора',
         ];
     }
@@ -137,7 +139,7 @@ class Object extends ActiveRecord
                 'langForeignKey' => 'object_id',
                 'tableName' => "{{%object_language}}",
                 'attributes' => [
-                    'name', 'description',
+                    'name', 'description', 'author', 'copyright'
                 ]
             ],
             TimestampBehavior::className(),
