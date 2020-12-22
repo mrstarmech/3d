@@ -207,10 +207,14 @@ function viewer(model, options, labels, admin) {
         }   
     }
 
+    var clientWidth, clientHeight;
+
     function init() {
+        clientWidth = viewerContainer.clientWidth;
+        clientHeight = viewerContainer.clientHeight;
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setClearColor(0xf0f0f0);
-        renderer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
+        renderer.setSize(clientWidth, clientHeight);
         renderer.domElement.addEventListener( 'wheel', mouseWheelHandler, false );
         camera.aspect = viewerContainer.clientWidth / viewerContainer.clientHeight;
         camera.updateProjectionMatrix();
@@ -1467,6 +1471,13 @@ function viewer(model, options, labels, admin) {
         }
         TestCorrectRulerVisibility();
         effectComposer.render();
+
+        if(clientHeight !== viewerContainer.clientHeight || clientWidth !== viewerContainer.clientWidth)
+        {
+            clientWidth = viewerContainer.clientWidth;
+            clientHeight = viewerContainer.clientHeight;
+            effectComposer.setSize(clientWidth, clientHeight);
+        }
     }
 
     //orthoshotext----------------------------------------------------------------------------------------------------------------------------
