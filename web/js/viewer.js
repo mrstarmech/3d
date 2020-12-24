@@ -293,7 +293,7 @@ function viewer(model, options, labels, admin) {
                     switchEnv('scale', options.scale);
                 }
 
-                renderer.domElement.addEventListener('mousedown', onContainerMouseDown, false);
+                renderer.domElement.addEventListener('pointerdown', onContainerPointerDown, false);
                 window.addEventListener('resize', onWindowResize, false);
 
 
@@ -1323,15 +1323,15 @@ function viewer(model, options, labels, admin) {
         return savedOptions;
     }
 
-    function onContainerMouseDown(event) {
-        renderer.domElement.addEventListener('mousemove', onContainerMouseMove, false);
-        renderer.domElement.addEventListener('mouseup', onContainerMouseUp, false);
-        renderer.domElement.addEventListener('mouseout', onContainerMouseOut, false);
+    function onContainerPointerDown(event) {
+        renderer.domElement.addEventListener('pointermove', onContainerPointerMove, false);
+        renderer.domElement.addEventListener('pointerup', onContainerPointerUp, false);
+        renderer.domElement.addEventListener('pointerout', onContainerPointerOut, false);
 
         mouseMoveTrigger = 0;
     }
 
-    function onContainerMouseMove(event) {
+    function onContainerPointerMove(event) {
         if (event.movementX === 0 && event.movementY === 0) {
             mouseMoveTrigger = 0;
         } else {
@@ -1340,10 +1340,10 @@ function viewer(model, options, labels, admin) {
         }
     }
 
-    function onContainerMouseUp(event) {
-        renderer.domElement.removeEventListener('mousemove', onContainerMouseMove, false);
-        renderer.domElement.removeEventListener('mouseup', onContainerMouseUp, false);
-        renderer.domElement.removeEventListener('mouseout', onContainerMouseOut, false);
+    function onContainerPointerUp(event) {
+        renderer.domElement.removeEventListener('pointermove', onContainerPointerMove, false);
+        renderer.domElement.removeEventListener('pointerup', onContainerPointerUp, false);
+        renderer.domElement.removeEventListener('pointerout', onContainerPointerOut, false);
 
         if (mouseMoveTrigger == 0) {
 
@@ -1378,10 +1378,10 @@ function viewer(model, options, labels, admin) {
 
     
 
-    function onContainerMouseOut(event) {
-        renderer.domElement.removeEventListener('mousemove', onContainerMouseMove, false);
-        renderer.domElement.removeEventListener('mouseup', onContainerMouseUp, false);
-        renderer.domElement.removeEventListener('mouseout', onContainerMouseOut, false);
+    function onContainerPointerOut(event) {
+        renderer.domElement.removeEventListener('pointermove', onContainerPointerMove, false);
+        renderer.domElement.removeEventListener('pointerup', onContainerPointerUp, false);
+        renderer.domElement.removeEventListener('pointerout', onContainerPointerOut, false);
     }
 
     function onWindowResize() {
