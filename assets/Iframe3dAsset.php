@@ -35,7 +35,7 @@ class Iframe3dAsset extends AssetBundle
         'js/three/postprocessing/OutlinePass.js?20200311',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
-        'js/viewer.js?20201224',
+        'js/viewer.js?20210111',
         'js/label.js',
         'js/loader.object.iframe.js?20201021',
     ];

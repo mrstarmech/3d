@@ -178,7 +178,7 @@ function viewer(model, options, labels, admin) {
             loadingBar.style.height = '100%';
 
             if (model.poster) {
-                loadingBar.style.background = "url('" + model.poster + "') center center / cover";
+                loadingBar.style.background = "url('" + model.poster + "') center center / contain no-repeat";
             }
             alert = document.createElement('div');
             alert.id = 'webGJ_allert';
