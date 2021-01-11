@@ -1477,6 +1477,7 @@ function viewer(model, options, labels, admin) {
             clientWidth = viewerContainer.clientWidth;
             clientHeight = viewerContainer.clientHeight;
             effectComposer.setSize(clientWidth, clientHeight);
+            renderer.setSize(clientWidth, clientHeight);
         }
     }
 
