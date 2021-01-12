@@ -178,7 +178,7 @@ function viewer(model, options, labels, admin) {
             loadingBar.style.height = '100%';
 
             if (model.poster) {
-                loadingBar.style.background = "url('" + model.poster + "') center center / contain no-repeat";
+                loadingBar.style.background = "url('" + model.poster + "') center center / auto 100% no-repeat";
             }
             alert = document.createElement('div');
             alert.id = 'webGJ_allert';
@@ -1478,6 +1478,8 @@ function viewer(model, options, labels, admin) {
             clientHeight = viewerContainer.clientHeight;
             effectComposer.setSize(clientWidth, clientHeight);
             renderer.setSize(clientWidth, clientHeight);
+            camera.aspect = clientWidth/clientHeight;
+            camera.updateProjectionMatrix();
         }
     }
 
