@@ -8,14 +8,14 @@
     height: 100%;
     margin: 0;
     padding: 0; }
-    .tree-object .container-object .link-site {
+    .link-site {
       position: absolute;
       left: 10px;
       bottom: 10px;
       opacity: .3; }
-      .tree-object .container-object .link-site:hover {
+      .link-site:hover {
         opacity: 1; }
-      .tree-object .container-object .link-site:before {
+      .link-site:before {
         display: inline-block;
         content: '';
         width: 20px;

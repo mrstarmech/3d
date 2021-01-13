@@ -42,8 +42,9 @@ $this->title = $object->name;
 ?>
 <div class="tree-object">
     <div class="container-object" data-state="static"
-         style="background: url(<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>) center center / cover;">
-        <?= Html::a('3d.nsu.ru', Yii::$app->urlManager->createAbsoluteUrl(['/object/view', 'id' => $object->link]), ['class' => 'link-site', 'target' => '_blank']) ?>
+         style="background: url(<?= '/' . $object->pathImage . '/' . $object->id . '/' . $object->image ?>) center center / contain no-repeat;">
+
         <div class="canvas-object"></div>
     </div>
 </div>
+<?= Html::a('3d.nsu.ru', Yii::$app->urlManager->createAbsoluteUrl(['/object/view', 'id' => $object->link]), ['class' => 'link-site', 'target' => '_blank']) ?>
