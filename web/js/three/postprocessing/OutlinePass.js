@@ -602,7 +602,7 @@ THREE.OutlinePass.prototype = Object.assign( Object.create( THREE.Pass.prototype
 						finalColor += + visibilityFactor * (1.0 - maskColor.r) * (1.0 - patternColor.r);\
 					gl_FragColor = finalColor;\
 				}",
-			blending: THREE.AdditiveBlending,
+			blending: THREE.MultiplyBlending,
 			depthTest: false,
 			depthWrite: false,
 			transparent: true

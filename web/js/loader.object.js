@@ -22,7 +22,7 @@ function start(admin) {
             OBJECTS.attr('data-render', 'success');
 
             if (!object.option.menuDisable) {
-                OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
+                OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu(admin));
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(supermenu());
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
                 window.modalDialogLayers = modalDialogShareLayersParams('');
@@ -104,7 +104,7 @@ function supermenu() {
 }
 
 
-function menu() {
+function menu(admin) {
     var menu = $('<div class="btn-toolbar container-menu-object" role="toolbar"></div>'),
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>'),
         submenu = $('<div class="btn-group btn-group-sm submenu" role="group"></div>');
@@ -135,6 +135,7 @@ function menu() {
     submenu.append('<button title="Ruler" class="btn menu-object ruler" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
     submenu.append('<button title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
     submenu.append('<button title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
+    if(admin)submenu.append('<button title="Enable Outline" class="btn menu-object outlineb" data-menu="enable-outline"><i class="far fa-circle"></i></button>');
     submenu.append('<button title="Rotate Model" class="btn menu-object" data-menu="rotate90"><i class="fas fa-sync-alt"></i></button>');
 
     if (object.option.grid) {
@@ -280,6 +281,10 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             break;
         case 'rotate90':
             t.switchEnv('rotate90');
+            break;
+        case 'enable-outline':
+            t.switchEnv('enable-outline');
+            buttonActive($('.outlineb'), t.olEnabled);
             break;
         case 'reset-dots':
             t.switchEnv('reset-dots', false);

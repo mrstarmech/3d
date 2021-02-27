@@ -829,6 +829,9 @@ function viewer(model, options, labels, admin) {
     function switchEnv(object, value) {
         value = typeof value !== 'undefined' ? value : false;
         switch (object) {
+            case 'enable-outline':
+                olEnabled = !olEnabled;
+                break;
             case 'rotate90':
                 rotateObject();
                 break;
@@ -1594,7 +1597,7 @@ function viewer(model, options, labels, admin) {
         updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         effectComposer.render();
-        downloadImage(renderer.domElement.toDataURL("image/jpeg", 1));
+        processOutline(renderer.domElement);
         renderer.setSize(ps.x,ps.y);
         effectComposer.setSize(ps.x,ps.y);
         camera.aspect = asp;
@@ -1610,7 +1613,7 @@ function viewer(model, options, labels, admin) {
         document.body.appendChild(a);
         a.href = url;
         a.download = "image.jpg";
-        a.click()
+        a.click();
         document.body.removeChild(a);
     }
 
@@ -1790,10 +1793,11 @@ function viewer(model, options, labels, admin) {
     const BACK_COLOR = 0xf0f0f0;
     var enableOutline = false;
     var texEnabled = true;
+    var olEnabled = false;
 
     function checkOutline()
     {
-        if(!texEnabled)
+        if(!texEnabled && olEnabled)
         {
             enableOutline = true;
         }
@@ -2292,6 +2296,104 @@ function viewer(model, options, labels, admin) {
         return new THREE.Quaternion().copy(sceneObjectsMesh[0].quaternion);
     }
 
+    function processOutline(canvas)
+    {
+        const tC = {
+            r:240,
+            g:240,
+            b:240
+        };
+        const cW = canvas.width;
+        const cH = canvas.height;
+        const cWB = cW * 4; // canvas width in bytes
+        let dCanvas = document.createElement('canvas');
+        dCanvas.width = cW;
+        dCanvas.height = cH;
+        let image = new Image();
+        image.onload = function () {
+            let ctx = dCanvas.getContext("2d");
+            ctx.drawImage(image,0,0);
+            let imageData = ctx.getImageData(0,0,cW,cH);
+            let data = imageData.data;
+            for(let x = 4; x < cWB - 4; x+=4)
+            {
+                for(let y = 1; y < cH - 1; y++)
+                {
+                    let pR = data[y*cWB + x];
+                    let pG = data[y*cWB + x + 1];
+                    let pB = data[y*cWB + x + 2];
+                    
+                    if(pR === tC.r && pG === tC.g && pB === tC.b)
+                    {
+                        const nb = new Uint8ClampedArray(32);
+                        let p1i = {x: x-4, y: y-1}; //top left index
+                        //pixels above
+                        //top left neighbour
+                        nb[0] = data[p1i.y * cWB + p1i.x];
+                        nb[1] = data[p1i.y * cWB + p1i.x + 1];
+                        nb[2] = data[p1i.y * cWB + p1i.x + 2];
+                        nb[3] = data[p1i.y * cWB + p1i.x + 3];
+                        //top center neighbour
+                        nb[4] = data[p1i.y * cWB + p1i.x + 4];
+                        nb[5] = data[p1i.y * cWB + p1i.x + 5];
+                        nb[6] = data[p1i.y * cWB + p1i.x + 6];
+                        nb[7] = data[p1i.y * cWB + p1i.x + 7];
+                        //top right neighbour
+                        nb[8] = data[p1i.y * cWB + p1i.x + 8];
+                        nb[9] = data[p1i.y * cWB + p1i.x + 9];
+                        nb[10] = data[p1i.y * cWB + p1i.x + 10];
+                        nb[11] = data[p1i.y * cWB + p1i.x + 11];
+                        //pixels inline
+                        p1i.y++;
+                        //right neighbour
+                        nb[12] = data[p1i.y * cWB + p1i.x];
+                        nb[13] = data[p1i.y * cWB + p1i.x + 1];
+                        nb[14] = data[p1i.y * cWB + p1i.x + 2];
+                        nb[15] = data[p1i.y * cWB + p1i.x + 3];
+                        //left neighbour
+                        nb[16] = data[p1i.y * cWB + p1i.x + 8];
+                        nb[17] = data[p1i.y * cWB + p1i.x + 9];
+                        nb[18] = data[p1i.y * cWB + p1i.x + 10];
+                        nb[19] = data[p1i.y * cWB + p1i.x + 11];
+                        //pixels below
+                        p1i.y++;
+                        //bottom left neighbour
+                        nb[20] = data[p1i.y * cWB + p1i.x];
+                        nb[21] = data[p1i.y * cWB + p1i.x + 1];
+                        nb[22] = data[p1i.y * cWB + p1i.x + 2];
+                        nb[23] = data[p1i.y * cWB + p1i.x + 3];
+                        //bottom center neighbour
+                        nb[24] = data[p1i.y * cWB + p1i.x + 4];
+                        nb[25] = data[p1i.y * cWB + p1i.x + 5];
+                        nb[26] = data[p1i.y * cWB + p1i.x + 6];
+                        nb[27] = data[p1i.y * cWB + p1i.x + 7];
+                        //bottom right neighbour
+                        nb[28] = data[p1i.y * cWB + p1i.x + 8];
+                        nb[29] = data[p1i.y * cWB + p1i.x + 9];
+                        nb[30] = data[p1i.y * cWB + p1i.x + 10];
+                        nb[31] = data[p1i.y * cWB + p1i.x + 11];
+                        
+                        for(let i = 0; i < 32; i+=4)
+                        {
+                            if(nb[i] >= 241 && nb[i+1] >= 241 && nb[i+2] >= 241)
+                            {
+                                pR = pG = pB = 0;
+                                //contour = true;
+                                break;
+                            }
+                        }
+                    }
+                    data[y*cWB + x] = pR;
+                    data[y*cWB + x + 1] = pG;
+                    data[y*cWB + x + 2] = pB;
+                }
+            }         
+            ctx.putImageData(imageData, 0, 0);
+            downloadImage(dCanvas.toDataURL("image/jpeg", 1));
+        };
+        image.src = canvas.toDataURL("image/png");
+    }
+
     return {
         appendTo: appendTo,
         render: render,
@@ -2305,5 +2407,6 @@ function viewer(model, options, labels, admin) {
         camera: camera,
         renderer: renderer,
         orthographer: orthographer,
+        olEnabled: olEnabled,
     };
 }
