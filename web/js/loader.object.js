@@ -135,7 +135,6 @@ function menu(admin) {
     submenu.append('<button title="Ruler" class="btn menu-object ruler" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
     submenu.append('<button title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
     submenu.append('<button title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
-    if(admin)submenu.append('<button title="Enable Outline" class="btn menu-object outlineb" data-menu="enable-outline"><i class="far fa-circle"></i></button>');
     submenu.append('<button title="Rotate Model" class="btn menu-object" data-menu="rotate90"><i class="fas fa-sync-alt"></i></button>');
 
     if (object.option.grid) {

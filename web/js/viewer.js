@@ -1445,8 +1445,6 @@ function viewer(model, options, labels, admin) {
                 updateDotScale(child);
             }
         });
-        
-        checkOutline();
         if(admin) {
             updateScaleRuler();
             updateScaleLabel(scrSpCan.label, TEXT_SIZE);
@@ -1456,21 +1454,11 @@ function viewer(model, options, labels, admin) {
         {
             effectComposer.passes[0].enabled = false;
             effectComposer.passes[1].enabled = true;
-            if(enableOutline)
-            {
-                effectComposer.passes[2].enabled = false;
-                effectComposer.passes[3].enabled = true;
-            }
         }
         else
         {
             effectComposer.passes[0].enabled = true;
             effectComposer.passes[1].enabled = false;
-            if(enableOutline)
-            {
-                effectComposer.passes[2].enabled = true;
-                effectComposer.passes[3].enabled = false;
-            }
         }
         TestCorrectRulerVisibility();
         effectComposer.render();
@@ -1797,26 +1785,10 @@ function viewer(model, options, labels, admin) {
     var effectComposer = new THREE.EffectComposer(renderer);
     var renderPass;
     var orthoPass;
-    var outlinePass;
-    var outlineOrthoPass;
     const BACK_COLOR = 0xf0f0f0;
     var enableOutline = false;
     var texEnabled = true;
     var olEnabled = false;
-
-    function checkOutline()
-    {
-        if(!texEnabled && olEnabled)
-        {
-            enableOutline = true;
-        }
-        else
-        {
-            enableOutline = false;
-            effectComposer.passes[2].enabled = false;
-            effectComposer.passes[3].enabled = false;
-        }
-    }
 
     function whiteBack(enable)
     {
@@ -1837,25 +1809,6 @@ function viewer(model, options, labels, admin) {
         orthoPass = new THREE.RenderPass(scene, co);
         orthoPass.enabled = false;
         effectComposer.addPass(orthoPass);
-
-        outlinePass = new THREE.OutlinePass(new THREE.Vector2(1024,1024), scene,camera);
-        outlinePass.enabled = false;
-        outlinePass.visibleEdgeColor.set('black');
-        outlinePass.edgeStrength = 2;
-        outlinePass.edgeGlow = 0;
-        outlinePass.edgeThickness = 0.1;
-        effectComposer.addPass(outlinePass);
-
-        outlineOrthoPass = new THREE.OutlinePass(new THREE.Vector2(1024,1024), scene,co);
-        outlineOrthoPass.enabled = false;
-        outlineOrthoPass.visibleEdgeColor.set('black');
-        outlineOrthoPass.edgeStrength = 2;
-        outlineOrthoPass.edgeGlow = 0;
-        outlineOrthoPass.edgeThickness = 0.1;
-        effectComposer.addPass(outlineOrthoPass);
-        outlinePass.selectedObjects = sceneObjectsMesh;
-        outlineOrthoPass.selectedObjects = sceneObjectsMesh;
-
         effectComposer.setSize(viewerContainer.clientWidth, viewerContainer.clientHeight);
     }
 
