@@ -1594,13 +1594,13 @@ function viewer(model, options, labels, admin) {
 
         scrSpCan.show(false);
         scrSpCan.get('scaleLabel').opt.vPos = -0.1;
-        updateScaleRuler(true);
-        updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         clearC = renderer.getClearColor().getHexString();
         renderer.setClearColor(0x000000,0);
         effectComposer.render();
         let mDataUrl = renderer.domElement.toDataURL('image/png');
         scrSpCan.show(true);
+        updateScaleRuler(true);
+        updateScaleLabel(scrSpCan.label,TEXT_SIZE);
         sceneObjectsMesh[0].visible = false;
         effectComposer.render();
         let rDataUrl = renderer.domElement.toDataURL('image/png');
@@ -1621,7 +1621,7 @@ function viewer(model, options, labels, admin) {
         let a = document.createElement('a');
         document.body.appendChild(a);
         a.href = url;
-        a.download = "image.jpg";
+        a.download = "image.png";
         a.click();
         document.body.removeChild(a);
     }
@@ -2429,7 +2429,7 @@ function viewer(model, options, labels, admin) {
                 {
                     for(y = 0; y < cH; y++)
                     {
-                        if(rdata[y*cWB + x + 3] != 0)
+                        if(rdata[y*cWB + x + 3] >= 75)
                         {
                             data2[y*cWB + x] = rdata[y*cWB + x];
                             data2[y*cWB + x + 1] = rdata[y*cWB + x + 1];
