@@ -1592,12 +1592,19 @@ function viewer(model, options, labels, admin) {
             camera.updateProjectionMatrix();
         }
 
-
+        scrSpCan.show(false);
         scrSpCan.get('scaleLabel').opt.vPos = -0.1;
         updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
+        clearC = renderer.getClearColor().getHexString();
+        renderer.setClearColor(0x000000,0);
         effectComposer.render();
-        processOutline(renderer.domElement);
+        let mDataUrl = renderer.domElement.toDataURL('image/png');
+        scrSpCan.show(true);
+        sceneObjectsMesh[0].visible = false;
+        effectComposer.render();
+        let rDataUrl = renderer.domElement.toDataURL('image/png');
+        processOutline(renderer.domElement,mDataUrl,rDataUrl,ColorToRGB(clearC));
         renderer.setSize(ps.x,ps.y);
         effectComposer.setSize(ps.x,ps.y);
         camera.aspect = asp;
@@ -1605,6 +1612,8 @@ function viewer(model, options, labels, admin) {
         camera.position.copy(opos);
         camera.updateProjectionMatrix();
         scrSpCan.get('scaleLabel').opt.vPos = 0;
+        renderer.setClearColor("#"+clearC,1);
+        sceneObjectsMesh[0].visible = true;
     }
 
     function downloadImage(url)
@@ -2296,7 +2305,7 @@ function viewer(model, options, labels, admin) {
         return new THREE.Quaternion().copy(sceneObjectsMesh[0].quaternion);
     }
 
-    function processOutline(canvas)
+    function processOutline(canvas, modelDataUrl, rulerDataUrl, clearColor)
     {
         const tC = {
             r:240,
@@ -2306,15 +2315,17 @@ function viewer(model, options, labels, admin) {
         const cW = canvas.width;
         const cH = canvas.height;
         const cWB = cW * 4; // canvas width in bytes
-        let dCanvas = document.createElement('canvas');
-        dCanvas.width = cW;
-        dCanvas.height = cH;
+        let modelCanvas = document.createElement('canvas');
+        modelCanvas.width = cW;
+        modelCanvas.height = cH;
         let image = new Image();
         image.onload = function () {
-            let ctx = dCanvas.getContext("2d");
+            let ctx = modelCanvas.getContext('2d');
             ctx.drawImage(image,0,0);
             let imageData = ctx.getImageData(0,0,cW,cH);
             let data = imageData.data;
+            let imageData2 = new ImageData(cW,cH);
+            let data2 = imageData2.data;
             for(let x = 4; x < cWB - 4; x+=4)
             {
                 for(let y = 1; y < cH - 1; y++)
@@ -2322,8 +2333,9 @@ function viewer(model, options, labels, admin) {
                     let pR = data[y*cWB + x];
                     let pG = data[y*cWB + x + 1];
                     let pB = data[y*cWB + x + 2];
+                    let pA = data[y*cWB + x + 3];
                     
-                    if(pR === tC.r && pG === tC.g && pB === tC.b)
+                    if(pA === 0)
                     {
                         const nb = new Uint8ClampedArray(32);
                         let p1i = {x: x-4, y: y-1}; //top left index
@@ -2375,23 +2387,77 @@ function viewer(model, options, labels, admin) {
                         
                         for(let i = 0; i < 32; i+=4)
                         {
-                            if(nb[i] >= 241 && nb[i+1] >= 241 && nb[i+2] >= 241)
+                            if(nb[i + 3] != 0)
                             {
-                                pR = pG = pB = 0;
-                                //contour = true;
+                                pR = 0;
+                                pG = pB = 0;
+                                pA = 255;
                                 break;
                             }
                         }
                     }
-                    data[y*cWB + x] = pR;
-                    data[y*cWB + x + 1] = pG;
-                    data[y*cWB + x + 2] = pB;
+
+                    data2[y*cWB + x] = pR;
+                    data2[y*cWB + x + 1] = pG;
+                    data2[y*cWB + x + 2] = pB;
+                    data2[y*cWB + x + 3] = pA;
                 }
-            }         
-            ctx.putImageData(imageData, 0, 0);
-            downloadImage(dCanvas.toDataURL("image/jpeg", 1));
+            }
+            for(let x = 0; x < cWB; x+=4)
+            {
+                for(let y = 0; y < cH; y++)
+                {
+                    if(data2[y*cWB + x + 3] === 0)
+                    {
+                        data2[y*cWB + x] = clearColor[0];
+                        data2[y*cWB + x + 1] = clearColor[1];
+                        data2[y*cWB + x + 2] = clearColor[2];
+                        data2[y*cWB + x + 3] = 255;
+                    }
+                }
+            }
+            let rulerCanvas = document.createElement('canvas');
+            rulerCanvas.width = cW;
+            rulerCanvas.height = cH;
+            let rImage = new Image();
+            rImage.onload = function(){
+                let rctx = rulerCanvas.getContext('2d');
+                rctx.drawImage(rImage,0,0);
+                let rImageData = rctx.getImageData(0,0,cW,cH);
+                let rdata = rImageData.data;
+                for(x = 0; x < cWB; x+=4)
+                {
+                    for(y = 0; y < cH; y++)
+                    {
+                        if(rdata[y*cWB + x + 3] != 0)
+                        {
+                            data2[y*cWB + x] = rdata[y*cWB + x];
+                            data2[y*cWB + x + 1] = rdata[y*cWB + x + 1];
+                            data2[y*cWB + x + 2] = rdata[y*cWB + x + 2];
+                            data2[y*cWB + x + 3] = rdata[y*cWB + x + 3];
+                        }
+                    }
+                }
+                ctx.putImageData(imageData2, 0, 0);
+                downloadImage(modelCanvas.toDataURL("image/jpeg", 1));
+            };
+            rImage.src = rulerDataUrl;
         };
-        image.src = canvas.toDataURL("image/png");
+        image.src = modelDataUrl;
+    }
+
+    function ColorToRGB(color)
+    {
+        let R = parseInt("0x"+color[0]+color[1]);
+        let G = parseInt("0x"+color[2]+color[3]);
+        let B = parseInt("0x"+color[4]+color[5]);
+        let rgb = new Uint8ClampedArray(4);
+        rgb[0] = R;
+        rgb[1] = G;
+        rgb[2] = B;
+        rgb[3] = 255;
+
+        return rgb;
     }
 
     return {
