@@ -1623,7 +1623,7 @@ function viewer(model, options, labels, admin) {
         let a = document.createElement('a');
         document.body.appendChild(a);
         a.href = url;
-        a.download = "image.png";
+        a.download = "image.jpg";
         a.click();
         document.body.removeChild(a);
     }
