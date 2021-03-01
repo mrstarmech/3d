@@ -281,10 +281,6 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         case 'rotate90':
             t.switchEnv('rotate90');
             break;
-        case 'enable-outline':
-            t.switchEnv('enable-outline');
-            buttonActive($('.outlineb'), t.olEnabled);
-            break;
         case 'reset-dots':
             t.switchEnv('reset-dots', false);
             break;

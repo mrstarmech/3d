@@ -1580,28 +1580,42 @@ function viewer(model, options, labels, admin) {
             camera.updateProjectionMatrix();
         }
 
-        scrSpCan.show(false);
         scrSpCan.get('scaleLabel').opt.vPos = -0.1;
-        clearC = renderer.getClearColor().getHexString();
-        renderer.setClearColor(0x000000,0);
-        effectComposer.render();
-        let mDataUrl = renderer.domElement.toDataURL('image/png');
-        scrSpCan.show(true);
         updateScaleRuler(true);
         updateScaleLabel(scrSpCan.label,TEXT_SIZE);
-        sceneObjectsMesh[0].visible = false;
-        effectComposer.render();
-        let rDataUrl = renderer.domElement.toDataURL('image/png');
-        processOutline(renderer.domElement,mDataUrl,rDataUrl,ColorToRGB(clearC));
-        renderer.setSize(ps.x,ps.y);
-        effectComposer.setSize(ps.x,ps.y);
-        camera.aspect = asp;
-        camera.fov = ofov;
-        camera.position.copy(opos);
-        camera.updateProjectionMatrix();
-        scrSpCan.get('scaleLabel').opt.vPos = 0;
-        renderer.setClearColor("#"+clearC,1);
-        sceneObjectsMesh[0].visible = true;
+        if(olEnabled){
+            scrSpCan.show(false);
+            clearC = renderer.getClearColor().getHexString();
+            renderer.setClearColor(0x000000,0);
+            effectComposer.render();
+            let mDataUrl = renderer.domElement.toDataURL('image/png');
+            scrSpCan.show(true);
+            sceneObjectsMesh[0].visible = false;
+            effectComposer.render();
+            let rDataUrl = renderer.domElement.toDataURL('image/png');
+            processOutline(renderer.domElement,mDataUrl,rDataUrl,ColorToRGB(clearC));
+            renderer.setSize(ps.x,ps.y);
+            effectComposer.setSize(ps.x,ps.y);
+            camera.aspect = asp;
+            camera.fov = ofov;
+            camera.position.copy(opos);
+            camera.updateProjectionMatrix();
+            scrSpCan.get('scaleLabel').opt.vPos = 0;
+            renderer.setClearColor("#"+clearC,1);
+            sceneObjectsMesh[0].visible = true;
+        }
+        else
+        {
+            effectComposer.render();
+            downloadImage(renderer.domElement.toDataURL('image/jpeg', 1));
+            renderer.setSize(ps.x,ps.y);
+            effectComposer.setSize(ps.x,ps.y);
+            camera.aspect = asp;
+            camera.fov = ofov;
+            camera.position.copy(opos);
+            camera.updateProjectionMatrix();
+            scrSpCan.get('scaleLabel').opt.vPos = 0;
+        }
     }
 
     function downloadImage(url)
