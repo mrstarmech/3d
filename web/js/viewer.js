@@ -2363,6 +2363,10 @@ function viewer(model, options, labels, admin) {
                             }
                         }
                     }
+                    else
+                    {
+                        pA = 255;
+                    }
 
                     data2[y*cWB + x] = pR;
                     data2[y*cWB + x + 1] = pG;
@@ -2374,11 +2378,12 @@ function viewer(model, options, labels, admin) {
             {
                 for(let y = 0; y < cH; y++)
                 {
-                    if(data2[y*cWB + x + 3] === 0)
+                    let d2A = THREE.MathUtils.mapLinear(data2[y*cWB + x + 3],0,255,0,1);
+                    if( d2A < 1)
                     {
-                        data2[y*cWB + x] = clearColor[0];
-                        data2[y*cWB + x + 1] = clearColor[1];
-                        data2[y*cWB + x + 2] = clearColor[2];
+                        data2[y*cWB + x] = Math.round(data2[y*cWB + x] * d2A) + Math.round(clearColor[0] * (1-d2A));
+                        data2[y*cWB + x + 1] = Math.round(data2[y*cWB + x + 1] * d2A) + Math.round(clearColor[1] * (1-d2A));
+                        data2[y*cWB + x + 2] = Math.round(data2[y*cWB + x + 2] * d2A) + Math.round(clearColor[2] * (1-d2A));
                         data2[y*cWB + x + 3] = 255;
                     }
                 }
