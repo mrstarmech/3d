@@ -2381,9 +2381,9 @@ function viewer(model, options, labels, admin) {
                     let d2A = THREE.MathUtils.mapLinear(data2[y*cWB + x + 3],0,255,0,1);
                     if( d2A < 1)
                     {
-                        data2[y*cWB + x] = Math.round(data2[y*cWB + x] * d2A) + Math.round(clearColor[0] * (1-d2A));
-                        data2[y*cWB + x + 1] = Math.round(data2[y*cWB + x + 1] * d2A) + Math.round(clearColor[1] * (1-d2A));
-                        data2[y*cWB + x + 2] = Math.round(data2[y*cWB + x + 2] * d2A) + Math.round(clearColor[2] * (1-d2A));
+                        data2[y*cWB + x] = Math.round(data2[y*cWB + x] * d2A + clearColor[0] * (1-d2A));
+                        data2[y*cWB + x + 1] = Math.round(data2[y*cWB + x + 1] * d2A + clearColor[1] * (1-d2A));
+                        data2[y*cWB + x + 2] = Math.round(data2[y*cWB + x + 2] * d2A + clearColor[2] * (1-d2A));
                         data2[y*cWB + x + 3] = 255;
                     }
                 }
@@ -2404,9 +2404,9 @@ function viewer(model, options, labels, admin) {
                         let rA = THREE.MathUtils.mapLinear(rdata[y*cWB + x + 3],0,255,0,1);
                         if(rA > 0)
                         {
-                            data2[y*cWB + x] = Math.round(data2[y*cWB + x] * (1-rA)) + Math.round(rdata[y*cWB + x] * rA);
-                            data2[y*cWB + x + 1] = Math.round(data2[y*cWB + x + 1] * (1-rA)) + Math.round(rdata[y*cWB + x + 1] * rA);
-                            data2[y*cWB + x + 2] = Math.round(data2[y*cWB + x + 2] * (1-rA)) + Math.round(rdata[y*cWB + x + 2] * rA);
+                            data2[y*cWB + x] = Math.round(data2[y*cWB + x] * (1-rA) + rdata[y*cWB + x] * rA);
+                            data2[y*cWB + x + 1] = Math.round(data2[y*cWB + x + 1] * (1-rA) + rdata[y*cWB + x + 1] * rA);
+                            data2[y*cWB + x + 2] = Math.round(data2[y*cWB + x + 2] * (1-rA) + rdata[y*cWB + x + 2] * rA);
                         }
                     }
                 }
