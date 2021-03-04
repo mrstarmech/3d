@@ -22,7 +22,7 @@ function start(admin) {
             OBJECTS.attr('data-render', 'success');
 
             if (!object.option.menuDisable) {
-                OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu());
+                OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu(admin));
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(supermenu());
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(modalDialogShare());
                 window.modalDialogLayers = modalDialogShareLayersParams('');
@@ -104,7 +104,7 @@ function supermenu() {
 }
 
 
-function menu() {
+function menu(admin) {
     var menu = $('<div class="btn-toolbar container-menu-object" role="toolbar"></div>'),
         topmenu = $('<div class="btn-group btn-group-sm" role="group"></div>'),
         submenu = $('<div class="btn-group btn-group-sm submenu" role="group"></div>');

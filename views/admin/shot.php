@@ -89,9 +89,12 @@ $('#saveLink').click(function() {
 $('#orthoLink').click(function() {
     window.t.switchEnv('shot', $('select[name=res]').val())});
 
-$('#wback').change(function () {
-    
+$('#wback').change(function () {  
     window.t.switchEnv('white-back', $("input[type=checkbox][name=wback]").is(":checked"))
+});
+
+$('#contour').change(function () {  
+    window.t.switchEnv('enable-outline', $("input[type=checkbox][name=contour]").is(":checked"))
 });
 
 $('#drawingLink').click(function() {
@@ -159,6 +162,8 @@ echo $this->render('_header_object', ['object' => $object]);
     </select>
     <input type="checkbox" id="wback" name="wback">
     <label for="wback">Белый фон</label>
+    <input type="checkbox" id="contour" name="contour">
+    <label for="contour">Контур</label>
 </div>
 
 

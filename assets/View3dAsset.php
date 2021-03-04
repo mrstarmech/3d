@@ -31,7 +31,6 @@ class View3dAsset extends AssetBundle
         'js/three/postprocessing/ShaderPass.js',
         'js/three/shaders/CopyShader.js',
         'js/three/postprocessing/RenderPass.js',
-        'js/three/postprocessing/OutlinePass.js',
         'js/jquery.fancybox.min.js',
         'js/colorpicker.min.js',
         'js/viewer.js',
