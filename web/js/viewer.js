@@ -43,7 +43,8 @@ function viewer(model, options, labels, admin) {
     var firstPass,
         orthographer = false,
         orthocam = false,
-        selfObj = this,
+        gltfMin = new THREE.Vector3(),
+        gltfMax = new THREE.Vector3(),
         scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000000),
         renderer = new THREE.WebGLRenderer({
@@ -541,10 +542,57 @@ function viewer(model, options, labels, admin) {
                 };
             }
             texture = new THREE.CanvasTexture(ctx.canvas);
+            texture.flipY = false;
             parametersMaterial.map = texture;
         }
 
         material = new THREE.MeshLambertMaterial(parametersMaterial);
+        material.userData.rt_value = {value:0};
+        material.userData.model_bounds = {value: {min: gltfMin, max: gltfMax}};
+        if(options.loader === 'gltfLoader')
+            material.vertexColors = true;
+        material.onBeforeCompile = shader =>{
+            shader.uniforms.rt_value = material.userData.rt_value;
+            shader.uniforms.bounds = material.userData.model_bounds;
+            shader.vertexShader = 
+                `uniform float rt_value;
+                struct Bounds
+                {
+                    vec3 min;
+                    vec3 max;
+                };
+                uniform Bounds bounds;
+                float map(float value, float min1, float max1, float min2, float max2) 
+                {
+                    return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+                }
+                ` + shader.vertexShader;
+            shader.vertexShader = shader.vertexShader.replace(
+                '#include <project_vertex>',
+                `#ifdef USE_COLOR
+                    float displace_x = map(vColor.x, 0.0f, 1.0f, bounds.min.x, bounds.max.x);
+                    float displace_y = map(vColor.y, 0.0f, 1.0f, bounds.min.y, bounds.max.y);
+                    float displace_z = map(vColor.z, 0.0f, 1.0f, bounds.min.z, bounds.max.z);
+                    vec3 displace_vec = vec3(displace_x, displace_y, displace_z);
+                    transformed = transformed + displace_vec * rt_value;
+                #endif
+
+                vec4 mvPosition = vec4( transformed, 1 );
+
+                #ifdef USE_INSTANCING
+                
+                    mvPosition = instanceMatrix * mvPosition;
+                
+                #endif
+                
+                mvPosition = modelViewMatrix * mvPosition;
+                
+                gl_Position = projectionMatrix * mvPosition;`
+            );
+            shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <color_fragment>`,' '
+            );
+        };
 
         var onProgress = function (progress) {
 
@@ -636,28 +684,29 @@ function viewer(model, options, labels, admin) {
                 break;
             case 'gltfLoader':
                 loader = new THREE.GLTFLoader();
-
+                drcLoader = new THREE.DRACOLoader();
+                drcLoader.setDecoderPath('/js/three/draco_r1.3.6/');
+                drcLoader.setDecoderConfig({type: 'js'});
+                loader.setDRACOLoader(drcLoader);
                 loader.load(
                     model.mesh,
                     function (object) {
-                        if (options.objectCoords) {
-                            object.position.x = objectDefaultCoords.x;
-                            object.position.y = objectDefaultCoords.y;
-                            object.position.z = objectDefaultCoords.z;
-                        }
-                        
-                        object.scene.traverse(function (node) {
-                            if (node.type === 'Mesh') {
-                                node.geometry.computeVertexNormals();
-                                node.geometry.normalizeNormals();
-                                node.geometry.computeBoundingBox();
-                                node.geometry.computeBoundingSphere();
-                                node.material.needsUpdate = true;
-                                sceneObjectsMesh.push(node);
-                            }
-                        });
-                        scene.add(object.scene);
+                        miX = object.parser.json.nodes[0].extras.minX;
+                        miY = object.parser.json.nodes[0].extras.minY;
+                        miZ = object.parser.json.nodes[0].extras.minZ;
+                        maX = object.parser.json.nodes[0].extras.maxX;
+                        maY = object.parser.json.nodes[0].extras.maxY;
+                        maZ = object.parser.json.nodes[0].extras.maxZ;
 
+                        
+
+                        gltfMin.set(miX,miY,miZ);
+                        gltfMax.set(maX,maY,maZ);
+                        scene.add(object.scene);
+                        sceneObjectsMesh.push(object.scene.children[0]);
+                        sceneObjectsMesh[0].material = material;
+                        //sceneObjectsMesh[0].geometry.morphTargetsRelative = false;
+                        drcLoader.dispose();
                         callback(true);
                     }, onProgress, onError
                 );
@@ -1083,6 +1132,11 @@ function viewer(model, options, labels, admin) {
                 }
                 
                 switchEnv('wireframe', options.wireframe);
+                break;
+            case 'morph':
+                setMorphTargetWeight(value);
+                break;
+            default:
                 break;
         }
         
@@ -2430,6 +2484,10 @@ function viewer(model, options, labels, admin) {
         rgb[3] = 255;
 
         return rgb;
+    }
+
+    function setMorphTargetWeight(value){
+        material.userData.rt_value.value = value;
     }
 
     return {

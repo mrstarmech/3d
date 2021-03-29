@@ -95,7 +95,15 @@ function supermenu() {
                    'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:green"></i></button>');
         supermenu.append(rt);
     }
-    
+    if (object.option.loader === 'gltfLoader') {
+        let targetWeight = '<div id="mt_popover"><input type=\'range\' id=\' target-weight \' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'1\'></div>';
+
+        mt_popover = $(targetWeight);
+
+        let mt = $('<button id="mt" title="MeshReconst" class="btn menu-object" data-menu="mesh-reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
+                   'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:red"></i></button>');
+        supermenu.append(mt);
+    }
     
     supermenu.append('<button title="Align camera" class="btn menu-object cam-align-btn" data-menu="align-camera"><i class="fas fa-crosshairs"></i></button>');
     supermenu.append('<button title="Reset dots" class="btn menu-object dots-reset-btn" data-menu="reset-dots"><i class="fas fa-redo"></i></button>');
@@ -400,19 +408,34 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.zoom);
             break;
         case 'reconstruction-tools':
-        object.option.rt = !object.option.rt;
-        if (object.option.rt) {
-            $(this).popover({
-                content: function(){
-                    return '<div id="rt_popover" style="width: 200px">' + rt_popover.html() + '</div>';
-                }
-            });
-            $(this).popover('show');
-        } else {
-            rt_popover.html($('#rt_popover').html());
-            $(this).popover('destroy');
-        }
-        buttonActive($(this), object.option.rt);
+            object.option.rt = !object.option.rt;
+            if (object.option.rt) {
+                $(this).popover({
+                    content: function(){
+                        return '<div id="rt_popover" style="width: 200px">' + rt_popover.html() + '</div>';
+                    }
+                });
+                $(this).popover('show');
+            } else {
+                rt_popover.html($('#rt_popover').html());
+                $(this).popover('destroy');
+            }
+            buttonActive($(this), object.option.rt);
+        break;
+        case 'mesh-reconstruction-tools':
+            object.option.rt = !object.option.rt;
+            if (object.option.rt) {
+                $(this).popover({
+                    content: function(){
+                        return '<div id="mt_popover" style="width: 200px">' + mt_popover.html() + '</div>';
+                    }
+                });
+                $(this).popover('show');
+            } else {
+                mt_popover.html($('#mt_popover').html());
+                $(this).popover('destroy');
+            }
+            buttonActive($(this), object.option.rt);
         break;
         case 'layer_pallete':
             var active_state = !$(this).hasClass('active');
@@ -462,7 +485,11 @@ $('.' + classNameContainer)
     $(this).attr('value', $(this).val());
     drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
     t.redrawTexture();
-})
+    })
+    .on('input change', '.weight-value', function () {
+        $(this).attr('value', $(this).val());
+        t.switchEnv('morph', parseFloat($(this).val()));
+    });
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
