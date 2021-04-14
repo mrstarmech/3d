@@ -24,6 +24,7 @@ function viewer(model, options, labels, admin) {
             z: 150
         }
     };
+    if(options.deteriorationLayers === 'undefined') options.deteriorationLayers = [];
 
     model = typeof model !== 'undefined' ? model : {
         name: 'no_model',
