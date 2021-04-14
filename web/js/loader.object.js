@@ -98,7 +98,9 @@ function supermenu() {
     if (object.option.loader === 'gltfLoader') {
         let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
                            'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' +
-                           'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'></div>';
+                           'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' + 
+                           '<button id="tex-checkbox" class="btn menu-object" data-menu="texture-disable" type="button">Disable texture</button><br><br>' +
+                           '<button id="tex-checkbox" class="btn menu-object" data-menu="light" type="button">Disable shadows</button></div>';
 
         mt_popover = $(targetWeight);
 
@@ -514,6 +516,14 @@ $('.' + classNameContainer)
 
         t.switchEnv('morph', {val: v0, type: $(this).attr('id')});
     });
+
+    function texClick() {
+        let c = document.getElementById('tex-checkbox');
+        console.log(c.checked);
+        c.checked = !c.checked;
+        console.log(c.checked);
+    }
+    
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
