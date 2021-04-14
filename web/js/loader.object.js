@@ -11,7 +11,7 @@ OBJECTS.click(function () {
     }
 
     if ($(this).attr('data-render')) {
-        return false;
+        //return false;
     }
 });
 
@@ -99,8 +99,8 @@ function supermenu() {
         let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
                            'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' +
                            'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' + 
-                           '<button id="tex-checkbox" class="btn menu-object" data-menu="texture-disable" type="button">Disable texture</button><br><br>' +
-                           '<button id="tex-checkbox" class="btn menu-object" data-menu="light" type="button">Disable shadows</button></div>';
+                           'Texture : <input type="checkbox" class="tex-checkbox" checked><br>' +
+                           'Shadows : <input type="checkbox" class="lit-checkbox" checked></div>';
 
         mt_popover = $(targetWeight);
 
@@ -515,6 +515,14 @@ $('.' + classNameContainer)
         $(this).val(v0);
 
         t.switchEnv('morph', {val: v0, type: $(this).attr('id')});
+    })
+    .on('change', '.tex-checkbox', function (event) {
+        object.option.textureDisable = !event.currentTarget.checked;
+        t.switchEnv('textureDisable', object.option.textureDisable);
+    })
+    .on('change', '.lit-checkbox', function (event) {
+        object.option.lights = (!event.currentTarget.checked ? 'AmbientLight' : 'Cameralight');
+        t.switchEnv('lights', object.option.lights);
     });
 
     function texClick() {
