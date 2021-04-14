@@ -417,7 +417,7 @@ function viewer(model, options, labels, admin) {
                     }
                 }
                 for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].alpha < 0 && options.deteriorationLayers.includes(i))
+                    if (drawings[i].alpha < 0 && options.deteriorationLayers.includes(i) && options.loader === 'gltfLoader')
                         drawings[i].alpha = -texReconstVal;
                     if (drawings[i].alpha < 0) {
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
