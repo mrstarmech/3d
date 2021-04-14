@@ -417,21 +417,22 @@ function viewer(model, options, labels, admin) {
                     }
                 }
                 for (let i = 0; i < drawings.length; i++) {
+                    if (drawings[i].alpha < 0 && options.deteriorationLayers.includes(i))
+                        drawings[i].alpha = -texReconstVal;
                     if (drawings[i].alpha < 0) {
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
                             ctx.globalAlpha = -drawings[i].alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
                         }
                     }
-                }
-                for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].alpha > 0) {
+                    else if (drawings[i].alpha > 0) {
                         if (typeof drawings[i].coloredCtx != 'undefined' ) {
                             ctx.globalAlpha = drawings[i].alpha;
                             ctx.drawImage(drawings[i].coloredCtx.canvas, 0, 0);
                         }
                     }
                 }
+
                 if (texture) texture.needsUpdate = true;
                 if (material) material.needsUpdate = true;
                 return;
@@ -1126,7 +1127,9 @@ function viewer(model, options, labels, admin) {
                 switchEnv('wireframe', options.wireframe);
                 break;
             case 'morph':
-                if(value.type === "target-weight") setMorphTargetWeight(value.val);
+                if(value.type === "target-weight") {texReconstVal = 0; redrawTexture(); setMorphTargetWeight(value.val);}
+                else if(value.type === "texture-weight") {texReconstVal = value.val; redrawTexture(); setMorphTargetWeight(0);}
+                else if(value.type === "both-weight"){setMorphTargetWeight(value.val); texReconstVal = value.val; redrawTexture();}
                 break;
             default:
                 break;
@@ -2477,6 +2480,8 @@ function viewer(model, options, labels, admin) {
 
         return rgb;
     }
+
+    let texReconstVal = 0;
 
     function setMorphTargetWeight(value){
         material.userData.rt_value.value = value;
