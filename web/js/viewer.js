@@ -417,15 +417,18 @@ function viewer(model, options, labels, admin) {
                     }
                 }
                 for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].alpha < 0 && options.deteriorationLayers.includes(i) && options.loader === 'gltfLoader')
-                        drawings[i].alpha = -texReconstVal;
                     if (drawings[i].alpha < 0) {
+                        if (options.deteriorationLayers.includes(i) && options.loader === 'gltfLoader')
+                            drawings[i].alpha = -texReconstVal;
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
                             ctx.globalAlpha = -drawings[i].alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
                         }
                     }
-                    else if (drawings[i].alpha > 0) {
+                }
+
+                for (let i = 0; i < drawings.length; i++) {
+                    if (drawings[i].alpha > 0) {
                         if (typeof drawings[i].coloredCtx != 'undefined' ) {
                             ctx.globalAlpha = drawings[i].alpha;
                             ctx.drawImage(drawings[i].coloredCtx.canvas, 0, 0);
