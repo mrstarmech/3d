@@ -97,12 +97,12 @@ function supermenu() {
     }
     if (object.option.loader === 'gltfLoader') {
         let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
-                           'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
+                           'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' +
                            'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'></div>';
 
         mt_popover = $(targetWeight);
 
-        let mt = $('<button id="mt" title="MeshReconst" class="btn menu-object" data-menu="mesh-reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
+        let mt = $('<button id="mt" title="Remove deterioration" class="btn menu-object" data-menu="mesh-reconstruction-tools" data-html="true" data-container=".container-supermenu-object"' +
                    'data-toggle="popover" data-placement="bottom"><i class="fas fa-atlas fa-2x" style="color:red"></i></button>');
         supermenu.append(mt);
     }
@@ -418,6 +418,12 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                     }
                 });
                 $(this).popover('show');
+                if($('#mt').hasClass('active')) {
+                    object.option.mt = false;
+                    mt_popover.html($('#mt_popover').html());
+                    $('#mt').popover('destroy');
+                    buttonActive($('#mt'), false);
+                }
             } else {
                 rt_popover.html($('#rt_popover').html());
                 $(this).popover('destroy');
@@ -433,6 +439,12 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                     }
                 });
                 $(this).popover('show');
+                if($('#rt').hasClass('active')) {
+                    object.option.rt = false;
+                    rt_popover.html($('#rt_popover').html());
+                    $('#rt').popover('destroy');
+                    buttonActive($('#rt'), false);
+                }
             } else {
                 mt_popover.html($('#mt_popover').html());
                 $(this).popover('destroy');

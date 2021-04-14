@@ -418,9 +418,12 @@ function viewer(model, options, labels, admin) {
                     }
                 }
                 for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].alpha < 0) {
+                    let alpha;
+                    if (!texEnabled) alpha = Math.max(0,drawings[i].alpha);
+                    else alpha = drawings[i].alpha;
+                    if (alpha < 0) {
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
-                            ctx.globalAlpha = -drawings[i].alpha;
+                            ctx.globalAlpha = -alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
                         }
                     }
