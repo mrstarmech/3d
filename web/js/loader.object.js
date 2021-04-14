@@ -96,9 +96,9 @@ function supermenu() {
         supermenu.append(rt);
     }
     if (object.option.loader === 'gltfLoader') {
-        let targetWeight = '<div id="mt_popover">Mesh : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
-                           'Tex : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
-                           'Both : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'></div>';
+        let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
+                           'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
+                           'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'></div>';
 
         mt_popover = $(targetWeight);
 
