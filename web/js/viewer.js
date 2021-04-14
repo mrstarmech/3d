@@ -419,8 +419,6 @@ function viewer(model, options, labels, admin) {
                 }
                 for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha < 0) {
-                        if (options.deteriorationLayers.includes(i) && options.loader === 'gltfLoader')
-                            drawings[i].alpha = -texReconstVal;
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
                             ctx.globalAlpha = -drawings[i].alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
@@ -1131,9 +1129,23 @@ function viewer(model, options, labels, admin) {
                 switchEnv('wireframe', options.wireframe);
                 break;
             case 'morph':
-                if(value.type === "target-weight") {texReconstVal = 0; redrawTexture(); setMorphTargetWeight(value.val);}
-                else if(value.type === "texture-weight") {texReconstVal = value.val; redrawTexture(); setMorphTargetWeight(0);}
-                else if(value.type === "both-weight"){setMorphTargetWeight(value.val); texReconstVal = value.val; redrawTexture();}
+                if(value.type === "target-weight") setMorphTargetWeight(value.val);
+                else if(value.type === "texture-weight") {
+                    for (let i = 0; i < options.deteriorationLayers.length; i++)
+                    {
+                        drawings[options.deteriorationLayers[i]].alpha = -value.val;
+                    }
+                    redrawTexture();
+                }
+                else if(value.type === "both-weight"){
+                    setMorphTargetWeight(value.val);
+                    texReconstVal = value.val;
+                    for (let i = 0; i < options.deteriorationLayers.length; i++)
+                    {
+                        drawings[options.deteriorationLayers[i]].alpha = -value.val;
+                    }
+                    redrawTexture();
+                }
                 break;
             default:
                 break;

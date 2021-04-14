@@ -490,12 +490,13 @@ $('.' + classNameContainer)
     })
     .on('input change', '.weight-value', function () {
         v0 = parseFloat($(this).val());
-        $('#target-weight').val(0);
-        $('#target-weight').attr('value', $('#target-weight').val());
-        $('#texture-weight').val(0);
-        $('#texture-weight').attr('value', $('#texture-weight').val());
-        $('#both-weight').val(0);
-        $('#both-weight').attr('value', $('#both-weight').val());
+        if($(this).attr('id') === 'both-weight')
+        {
+            $('#target-weight').val(v0);
+            $('#target-weight').attr('value',v0);
+            $('#texture-weight').val(v0);
+            $('#texture-weight').attr('value',v0);
+        }
         $(this).attr('value', v0);
         $(this).val(v0);
 
