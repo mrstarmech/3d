@@ -542,7 +542,7 @@ function viewer(model, options, labels, admin) {
                 };
             }
             texture = new THREE.CanvasTexture(ctx.canvas);
-            texture.flipY = false;
+            if(options.loader === 'gltfLoader') texture.flipY = false;
             parametersMaterial.map = texture;
         }
 
@@ -696,6 +696,7 @@ function viewer(model, options, labels, admin) {
                         scene.add(object.scene);
                         sceneObjectsMesh.push(object.scene.children[0]);
                         sceneObjectsMesh[0].material = material;
+                        material.needsUpdate = true;
                         //sceneObjectsMesh[0].geometry.morphTargetsRelative = false;
                         drcLoader.dispose();
                         callback(true);
@@ -1125,7 +1126,7 @@ function viewer(model, options, labels, admin) {
                 switchEnv('wireframe', options.wireframe);
                 break;
             case 'morph':
-                setMorphTargetWeight(value);
+                if(value.type === "target-weight") setMorphTargetWeight(value.val);
                 break;
             default:
                 break;

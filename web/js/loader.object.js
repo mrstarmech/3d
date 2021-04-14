@@ -20,7 +20,7 @@ function start(admin) {
         window.t = new viewer(object.setting, object.option, object.labels, admin);
         t.appendTo(classNameCanvas, function () {
             OBJECTS.attr('data-render', 'success');
-
+            object.option.mt = false;
             if (!object.option.menuDisable) {
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(menu(admin));
                 OBJECTS.children('.' + classNameContainer).children('.' + classNameCanvas).append(supermenu());
@@ -96,7 +96,9 @@ function supermenu() {
         supermenu.append(rt);
     }
     if (object.option.loader === 'gltfLoader') {
-        let targetWeight = '<div id="mt_popover"><input type=\'range\' id=\' target-weight \' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'1\'></div>';
+        let targetWeight = '<div id="mt_popover">Mesh : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
+                           'Tex : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
+                           'Both : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'></div>';
 
         mt_popover = $(targetWeight);
 
@@ -423,8 +425,8 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
             buttonActive($(this), object.option.rt);
         break;
         case 'mesh-reconstruction-tools':
-            object.option.rt = !object.option.rt;
-            if (object.option.rt) {
+            object.option.mt = !object.option.mt;
+            if (object.option.mt) {
                 $(this).popover({
                     content: function(){
                         return '<div id="mt_popover" style="width: 200px">' + mt_popover.html() + '</div>';
@@ -435,7 +437,7 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 mt_popover.html($('#mt_popover').html());
                 $(this).popover('destroy');
             }
-            buttonActive($(this), object.option.rt);
+            buttonActive($(this), object.option.mt);
         break;
         case 'layer_pallete':
             var active_state = !$(this).hasClass('active');
@@ -482,13 +484,22 @@ $('.' + classNameContainer)
         t.camera.updateProjectionMatrix();
     })
     .on('input change', '.alpha-value', function () {
-    $(this).attr('value', $(this).val());
-    drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
-    t.redrawTexture();
+        $(this).attr('value', $(this).val());
+        drawings[parseInt($(this).attr('id'))].alpha = parseFloat($(this).val());
+        t.redrawTexture();
     })
     .on('input change', '.weight-value', function () {
-        $(this).attr('value', $(this).val());
-        t.switchEnv('morph', parseFloat($(this).val()));
+        v0 = parseFloat($(this).val());
+        $('#target-weight').val(0);
+        $('#target-weight').attr('value', $('#target-weight').val());
+        $('#texture-weight').val(0);
+        $('#texture-weight').attr('value', $('#texture-weight').val());
+        $('#both-weight').val(0);
+        $('#both-weight').attr('value', $('#both-weight').val());
+        $(this).attr('value', v0);
+        $(this).val(v0);
+
+        t.switchEnv('morph', {val: v0, type: $(this).attr('id')});
     });
 
 var eFullscreenName = function () {
