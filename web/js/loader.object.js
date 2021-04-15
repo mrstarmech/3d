@@ -99,8 +99,8 @@ function supermenu() {
         let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
                            'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' +
                            'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' + 
-                           'Texture : <input type="checkbox" class="tex-checkbox" checked><br>' +
-                           'Shadows : <input type="checkbox" class="lit-checkbox" checked></div>';
+                           'Texture : <input type="checkbox" id="t-check" class="tex-checkbox" checked><br>' +
+                           'Shadows : <input type="checkbox" id="l-check" class="lit-checkbox" checked></div>';
 
         mt_popover = $(targetWeight);
 
@@ -447,7 +447,13 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                     $('#rt').popover('destroy');
                     buttonActive($('#rt'), false);
                 }
+                
+                $('#l-check').checked = false;
             } else {
+                if(object.option.textureDisable) $('#t-check').removeAttr('checked');
+                else $('#t-check').attr('checked','');
+                if(object.option.lights === 'AmbientLight') $('#l-check').removeAttr('checked');
+                else $('#l-check').attr('checked','');
                 mt_popover.html($('#mt_popover').html());
                 $(this).popover('destroy');
             }
@@ -511,6 +517,11 @@ $('.' + classNameContainer)
             $('#texture-weight').val(v0);
             $('#texture-weight').attr('value',v0);
         }
+        else
+        {
+            $('#both-weight').val(0);
+            $('#target-weight').attr('value', 0);
+        }
         $(this).attr('value', v0);
         $(this).val(v0);
 
@@ -523,15 +534,7 @@ $('.' + classNameContainer)
     .on('change', '.lit-checkbox', function (event) {
         object.option.lights = (!event.currentTarget.checked ? 'AmbientLight' : 'Cameralight');
         t.switchEnv('lights', object.option.lights);
-    });
-
-    function texClick() {
-        let c = document.getElementById('tex-checkbox');
-        console.log(c.checked);
-        c.checked = !c.checked;
-        console.log(c.checked);
-    }
-    
+    });   
 
 var eFullscreenName = function () {
     if ('onfullscreenchange' in document) return 'fullscreenchange';
