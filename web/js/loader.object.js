@@ -422,6 +422,10 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 $(this).popover('show');
                 if($('#mt').hasClass('active')) {
                     object.option.mt = false;
+                    if(object.option.textureDisable) $('#t-check').removeAttr('checked');
+                    else $('#t-check').attr('checked','');
+                    if(object.option.lights === 'AmbientLight') $('#l-check').removeAttr('checked');
+                    else $('#l-check').attr('checked','');
                     mt_popover.html($('#mt_popover').html());
                     $('#mt').popover('destroy');
                     buttonActive($('#mt'), false);
