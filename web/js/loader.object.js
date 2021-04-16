@@ -99,8 +99,8 @@ function supermenu() {
         let targetWeight = '<div id="mt_popover">Relief : <input type=\'range\' id=\'target-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>'+
                            'Color : <input type=\'range\' id=\'texture-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' +
                            'Relief&Color : <input type=\'range\' id=\'both-weight\' class=\'weight-value\' step=\'0.05\' min=\'0\' max=\'1\' value = \'0\'><br>' + 
-                           'Texture : <input type="checkbox" id="t-check" class="tex-checkbox" checked><br>' +
-                           'Shadows : <input type="checkbox" id="l-check" class="lit-checkbox" checked></div>';
+                           'Texture : <input type="checkbox" id="t-check" class="tex-checkbox"><br>' +
+                           'Shadows : <input type="checkbox" id="l-check" class="lit-checkbox"></div>';
 
         mt_popover = $(targetWeight);
 
@@ -145,8 +145,8 @@ function menu(admin) {
     }
     submenu.append('<button title="Share" class="btn menu-object" data-menu="share"><i class="fas fa-share-alt"></i></button>');
     submenu.append('<button title="Ruler" class="btn menu-object ruler" data-menu="ruler"><i class="fas fa-ruler"></i></button>');
-    submenu.append('<button title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
-    submenu.append('<button title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
+    submenu.append('<button id="lit-btn" title="Light" class="btn menu-object" data-menu="light"><i class="fas fa-lightbulb"></i></button>');
+    submenu.append('<button id="tex-btn" title="Disable Texture" class="btn menu-object" data-menu="texture-disable"><i class="fas fa-image"></i></button>');
     submenu.append('<button title="Rotate Model" class="btn menu-object" data-menu="rotate90"><i class="fas fa-sync-alt"></i></button>');
 
     if (object.option.grid) {
@@ -390,11 +390,13 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
         case 'light':
             object.option.lights = (object.option.lights == 'Cameralight' ? 'AmbientLight' : 'Cameralight');
             buttonActive($(this), object.option.lights === 'AmbientLight');
+            $('#l-check').prop('checked', object.option.lights === 'Cameralight');
             t.switchEnv('lights', object.option.lights);
             break;
         case 'texture-disable':
             object.option.textureDisable = !object.option.textureDisable;
             buttonActive($(this), object.option.textureDisable);
+            $('#t-check').prop('checked', !object.option.textureDisable);
             t.switchEnv('textureDisable', object.option.textureDisable);
             break;
         case 'grid':
@@ -422,10 +424,6 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                 $(this).popover('show');
                 if($('#mt').hasClass('active')) {
                     object.option.mt = false;
-                    if(object.option.textureDisable) $('#t-check').removeAttr('checked');
-                    else $('#t-check').attr('checked','');
-                    if(object.option.lights === 'AmbientLight') $('#l-check').removeAttr('checked');
-                    else $('#l-check').attr('checked','');
                     mt_popover.html($('#mt_popover').html());
                     $('#mt').popover('destroy');
                     buttonActive($('#mt'), false);
@@ -450,14 +448,10 @@ $('.' + classNameContainer).on('click', '.menu-object', function () {
                     rt_popover.html($('#rt_popover').html());
                     $('#rt').popover('destroy');
                     buttonActive($('#rt'), false);
-                }
-                
-                $('#l-check').checked = false;
+                } 
+                $('#t-check').prop('checked', !object.option.textureDisable);
+                $('#l-check').prop('checked', object.option.lights === 'Cameralight');
             } else {
-                if(object.option.textureDisable) $('#t-check').removeAttr('checked');
-                else $('#t-check').attr('checked','');
-                if(object.option.lights === 'AmbientLight') $('#l-check').removeAttr('checked');
-                else $('#l-check').attr('checked','');
                 mt_popover.html($('#mt_popover').html());
                 $(this).popover('destroy');
             }
@@ -533,10 +527,12 @@ $('.' + classNameContainer)
     })
     .on('change', '.tex-checkbox', function (event) {
         object.option.textureDisable = !event.currentTarget.checked;
+        buttonActive($('#tex-btn'), object.option.textureDisable);
         t.switchEnv('textureDisable', object.option.textureDisable);
     })
     .on('change', '.lit-checkbox', function (event) {
         object.option.lights = (!event.currentTarget.checked ? 'AmbientLight' : 'Cameralight');
+        buttonActive($('#lit-btn'), !event.currentTarget.checked);
         t.switchEnv('lights', object.option.lights);
     });   
 
@@ -551,7 +547,7 @@ var eFullscreenName = function () {
 if (eFullscreenName) {
     document.addEventListener(eFullscreenName, function () {
         var element = $('.menu-object[data-menu=full-screen]'),
-            value = element.attr('data-full-screen') === 'true'
+            value = element.attr('data-full-screen') === 'true';
         element.attr('data-full-screen', !value);
         buttonActive(element, !value);
     }, false);
