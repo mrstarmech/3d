@@ -24,6 +24,7 @@ function viewer(model, options, labels, admin) {
             z: 150
         }
     };
+    if(typeof options.deteriorationLayers === 'undefined') options.deteriorationLayers = [];
 
     model = typeof model !== 'undefined' ? model : {
         name: 'no_model',
@@ -43,7 +44,8 @@ function viewer(model, options, labels, admin) {
     var firstPass,
         orthographer = false,
         orthocam = false,
-        selfObj = this,
+        gltfMin = new THREE.Vector3(),
+        gltfMax = new THREE.Vector3(),
         scene = new THREE.Scene(),
         camera = new THREE.PerspectiveCamera(60, 1 / 1, 2, 5000000),
         renderer = new THREE.WebGLRenderer({
@@ -416,13 +418,17 @@ function viewer(model, options, labels, admin) {
                     }
                 }
                 for (let i = 0; i < drawings.length; i++) {
-                    if (drawings[i].alpha < 0) {
+                    let alpha;
+                    if (!texEnabled) alpha = Math.max(0,drawings[i].alpha);
+                    else alpha = drawings[i].alpha;
+                    if (alpha < 0) {
                         if (typeof drawings[i].minusedCtx != 'undefined' ) {
-                            ctx.globalAlpha = -drawings[i].alpha;
+                            ctx.globalAlpha = -alpha;
                             ctx.drawImage(drawings[i].minusedCtx.canvas, 0, 0);
                         }
                     }
                 }
+
                 for (let i = 0; i < drawings.length; i++) {
                     if (drawings[i].alpha > 0) {
                         if (typeof drawings[i].coloredCtx != 'undefined' ) {
@@ -431,6 +437,7 @@ function viewer(model, options, labels, admin) {
                         }
                     }
                 }
+
                 if (texture) texture.needsUpdate = true;
                 if (material) material.needsUpdate = true;
                 return;
@@ -541,11 +548,60 @@ function viewer(model, options, labels, admin) {
                 };
             }
             texture = new THREE.CanvasTexture(ctx.canvas);
+            if(options.loader === 'gltfLoader') texture.flipY = false;
             parametersMaterial.map = texture;
         }
 
         material = new THREE.MeshLambertMaterial(parametersMaterial);
+        if(options.loader === 'gltfLoader')
+        {
+            material.userData.rt_value = {value:0};
+            material.onBeforeCompile = shader =>{
+                shader.uniforms.rt_value = material.userData.rt_value;
+                shader.vertexShader = 
+                    `
+                    uniform float rt_value;
+                    attribute vec3 _position_t;
+                    attribute vec3 _normal_t;
+                    float map(float value, float min1, float max1, float min2, float max2) 
+                    {
+                        return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
+                    }
+                    ` + shader.vertexShader;
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <project_vertex>',
+                    `
+                    transformed = transformed + _position_t * rt_value;
 
+                    vec4 mvPosition = vec4( transformed, 1 );
+
+                    #ifdef USE_INSTANCING
+                    
+                        mvPosition = instanceMatrix * mvPosition;
+                    
+                    #endif
+                    
+                    mvPosition = modelViewMatrix * mvPosition;
+                    
+                    gl_Position = projectionMatrix * mvPosition;`
+                );
+                shader.vertexShader = shader.vertexShader.replace(
+                    '#include <beginnormal_vertex>',`
+                    vec3 objectNormal = vec3( normal ) + _normal_t * rt_value;
+                    
+                    #ifdef USE_TANGENT
+                    
+                        vec3 objectTangent = vec3( tangent.xyz );
+                    
+                    #endif
+                    `
+                );
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    `#include <color_fragment>`,' '
+                );
+            };
+        }
+        
         var onProgress = function (progress) {
 
         };
@@ -636,28 +692,19 @@ function viewer(model, options, labels, admin) {
                 break;
             case 'gltfLoader':
                 loader = new THREE.GLTFLoader();
-
+                drcLoader = new THREE.DRACOLoader();
+                drcLoader.setDecoderPath('/js/three/draco_r1.3.6/');
+                drcLoader.setDecoderConfig({type: 'js'});
+                loader.setDRACOLoader(drcLoader);
                 loader.load(
                     model.mesh,
                     function (object) {
-                        if (options.objectCoords) {
-                            object.position.x = objectDefaultCoords.x;
-                            object.position.y = objectDefaultCoords.y;
-                            object.position.z = objectDefaultCoords.z;
-                        }
-                        
-                        object.scene.traverse(function (node) {
-                            if (node.type === 'Mesh') {
-                                node.geometry.computeVertexNormals();
-                                node.geometry.normalizeNormals();
-                                node.geometry.computeBoundingBox();
-                                node.geometry.computeBoundingSphere();
-                                node.material.needsUpdate = true;
-                                sceneObjectsMesh.push(node);
-                            }
-                        });
                         scene.add(object.scene);
-
+                        sceneObjectsMesh.push(object.scene.children[0]);
+                        sceneObjectsMesh[0].material = material;
+                        material.needsUpdate = true;
+                        //sceneObjectsMesh[0].geometry.morphTargetsRelative = false;
+                        drcLoader.dispose();
                         callback(true);
                     }, onProgress, onError
                 );
@@ -1083,6 +1130,27 @@ function viewer(model, options, labels, admin) {
                 }
                 
                 switchEnv('wireframe', options.wireframe);
+                break;
+            case 'morph':
+                if(value.type === "target-weight") setMorphTargetWeight(value.val);
+                else if(value.type === "texture-weight") {
+                    for (let i = 0; i < options.deteriorationLayers.length; i++)
+                    {
+                        drawings[options.deteriorationLayers[i]].alpha = -value.val;
+                    }
+                    redrawTexture();
+                }
+                else if(value.type === "both-weight"){
+                    setMorphTargetWeight(value.val);
+                    texReconstVal = value.val;
+                    for (let i = 0; i < options.deteriorationLayers.length; i++)
+                    {
+                        drawings[options.deteriorationLayers[i]].alpha = -value.val;
+                    }
+                    redrawTexture();
+                }
+                break;
+            default:
                 break;
         }
         
@@ -2430,6 +2498,12 @@ function viewer(model, options, labels, admin) {
         rgb[3] = 255;
 
         return rgb;
+    }
+
+    let texReconstVal = 0;
+
+    function setMorphTargetWeight(value){
+        material.userData.rt_value.value = value;
     }
 
     return {

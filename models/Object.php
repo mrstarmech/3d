@@ -38,6 +38,8 @@ class Object extends ActiveRecord
     const SCENARIO_VIEW = 'view';
 
     const LOADER_OBJ = 'objLoader';
+    const LOADER_GLTF = 'gltfLoader';
+    const LOADER_DRACO = 'dracoLoader';
     const LOADER_UTF8 = 'utf8Loader';
 
     const PATH_IMAGE = 'uploads';
@@ -201,8 +203,24 @@ class Object extends ActiveRecord
                 $this->fileObj->saveAs($path . '/' . $this->fileObj->baseName . '.' . $this->fileObj->extension);
                 $this->obj = $this->fileObj->baseName . '.' . $this->fileObj->extension;
 
-                if (isset($this->optionArray->loader) and $this->optionArray->loader == Object::LOADER_OBJ) {
-                    $this->setSetting('mesh', '/' . $path . '/' . $this->obj);
+                $this->setSetting('mesh', '/' . $path . '/' . $this->obj);
+                switch ($this->fileObj->extension) {
+                    case 'obj':
+                        $this->setOption('loader', Object::LOADER_OBJ);
+                        break;
+                    case 'gltf':
+                        $this->setOption('loader', Object::LOADER_GLTF);
+                        $this->setDeterioration();
+                        break;
+                    case 'glb':
+                        $this->setOption('loader', Object::LOADER_GLTF);
+                        $this->setDeterioration();
+                        break;
+                    case 'drc':
+                        $this->setOption('loader', Object::LOADER_DRACO);
+                        break;
+                    default:
+                        break;
                 }
             }
 
@@ -403,5 +421,14 @@ class Object extends ActiveRecord
             (is_dir("$dir/$file") && !is_link($dir)) ? self::deleteDir("$dir/$file") : unlink("$dir/$file");
         }
         return rmdir($dir);
+    }
+
+    public function setDeterioration()
+    {
+        $options = $this->getOptionArray();
+        if(!isset($options->deteriorationLayers))
+        {
+            $this->setOption('deteriorationLayers', [0]);
+        }
     }
 }
