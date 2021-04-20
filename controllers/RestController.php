@@ -33,16 +33,19 @@ class RestController extends Controller
 
     public function actionCopyright($id, $lng)
     {
-        $object = Object::find()
-            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]])->one();
+        $objectID = (new Query)
+            ->select('id')
+            ->from('object')
+            ->where(['or', [Object::tableName() . '.id' => $id], ['sef' => $id]])
+            ->one();
         
-        $query = new Query;
-        $query->select(['author','copyright'])
-        ->from('object_language')
-        ->where(['object_id'=>$object->id])
-        ->andWhere(['locale'=>$lng]);
-        $result = $query->one();
+        $result = (new Query)
+            ->select(['author','copyright'])
+            ->from('object_language')
+            ->where(['object_id'=>$objectID])
+            ->andWhere(['locale'=>$lng])
+            ->one();
 
-        return \json_encode([$result['author'],$result['copyright'],$object->license]);
+        return \json_encode($result);
     }
 }
