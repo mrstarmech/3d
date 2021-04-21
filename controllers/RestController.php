@@ -5,7 +5,6 @@ namespace app\controllers;
 use yii\rest\Controller;
 use app\models\Object;
 use yii\db\Query;
-use Yii;
 
 class RestController extends Controller
 {
@@ -46,6 +45,6 @@ class RestController extends Controller
             ->andWhere(['locale'=>$lng])
             ->one();
 
-        return \json_encode($result);
+        return json_encode($result);
     }
 }
